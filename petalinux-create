@@ -1,0 +1,175 @@
+#!/usr/bin/env python3
+
+# Copyright (C) 2021-2022, Xilinx, Inc.  All rights reserved.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.  All rights reserved.
+#
+# Author:
+#       Raju Kumar Pothuraju <rajukumar.pothuraju@amd.com>
+#
+# SPDX-License-Identifier: MIT
+
+import os
+import sys
+import argparse
+
+scripts_path = os.path.dirname(os.path.realpath(__file__))
+libs_path = scripts_path + '/libs'
+sys.path = sys.path + [libs_path]
+import logger_setup
+import plnx_utils
+import bitbake_utils
+import create_component
+
+logger, console_h = logger_setup.setup_logger('PetaLinux')
+
+
+def main():
+    parser = argparse.ArgumentParser(description='This creates a new PetaLinux Project or component ',
+                                     formatter_class=argparse.RawTextHelpFormatter,
+                                     add_help=False,
+                                     usage='Use %(prog)s <subcommand> --help to get help on a specific command')
+
+    # Global args
+    parser.add_argument('-f', '--force', action='store_true',
+                        help='Force overwriting an existing component directory')
+    parser.add_argument('-d', '--debug', action='store_true',
+                        help='Display the Debug prints')
+    parser.add_argument('--out', default=os.getcwd(), type=os.path.realpath,
+                        help=argparse.SUPPRESS)
+    parser.add_argument('-n', '--name', default='',
+                        help='Specify a name for the component or project.'
+                        '\nIt is OPTIONAL to create a PROJECT when you specify a'
+                        ' source BSP to create a project')
+    global_args, unparsed_args = parser.parse_known_args()
+
+    parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
+                        help='Show this help message and exit')
+    subparsers = parser.add_subparsers(dest="command",
+                                       title='subcommands', metavar='<subcommand>')
+    subparsers.required = True
+
+    # Project parser args
+    project_parser = subparsers.add_parser('project', help='Create PetaLinux project',
+                                           formatter_class=argparse.RawTextHelpFormatter)
+    project_parser.add_argument('-s', '--source', type=os.path.realpath,
+                                help='Specify a PetaLinux BSP as a project source')
+    project_parser.add_argument('--template', default='',
+                                help='Specify the template name to use.',
+                                choices=['versal-net', 'versal', 'zynqMP', 'zynq', 'microblaze'])
+    project_parser.add_argument('--tmpdir', help='Specify the local drive path as TMPDIR location when creating project.'
+                                '\nDefault TMPDIR cannot be under NFS. By default.'
+                                '\nPetaLinux sets the TMPDIR under /tmp when project is on NFS.'
+                                '\nYou can set your own local drive as TMPDIR PATH using --tmpdir option.')
+    project_parser.set_defaults(func=create_component.CreateComponent)
+
+    # Apps parser args
+    apps_parser = subparsers.add_parser('apps', help='Create User applications',
+                                        formatter_class=argparse.RawTextHelpFormatter)
+    apps_parser.add_argument('--static-pn', metavar='',
+                             help='Specify the package name created with fpgamanager_dtg'
+                             '\nto use with in fpgamanager_dtg_dfx.'
+                             '\nNOTE: This supports only for versal and zynqmp.')
+    apps_parser.add_argument('--template', metavar='', default='c', type=str,
+                             choices=['c', 'c++', 'autoconf', 'install', 'fpgamanager',
+                                      'fpgamanager_dtg', 'fpgamanager_dtg_dfx', 'fpgamanager_dtg_csoc'],
+                             help='Specify the template name to create apps'
+                             '\nc                    : c user application(default)'
+                             '\nc++                  : c++ user application'
+                             '\nautoconf             : autoconf user application'
+                             '\ninstall              : install data only'
+                             '\nfpgamanager          : Pack the .dtbo,.bin/.pdi,shell.json/accel.json '
+                             '\n\t\t\tand .xclbin files into rootfs supports for versal,zynqmp and zynq.'
+                             '\nfpgamanger_dtg       : Extract the .xsa and pack the .dtbo,.bin/.pdi,shell.json '
+                             '\n\t\t\tand .xclbin files into rootfs, supports for versal,zynqmp and zynq.'
+                             '\nfpgamanager_dtg_dfx  : Extract the DFX partial .xsa and pack '
+                             '\n\t\t\tthe .dtbo,.bin/.pdi and accel.json files into rootfs.'
+                             '\n\t\t\tsupports only for versal and zynqmp.'
+                             '\nfpgamanager_dtg_csoc : Extract the Classic soc partial .xsa and pack '
+                             '\n\t\t\tthe .dtbo,.bin/.pdi and accel.json files into rootfs. supports only for versal.',
+                             )
+    apps_parser.add_argument('--srcuri', nargs='*', default='',
+                             help='This option is to specify the source files'
+                             '\nfrom outside project.This will copy specified'
+                             '\nfiles into recipe files directory and add to'
+                             '\nSRC_URI variable in .bb file. Specify the multiple files with space.'
+                             )
+    apps_parser.add_argument('--enable', action='store_true',
+                             help='Enable the Application')
+    apps_parser.add_argument('-p', '--project', metavar='PROJECT_DIR', type=os.path.realpath,
+                             help='Specify full path to a PetaLinux project.'
+                             '\nDefault is the working project.')
+    apps_parser.set_defaults(func=create_component.CreateComponent)
+
+    # Modules parser args
+    modules_parser = subparsers.add_parser('modules', help='Create Linux user module',
+                                           formatter_class=argparse.RawTextHelpFormatter)
+    modules_parser.add_argument('--srcuri', nargs='*',
+                                help='This option is to specify the source files'
+                                '\nfrom outside project.This will copy specified'
+                                '\nfiles into recipe files directory and add to'
+                                '\nSRC_URI variable in .bb file. Specify the multiple files with space.'
+                                )
+    modules_parser.add_argument('--enable', action='store_true',
+                                help='Enable the Module')
+    modules_parser.add_argument('-p', '--project', metavar='PROJECT_DIR', type=os.path.realpath,
+                                help='Specify full path to a PetaLinux project.'
+                                '\nDefault is the working project.')
+    modules_parser.set_defaults(func=create_component.CreateComponent)
+
+    args = parser.parse_args(unparsed_args, namespace=global_args)
+
+    # Print debug prints if debug selected
+    if args.debug:
+        console_h.setLevel(logging.DEBUG)
+
+    # static_pn name should be specified for fpgamanager_dtg_dfx
+    if args.command == 'apps' and \
+            args.template == 'fpgamanager_dtg_dfx' and not args.static_pn:
+        logger.error('Creating "%s" template app requires '
+                     '--static-pn <STATIC_PACKAGE_NAME> to be defined' % (args.template))
+        sys.exit(255)
+
+    proot = ''
+    args.local_srcuris = ''
+    args.network_srcuris = ''
+    if args.command in ['apps', 'modules']:
+        # For apps or modules, name should be specified
+        if not args.name:
+            logger.error('Component name is not specified!')
+            sys.exit(255)
+        # Check apps or modules name to not have special chars
+        reason = bitbake_utils.validate_pn(args.name)
+        if reason:
+            logger.error(reason)
+            sys.exit(255)
+
+        # Exit if PROOT is not PetaLinux project
+        proot = plnx_utils.exit_not_plnx_project(args.project)
+
+        # Exit if PetaLinux version mismatch
+        if not plnx_utils.petalinux_version_check(proot):
+            sys.exit(255)
+
+        # Validate SRCURI given by users
+        if args.srcuri:
+            args.local_srcuris, args.network_srcuris = bitbake_utils.validate_srcuri(
+                args.srcuri)
+    else:
+        # Give error if source not found
+        if args.source and not os.path.exists(args.source):
+            logger.error('BSP file "%s" doesnot exists' % args.source)
+            sys.exit(255)
+
+    logger.info('Create %s: %s' % (args.command, args.name))
+    ret = args.func(args, proot)
+    return ret
+
+
+if __name__ == "__main__":
+    try:
+        ret = main()
+    except Exception:
+        ret = 1
+        import traceback
+        traceback.print_exc()
+    sys.exit(ret)
