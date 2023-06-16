@@ -16,11 +16,10 @@ import logging
 scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
-
-logger = logging.getLogger('PetaLinux')
 import bitbake_utils
 import plnx_utils
 
+logger = logging.getLogger('PetaLinux')
 
 def get_filesystem_id(path):
     '''Run stat command and get the filesystem ID'''
@@ -36,7 +35,7 @@ def is_tmpdir_nfs(Tmpdir):
         plnx_utils.CreateDir(Tmpdir)
         if get_filesystem_id(Tmpdir) == '6969':
             logger.error('% s directory is on NFS. Please set local storage for'
-                  ' TMPDIR through petalinux-create using --tmpdir.' % Tmpdir)
+                         ' TMPDIR through petalinux-create using --tmpdir.' % Tmpdir)
             sys.exit(255)
 
 
@@ -47,7 +46,8 @@ def create_tmpdir_ifnfs(cpath, name, tmpdir):
     tmpdir_macro = 'CONFIG_TMP_DIR_LOCATION'
 
     if get_filesystem_id(cpath) == '6969' and not tmpdir:
-        logger.warning('Project on NFS mount, trying to relocate TMPDIR to local storage (/tmp)')
+        logger.warning(
+            'Project on NFS mount, trying to relocate TMPDIR to local storage (/tmp)')
         import time
         import string
         import random
@@ -90,9 +90,11 @@ def if_component_exists(command, Force, cpath, name):
 
     if os.path.exists(cpath):
         if Force:
-            logger.warn('"%s" already exists and --force parameter specified, overwriting' % cpath)
+            logger.warning(
+                '"%s" already exists and --force parameter specified, overwriting' % cpath)
         else:
-            logger.error('Component "%s" already exists. Use --force option to overwrite' % cpath)
+            logger.error(
+                'Component "%s" already exists. Use --force option to overwrite' % cpath)
             sys.exit(255)
 
 
@@ -114,8 +116,9 @@ def SetupAppsModules(args, template_path, cpath, proot):
         map_str = '@appname@'
     else:
         map_str = '@modname@ @mod_name@'
-    plnx_utils.replace_str_fromdir(
-        cpath, map_str, recipe_name, include_dir_names=True)
+    for _str in map_str.split():
+        plnx_utils.replace_str_fromdir(
+            cpath, _str, recipe_name, include_dir_names=True)
 
     srcuri2add = []
     if args.network_srcuris:
@@ -151,7 +154,8 @@ def Createproject(args, proot, cpath):
         if not projects:
             if args.name:
                 plnx_utils.RemoveDir(cpath)
-            logger.error('No PetaLinux projects found in the BSP %s' % args.source)
+            logger.error(
+                'No PetaLinux projects found in the BSP %s' % args.source)
             sys.exit(255)
         if args.name:
             defaultproj = projects[0]
@@ -212,7 +216,7 @@ def Createproject(args, proot, cpath):
             msgonfail = 'Failed to extract %s from BSP %s!' % (
                 project, args.source)
             cmd_status = plnx_utils.runCmd(
-                tar_cmd, cpath, msgonfail, shell=True)
+                tar_cmd, cpath, failed_msg=msgonfail, shell=True)
             create_tmpdir_ifnfs(proot, project, args.tmpdir)
             installed_proj.append(project)
 
@@ -268,7 +272,7 @@ def Createapps(args, proot, cpath):
 
     if not os.path.exists(template_path):
         logger.error('Invalid template %s for %s' %
-              (args.command, args.template))
+                     (args.command, args.template))
         sys.exit(255)
     SetupAppsModules(args, template_path, cpath, proot)
 
@@ -288,10 +292,14 @@ def CreateComponent(args, proot):
         cpath = os.path.join(args.out, args.name)
     else:
         recipes_path = 'recipes-%s' % (args.command)
+        fpga_templates = ['fpgamanager', 'fpgamanager_dtg', 
+                'fpgamanager_dtg_dfx', 'fpgamanager_dtg_csoc']
         if args.command == 'apps' and \
-                args.template in ['fpgamanager', 'fpgamanager_dtg', 'fpgamanager_dtg_dfx', 'fpgamanager_dtg_csoc']:
+                args.template in fpga_templates:
             recipes_path = 'recipes-firmware'
-            logger.warning('Creating "%s" template apps required FPGA Manager to be enabled in petalinux-config' % (args.template))
+            logger.warning(
+                'Creating "%s" template apps required FPGA Manager \
+to be enabled in petalinux-config' % (args.template))
         cpath = os.path.join(proot, 'project-spec', 'meta-user',
                              recipes_path, args.name)
 
@@ -306,7 +314,7 @@ def CreateComponent(args, proot):
         Createmodules(args, proot, cpath)
     logger.info('New %s successfully created in %s' % (args.command, cpath))
 
-    # 
+    # Enable the component
     if args.command in ['apps', 'modules'] and args.enable:
         logger.info('Enabling created component')
         rootfs_config = os.path.join(

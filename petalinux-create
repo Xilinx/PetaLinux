@@ -15,19 +15,20 @@ import argparse
 scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
-import logger_setup
-import plnx_utils
-import bitbake_utils
 import create_component
+import bitbake_utils
+import plnx_utils
+import logger_setup
 
 logger, console_h = logger_setup.setup_logger('PetaLinux')
 
 
 def main():
-    parser = argparse.ArgumentParser(description='This creates a new PetaLinux Project or component ',
-                                     formatter_class=argparse.RawTextHelpFormatter,
-                                     add_help=False,
-                                     usage='Use %(prog)s <subcommand> --help to get help on a specific command')
+    parser = argparse.ArgumentParser(
+        description='This creates a new PetaLinux Project or component ',
+        formatter_class=argparse.RawTextHelpFormatter,
+        add_help=False,
+        usage='Use %(prog)s <subcommand> --help to get help on a specific command')
 
     # Global args
     parser.add_argument('-f', '--force', action='store_true',
@@ -56,7 +57,8 @@ def main():
     project_parser.add_argument('--template', default='',
                                 help='Specify the template name to use.',
                                 choices=['versal-net', 'versal', 'zynqMP', 'zynq', 'microblaze'])
-    project_parser.add_argument('--tmpdir', help='Specify the local drive path as TMPDIR location when creating project.'
+    project_parser.add_argument('--tmpdir',
+                                help='Specify the local drive path as TMPDIR location when creating project.'
                                 '\nDefault TMPDIR cannot be under NFS. By default.'
                                 '\nPetaLinux sets the TMPDIR under /tmp when project is on NFS.'
                                 '\nYou can set your own local drive as TMPDIR PATH using --tmpdir option.')
@@ -115,6 +117,11 @@ def main():
                                 help='Specify full path to a PetaLinux project.'
                                 '\nDefault is the working project.')
     modules_parser.set_defaults(func=create_component.CreateComponent)
+
+    # Display help if no args specified
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
 
     args = parser.parse_args(unparsed_args, namespace=global_args)
 
