@@ -18,6 +18,7 @@ scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
 import plnx_utils
+import plnx_vars
 import bitbake_utils
 
 logger = logging.getLogger('PetaLinux')
@@ -32,7 +33,6 @@ def config_handler(proot, fragment_path, component, logfile):
     timestamp = str(timestamp)
     timestamp = timestamp.replace(' ', '-').replace(':', '-')
     user_fragmentcfg = 'user_%s.cfg' % timestamp
-    bblayer_path = os.path.join(proot, 'project-spec', 'meta-user')
 
     if fragment_path and not fragment_path.isspace() and \
             os.path.getsize(fragment_path) > 0:
@@ -40,32 +40,37 @@ def config_handler(proot, fragment_path, component, logfile):
             os.path.dirname(fragment_path), str(user_fragmentcfg))
         plnx_utils.RenameFile(fragment_path, user_fragmentcfg_path)
         cmd = 'recipetool appendsrcfile -wW %s %s %s' % (
-            bblayer_path, component, user_fragmentcfg_path)
+            plnx_vars.MetaUserDir.format(proot),
+            component, user_fragmentcfg_path)
         logger.info(cmd)
         bitbake_utils.run_bitbakecmd(cmd, proot, shell=True, logfile=logfile)
 
 
 def get_hw_file(hw_file, hw_ext, proot):
     '''Copy HW file into project and rename to system.xsa'''
-    projhw_dir = os.path.join(proot, 'project-spec', 'hw-description')
-    metadata_file = os.path.join(proot, '.petalinux', 'metadata')
-    plnx_utils.RemoveDir(projhw_dir)
-    plnx_utils.CreateDir(projhw_dir)
-    plnx_utils.update_config_value('HARDWARE_PATH', hw_file, metadata_file)
-    plnx_utils.update_config_value('HDF_EXT', hw_ext, metadata_file)
+    plnx_utils.RemoveDir(plnx_vars.HWDescDir.format(proot))
+    plnx_utils.CreateDir(plnx_vars.HWDescDir.format(proot))
+    plnx_utils.update_config_value('HARDWARE_PATH', hw_file,
+                                   plnx_vars.MetaDataFile.format(proot))
+    plnx_utils.update_config_value('HDF_EXT', hw_ext,
+                                   plnx_vars.MetaDataFile.format(proot))
     if hw_ext == 'sdt':
-        plnx_utils.CopyDir(os.path.dirname(hw_file), projhw_dir)
+        plnx_utils.CopyDir(os.path.dirname(hw_file),
+                           plnx_vars.HWDescDir.format(proot))
         # CopyDir doesnot support exclude option so removing xsa's
-        for _file in os.listdir(projhw_dir):
+        for _file in os.listdir(plnx_vars.HWDescDir.format(proot)):
             if _file.endswith('.xsa'):
-                plnx_utils.RemoveFile(os.path.join(projhw_dir, _file))
+                plnx_utils.RemoveFile(
+                    os.path.join(plnx_vars.HWDescDir.format(proot), _file))
     else:
-        plnx_utils.CopyFile(hw_file, projhw_dir)
+        plnx_utils.CopyFile(hw_file, plnx_vars.HWDescDir.format(proot))
         base_filename = os.path.basename(hw_file)
         dest_filename = 'system.xsa'
         if base_filename != dest_filename:
             logger.info('Renaming %s to %s' % (base_filename, dest_filename))
-            plnx_utils.RenameFile(base_filename, dest_filename)
+            plnx_utils.RenameFile(
+                os.path.join(plnx_vars.HWDescDir.format(proot), base_filename),
+                plnx_vars.DefXsaPath.format(proot))
     return True
 
 
@@ -98,6 +103,8 @@ def validate_hw_file(args, proot):
         hw_file = ''.join(hw_file)
         hw_ext = pathlib.Path(hw_file).suffix
         hw_ext = ''.join(hw_ext.split('.'))
+        if hw_ext == 'dts':
+            hw_ext = 'sdt'
         old_hw_ext = plnx_utils.is_hwflow_sdt(proot)
         if old_hw_ext and hw_ext != old_hw_ext:
             logger.error('This Project was configured with "%s", you may see issues '
@@ -120,22 +127,10 @@ def config_yocto_component(proot, component, config_target, logfile):
     arch = plnx_utils.get_system_arch(proot)
     if component not in ['project', 'rootfs']:
         logger.info('Configuring: %s' % (component))
-        gui_components = {
-            'uboot': 'virtual/bootloader', 'u-boot': 'virtual/bootloader',
-            'kernel': 'virtual/kernel', 'linux-xlnx': 'virtual/kernel'
-        }
-        cmd_components = {
-            'pmufw': 'virtual/pmu-firmware', 'pmu-firmware': 'virtual/pmu-firmware',
-            'fsbl': 'virtual/fsbl', 'fsbl-firmware': 'virtual/fsbl',
-            'plm': 'virtual/plm', 'plm-firmware': 'virtual/plm',
-            'psmfw': 'virtual/psm-firmware', 'psm-firmware': 'virtual/psm-firmware',
-            'dtb': 'virtual/dtb', 'devicetree': 'virtual/dtb', 'device-tree': 'virtual/dtb',
-            'fsboot': 'virtual/fsboot'
-        }
-        if component in gui_components.keys():
-            component = gui_components[component]
-        if component in cmd_components.keys():
-            component = cmd_components[component]
+        if component in plnx_vars.GUI_Components.keys():
+            component = plnx_vars.GUI_Components[component]
+        if component in plnx_vars.CMD_Components.keys():
+            component =  plnx_vars.CMD_Components[component]
         if component == 'bootloader':
             if arch == 'microblaze':
                 component = 'virtual/fsboot'
@@ -143,8 +138,8 @@ def config_yocto_component(proot, component, config_target, logfile):
                 component = 'virtual/fsbl'
         bitbake_task = 'menuconfig'
         if config_target == 'silentconfig' or \
-                component in cmd_components.keys() or \
-                component in cmd_components.values():
+                component in  plnx_vars.CMD_Components.keys() or \
+                component in  plnx_vars.CMD_Components.values():
             bitbake_task = 'configure'
         bitbake_cmd = ''
         if component == 'virtual/kernel':

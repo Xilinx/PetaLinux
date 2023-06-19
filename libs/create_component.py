@@ -18,6 +18,7 @@ libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
 import bitbake_utils
 import plnx_utils
+import plnx_vars
 
 logger = logging.getLogger('PetaLinux')
 
@@ -42,9 +43,6 @@ def is_tmpdir_nfs(Tmpdir):
 def create_tmpdir_ifnfs(cpath, name, tmpdir):
     '''Create the TMPDIR if current filesystem is located in NFS.
     Default TMPDIR location will be /tmp and update system config file'''
-    sysconfig_file = os.path.join(cpath, 'project-spec', 'configs', 'config')
-    tmpdir_macro = 'CONFIG_TMP_DIR_LOCATION'
-
     if get_filesystem_id(cpath) == '6969' and not tmpdir:
         logger.warning(
             'Project on NFS mount, trying to relocate TMPDIR to local storage (/tmp)')
@@ -58,26 +56,29 @@ def create_tmpdir_ifnfs(cpath, name, tmpdir):
         random_tmpdir = os.path.join(def_tmp, tmp_dir_name)
         plnx_utils.CreateDir(random_tmpdir)
         logger.info('Project TMPDIR is redirecting to %s' % (random_tmpdir))
-        plnx_utils.update_config_value(tmpdir_macro, '"%s"' %
-                                       random_tmpdir, sysconfig_file)
+        plnx_utils.update_config_value(plnx_vars.TmpDirConf, '"%s"' %
+                            random_tmpdir, plnx_vars.SysConfFile.format(cpath))
     elif tmpdir:
         logger.info('Project TMPDIR is redirecting to %s' % (tmpdir))
-        plnx_utils.update_config_value(tmpdir_macro, '"%s"' %
-                                       tmpdir, sysconfig_file)
+        plnx_utils.update_config_value(plnx_vars.TmpDirConf, '"%s"' %
+                            tmpdir, plnx_vars.SysConfFile.format(cpath))
 
 
 def remove_if_component_exists(command, cpath, name):
     '''Take the backup of old directory or file.
     Remove if andy backup copies present already'''
     if command != 'project' or name:
+        cpath_backup = cpath.rstrip('/')+'_old'
         # Delete any earlier backup copy
-        plnx_utils.RemoveDir(cpath)
+        plnx_utils.RemoveDir(cpath_backup)
         # Rename the current dir
-        plnx_utils.RenameDir(cpath, cpath.rstrip('/')+'_old')
+        plnx_utils.RenameDir(cpath, cpath_backup)
         # Rename bb file
         if command != 'project':
-            plnx_utils.RenameFile(os.path.join('cpath%s' % '_old', 'name%s' % '.bb'),
-                                  os.path.join('cpath%s' % '_old', 'name%s' % '.bb.old'))
+            plnx_utils.RenameFile(
+                    os.path.join(cpath_backup, name+'.bb'),
+                    os.path.join(cpath_backup, name+'.bb.old')
+                    )
         plnx_utils.CreateDir(cpath)
 
 
@@ -105,13 +106,12 @@ def SetupAppsModules(args, template_path, cpath, proot):
     proot - Project Directory
     Update recipe file with user specified SRC_URI and STATIC_PN
     '''
-    user_rfsconfig_path = os.path.join(
-        proot, 'project-spec', 'meta-user', 'conf', 'user-rootfsconfig')
     plnx_utils.CopyDir(template_path, cpath)
     recipe_name = args.name
     config_string = 'CONFIG_%s\n' % (args.name)
-    plnx_utils.add_str_to_file(user_rfsconfig_path, config_string,
-                               ignore_if_exists=True, mode='a+')
+    plnx_utils.add_str_to_file(
+            plnx_vars.UsrRfsConfig.format(proot),
+            config_string, ignore_if_exists=True, mode='a+')
     if args.command == 'apps':
         map_str = '@appname@'
     else:
@@ -231,58 +231,40 @@ def Createproject(args, proot, cpath):
             logger.error(
                 'Neither target project name nor PetaLinux project source BSP is specified!')
             sys.exit(255)
-        petalinux = os.environ.get('PETALINUX', '')
-        template_proj = os.path.join(
-            petalinux, 'etc', 'template', args.command)
-        template_path = os.path.join(
-            template_proj, 'template-%s' % args.template)
-        template_common = os.path.join(template_proj, 'common')
         plnx_utils.CreateDir(cpath)
-        plnx_utils.CopyDir(template_common, cpath)
-        plnx_utils.CopyDir(template_path, cpath)
+        plnx_utils.CopyDir(plnx_vars.TemplateCommon.format(args.command), cpath)
+        plnx_utils.CopyDir(plnx_vars.TemplateDir_C.format(
+            args.command, args.template),
+            cpath)
         # Update the host name and the produdct name of the project
         project_name = os.path.basename(cpath)
         plnx_utils.replace_str_fromdir(cpath, '@projname@', project_name)
-        plnx_utils.CreateDir(os.path.join(cpath, '.petalinux'))
-        gitignore_str = '''*/*/config.old
-*/*/rootfs_config.old
-build/
-images/linux/
-pre-built/linux/
-.petalinux/*
-!.petalinux/metadata
-*.o
-*.jou
-*.log
-/components/plnx_workspace
-/components/yocto
-'''
-        if not os.path.exists(os.path.join(cpath, '.gitignore')):
-            plnx_utils.add_str_to_file(os.path.join(cpath, '.gitignore'),
-                                       gitignore_str)
+        plnx_utils.CreateDir(plnx_vars.MetaDataDir.format(cpath))
+        if not os.path.exists(plnx_vars.GitIgnoreFile.format(cpath)):
+            plnx_utils.add_str_to_file(
+                plnx_vars.GitIgnoreFile.format(cpath),
+                plnx_vars.GitIgnoreStr)
         create_tmpdir_ifnfs(cpath, args.name, args.tmpdir)
 
 
 def Createapps(args, proot, cpath):
     ''' Create Apps for Project'''
-    petalinux = os.environ.get('PETALINUX', '')
-    template_apps = os.path.join(petalinux, 'etc', 'template', args.command)
-    template_path = os.path.join(
-        template_apps, 'template-%s' % (args.template))
-
-    if not os.path.exists(template_path):
-        logger.error('Invalid template %s for %s' %
-                     (args.command, args.template))
+    if not os.path.exists(
+        plnx_vars.TemplateDir_C.format(args.command, args.template)
+        ):
+        logger.error('Invalid template %s for %s' % (
+            args.command, args.template))
         sys.exit(255)
-    SetupAppsModules(args, template_path, cpath, proot)
+    SetupAppsModules(args, 
+        plnx_vars.TemplateDir_C.format(args.command, args.template),
+        cpath, proot)
 
 
 def Createmodules(args, proot, cpath):
     ''' Create Modules for Project'''
-    petalinux = os.environ.get('PETALINUX', '')
-    template_modules = os.path.join(petalinux, 'etc', 'template', args.command)
-    template_path = os.path.join(template_modules, 'template-c')
-    SetupAppsModules(args, template_path, cpath, proot)
+    SetupAppsModules(args, 
+        plnx_vars.TemplateDir_C.format(args.command, 'c'),
+        cpath, proot)
 
 
 def CreateComponent(args, proot):
@@ -292,15 +274,13 @@ def CreateComponent(args, proot):
         cpath = os.path.join(args.out, args.name)
     else:
         recipes_path = 'recipes-%s' % (args.command)
-        fpga_templates = ['fpgamanager', 'fpgamanager_dtg', 
-                'fpgamanager_dtg_dfx', 'fpgamanager_dtg_csoc']
         if args.command == 'apps' and \
-                args.template in fpga_templates:
+                args.template in plnx_vars.FPGA_Templates:
             recipes_path = 'recipes-firmware'
             logger.warning(
                 'Creating "%s" template apps required FPGA Manager \
 to be enabled in petalinux-config' % (args.template))
-        cpath = os.path.join(proot, 'project-spec', 'meta-user',
+        cpath = os.path.join(plnx_vars.MetaUserDir.format(proot),
                              recipes_path, args.name)
 
     if_component_exists(args.command, args.force, cpath, args.name)
@@ -317,8 +297,7 @@ to be enabled in petalinux-config' % (args.template))
     # Enable the component
     if args.command in ['apps', 'modules'] and args.enable:
         logger.info('Enabling created component')
-        rootfs_config = os.path.join(
-            proot, 'project-spec', 'configs', 'rootfs_config')
         plnx_utils.add_str_to_file(
-            rootfs_config, 'CONFIG_%s=y\n' % args.name, ignore_if_exists=True, mode='a+')
+            plnx_vars.RfsConfig.format(proot),
+            'CONFIG_%s=y\n' % args.name, ignore_if_exists=True, mode='a+')
         logger.info('%s has been enabled' % args.name)

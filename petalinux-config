@@ -16,10 +16,11 @@ import logging
 scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
-import config_component
-import bitbake_utils
-import plnx_utils
 import logger_setup
+import plnx_vars
+import plnx_utils
+import bitbake_utils
+import config_component
 
 logger, console_h = logger_setup.setup_logger('PetaLinux')
 
@@ -35,7 +36,7 @@ def _config(args, proot):
     if args.debug:
         gen_confargs += ' --debug'
     plnx_utils.update_config_value('VALIDATE_HW_CHKSUM', '1',
-                        os.path.join(proot, '.petalinux', 'metadata'))
+                                   plnx_vars.MetaDataFile.format(proot))
     if args.get_hw_description:
         config_component.validate_hw_file(args, proot)
     plnx_utils.setup_plnwrapper(args, proot, config_target, gen_confargs)
@@ -78,14 +79,13 @@ def main():
         sys.exit(255)
 
     args.command = os.path.basename(sys.argv[0])
-    args.builddir = os.path.join(proot, 'build')
+    args.builddir = plnx_vars.BuildDir.format(proot)
     plnx_utils.CreateDir(args.builddir)
 
-    plnx_utils.CreateDir(os.path.join(proot, 'components', 'plnx_workspace'))
+    plnx_utils.CreateDir(plnx_vars.PlnxWorkspace.format(proot))
 
-    args.logfile = os.path.join(args.builddir, 'config.log')
-    plnx_utils.RenameFile(args.logfile, os.path.join(
-        args.builddir, 'config.log.old'))
+    args.logfile = plnx_vars.ConfigLogFile.format(proot)
+    plnx_utils.RenameFile(args.logfile, args.logfile + '.old')
 
     # Setup logger to file
     logger_setup.setup_logger_file(args.logfile)

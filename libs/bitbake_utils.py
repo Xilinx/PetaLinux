@@ -21,6 +21,7 @@ scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
 import plnx_utils
+import plnx_vars
 
 
 def bb_updatevar(recipename, bbvar, value, append=False):
@@ -88,35 +89,28 @@ def validate_srcuri(srcuris=[]):
     return localfiles, networkfiles
 
 
-def env_source_scriptname(arch):
-    '''Return the yocto envronment file name'''
-    env_prefix = 'environment-setup'
-    env_arch = {
-        'aarch64': 'cortexa72-cortexa53-xilinx-linux',
-        'arm': 'cortexa9t2hf-neon-xilinx-linux-gnueabi',
-        'microblaze': 'microblazeel-v11.0-bs-cmp-re-mh-div-xilinx-linux'
-    }
-    return '%s-%s' % (env_prefix, env_arch[arch])
-
-
 def get_bitbake_env(proot, logfile):
     '''Get the bitbake environment setup command to'''
     '''run before bitbake command'''
-    esdk_installdir = os.path.join(proot, 'components', 'yocto')
-    sysconfig_file = os.path.join(proot, 'project-spec', 'configs', 'config')
     arch = plnx_utils.get_system_arch(proot)
-    env_scirpt = env_source_scriptname(arch)
+    env_scirpt = '%s-%s' % (
+        plnx_vars.YoctoEnvPrefix, plnx_vars.YoctoEnvFile[arch]
+    )
     buildtools_ext = plnx_utils.get_config_value(
-        'CONFIG_YOCTO_BUILDTOOLS_EXTENDED', sysconfig_file)
+        plnx_vars.BuildToolsExtConf, plnx_vars.SysConfFile.format(proot)
+    )
     source_cmd = 'unset LD_LIBRARY_PATH;'
     source_cmd += 'source %s &>> %s;' % (
-        os.path.join(esdk_installdir, env_scirpt), logfile)
+        os.path.join(plnx_vars.EsdkInstalledDir.format(proot),
+                     env_scirpt), logfile
+    )
     if buildtools_ext == 'y':
         source_cmd += 'source %s;' % plnx_utils.get_buildtools_path('extended')
     else:
         source_cmd += 'source %s;' % plnx_utils.get_buildtools_path()
-    source_cmd += 'source %s &>> %s;' % (os.path.join(
-        esdk_installdir, 'layers', 'poky', 'oe-init-build-env'), logfile)
+    source_cmd += 'source %s %s &>> %s;' % (
+        os.path.join(plnx_vars.OeInitEnv.format(proot)),
+        plnx_vars.BuildDir.format(proot), logfile)
     return source_cmd
 
 
@@ -124,54 +118,61 @@ def setup_bitbake_env(proot, logfile):
     '''Copy esdk conf files into build directory and remove'''
     '''EXTRA_IMAGE_FEATURES from local.conf file and pre env '''
     '''setup for PetaLinux'''
-    esdk_installdir = os.path.join(proot, 'components', 'yocto')
-    conf_dir = os.path.join(proot, 'build', 'conf')
-    bblayers_conf = os.path.join(conf_dir, 'bblayers.conf')
-    local_conf = os.path.join(conf_dir, 'local.conf')
-
     conf_generated = False
-    if os.path.exists(bblayers_conf) and os.path.exists(local_conf):
+    if os.path.exists(plnx_vars.BBLayersConf.format(proot)) and \
+            os.path.exists(plnx_vars.LocalConf.format(proot)):
         conf_generated = True
 
     source_cmd = get_bitbake_env(proot, logfile)
     plnx_utils.runCmd(source_cmd, proot, shell=True)
     if not conf_generated:
-        plnx_utils.CopyDir(os.path.join(esdk_installdir, 'conf'), conf_dir)
-        plnx_utils.RemoveFile(os.path.join(conf_dir, 'devtool.conf'))
+        plnx_utils.CopyDir(
+            plnx_vars.EsdkConfDir.format(proot),
+            plnx_vars.ConfDir.format(proot)
+        )
+        plnx_utils.RemoveFile(plnx_vars.DevtoolConfFile.format(proot))
         plnx_utils.remove_str_from_file(
-            local_conf, '^EXTRA_IMAGE_FEATURES(.*)')
-        plnx_utils.remove_str_from_file(local_conf, '^SSTATE_MIRRORS(.*)')
+            plnx_vars.LocalConf.format(proot),
+            'EXTRA_IMAGE_FEATURES(.*)')
         plnx_utils.remove_str_from_file(
-            local_conf, '^include conf\/plnxbuild.conf')
+            plnx_vars.LocalConf.format(proot),
+            'SSTATE_MIRRORS(.*)')
         plnx_utils.remove_str_from_file(
-            local_conf, '^require conf\/locked-sigs.inc')
+            plnx_vars.LocalConf.format(proot),
+            'include conf\/plnxbuild.conf')
         plnx_utils.remove_str_from_file(
-            local_conf, '^require conf\/unlocked-sigs.inc')
+            plnx_vars.LocalConf.format(proot),
+            'require conf\/locked-sigs.inc')
+        plnx_utils.remove_str_from_file(
+            plnx_vars.LocalConf.format(proot),
+            'require conf\/unlocked-sigs.inc')
     plnx_utils.replace_str_fromdir(
-        conf_dir, 'SDKBASEMETAPATH = "${TOPDIR}"', 'SDKBASEMETAPATH = "%s"' % (esdk_installdir))
+        plnx_vars.ConfDir.format(proot),
+        'SDKBASEMETAPATH = "${TOPDIR}"',
+        'SDKBASEMETAPATH = "%s"' % (
+            plnx_vars.EsdkInstalledDir.format(proot)))
     plnx_utils.add_str_to_file(
-        local_conf, 'require conf/locked-sigs.inc\n', ignore_if_exists=True, mode='a+')
+        plnx_vars.LocalConf.format(proot),
+        'require conf/locked-sigs.inc\n', ignore_if_exists=True, mode='a+')
     plnx_utils.add_str_to_file(
-        local_conf, 'require conf/unlocked-sigs.inc\n', ignore_if_exists=True, mode='a+')
+        plnx_vars.LocalConf.format(proot),
+        'require conf/unlocked-sigs.inc\n', ignore_if_exists=True, mode='a+')
 
 
 def get_yocto_source(proot):
     '''Install esdk file into components/yocto for the first time'''
     ''' and ask user input if checksum changed from tool to project'''
     arch = plnx_utils.get_system_arch(proot)
-    esdk_installdir = os.path.join(proot, 'components', 'yocto')
     yocto_esdkpath, arch = plnx_utils.get_yocto_path(proot, arch)
     if not os.path.exists(yocto_esdkpath):
         logger.error('"%s" is missing in petalinux-tools.'
                      'Installed Petalinux tools are broken. Please reinstall' % yocto_esdkpath)
         sys.exit(255)
 
-    metadata_file = os.path.join(proot, '.petalinux', 'metadata')
     esdk_metadata_file = os.path.join(os.path.dirname(yocto_esdkpath),
                                       '.statistics', arch)
-    sysconfig_file = os.path.join(proot, 'project-spec', 'configs', 'config')
-    buildtools_ext = plnx_utils.get_config_value(
-        'CONFIG_YOCTO_BUILDTOOLS_EXTENDED', sysconfig_file)
+    buildtools_ext = plnx_utils.get_config_value(plnx_vars.BuildToolsExtConf,
+                                                 plnx_vars.SysConfFile.format(proot))
     sdk_command = ''
     if buildtools_ext == 'y':
         sdk_command += 'unset LD_LIBRARY_PATH;'
@@ -179,12 +180,8 @@ def get_yocto_source(proot):
             'extended')
     else:
         plnx_utils.check_gcc_version()
-    locked_signs = {
-        'aarch64': 't-aarch64 t-allarch t-x86-64-aarch64 t-x86-64 t-x86-64-x86-64-nativesdk',
-        'arm': 't-allarch t-x86-64-x86-64-nativesdk t-x86-64 t-cortexa9t2hf-neon t-x86-64-arm',
-        'microblaze': 't-x86-64 t-allarch t-x86-64-x86-64-nativesdk t-microblazeel-v11.0-bs-cmp-mh-div t-x86-64-microblazeel'
-    }
-    sdk_cksumproj = plnx_utils.get_config_value('YOCTO_SDK', metadata_file)
+    sdk_cksumproj = plnx_utils.get_config_value(
+        'YOCTO_SDK', plnx_vars.MetaDataFile.format(proot))
     sdk_cksumtool = plnx_utils.get_config_value('BASE_SDK', esdk_metadata_file)
     if sdk_cksumproj and sdk_cksumproj != sdk_cksumtool:
         logger.warning('Your yocto SDK was changed in tool')
@@ -196,43 +193,45 @@ def get_yocto_source(proot):
             userchoice = input(
                 'Please input "y" to proceed the installing SDK into project, "n" to exit:')
             if userchoice in ['y', 'Y', 'yes', 'Yes', 'YEs', 'YES']:
-                plnx_utils.RemoveDir(esdk_installdir)
+                plnx_utils.RemoveDir(plnx_vars.EsdkInstalledDir.format(proot))
                 break
             if userchoice in ['n', 'N', 'no', 'NO', 'No', 'nO']:
                 return False
-    plnx_utils.CreateDir(esdk_installdir)
-    locked_file = os.path.join(esdk_installdir, 'conf', 'locked-sigs.inc')
-    bblayers_conf = os.path.join(esdk_installdir, 'conf', 'bblayers.conf')
-    if not os.path.exists(bblayers_conf):
+    plnx_utils.CreateDir(plnx_vars.EsdkInstalledDir.format(proot))
+    if not os.path.exists(plnx_vars.EsdkBBLayerconf.format(proot)):
         logger.info(
             'Extracting yocto SDK to components/yocto. This may take time!')
-        sdk_command += '%s -p -y -d "%s"' % (yocto_esdkpath, esdk_installdir)
+        sdk_command += '%s -p -y -d "%s"' % (yocto_esdkpath,
+                                             plnx_vars.EsdkInstalledDir.format(proot))
         plnx_utils.runCmd(sdk_command, proot, shell=True)
 
         plnx_utils.remove_str_from_file(
-            locked_file, '^SIGGEN_LOCKEDSIGS_TYPES(.*)')
-        locked_string = 'SIGGEN_LOCKEDSIGS_TYPES = "%s"' % (locked_signs[arch])
-        plnx_utils.add_str_to_file(locked_file, locked_string, mode='a+')
+            plnx_vars.LockedSigsFile.format(
+                proot), '^SIGGEN_LOCKEDSIGS_TYPES(.*)'
+        )
+        locked_string = 'SIGGEN_LOCKEDSIGS_TYPES = "%s"' % (
+            plnx_vars.LockedSigns[arch])
+        plnx_utils.add_str_to_file(
+            plnx_vars.LockedSigsFile.format(proot), locked_string, mode='a+')
         plnx_utils.remove_str_from_file(
-            bblayers_conf, '\${SDKBASEMETAPATH}/workspace')
-        plnx_utils.RemoveFile(os.path.join(esdk_installdir, '.devtoolbase'))
+            plnx_vars.EsdkBBLayerconf.format(proot), '\${SDKBASEMETAPATH}/workspace')
+        plnx_utils.RemoveFile(plnx_vars.DevtoolFile.format(proot))
 
-    plnx_utils.update_config_value('YOCTO_SDK', sdk_cksumtool, metadata_file)
+    plnx_utils.update_config_value(
+        'YOCTO_SDK', sdk_cksumtool, plnx_vars.MetaDataFile.format(proot))
 
 
 def append_bitbake_log(proot, logfile):
     '''Append console-latest.log and genmachineconf.log into config/build.log'''
-    sysconf = os.path.join(proot, 'project-spec', 'configs', 'config')
-    gmc_log = os.path.join(proot, 'project-spec',
-                           'configs', 'gen-machineconf.log')
-    plnxconf = os.path.join(proot, 'build', 'conf', 'plnxtool.conf')
-    arch = plnx_utils.get_system_arch(proot)
-    tmp_dir = plnx_utils.get_config_value('CONFIG_TMP_DIR_LOCATION', sysconf)
+    tmp_dir = plnx_utils.get_config_value(
+        plnx_vars.TmpDirConf, plnx_vars.SysConfFile.format(proot))
     tmp_dir = tmp_dir.replace('${PROOT}', proot).replace('$PROOT', proot)
-    machine_name = plnx_utils.get_config_value('MACHINE ', plnxconf).strip()
+    machine_name = plnx_utils.get_config_value(
+        'MACHINE ', plnx_vars.PlnxToolConf.format(proot)).strip()
     log_dir = os.path.join(tmp_dir, 'log', 'cooker', machine_name)
-    if os.path.isfile(gmc_log) and logfile:
-        plnx_utils.concate_files(gmc_log, logfile)
+    if os.path.isfile(plnx_vars.GenMachLogFile.format(proot)) and logfile:
+        plnx_utils.concate_files(
+            plnx_vars.GenMachLogFile.format(proot), logfile)
     if os.path.exists(log_dir):
         bb_file = os.path.join(log_dir, 'console-latest.log')
         if os.path.isfile(bb_file) and logfile:
@@ -243,21 +242,18 @@ def append_bitbake_log(proot, logfile):
 
 def get_sdt_setup(proot):
     '''Install SDT SDL file into project'''
-    proj_sdt_dir = os.path.join(
-        proot, 'components', 'yocto', 'decoupling', 'setup')
-    sdt_sdk_file = os.path.join(os.environ.get(
-        'PETALINUX', ''), 'components', 'yocto', 'decoupling', 'decouple-prestep.sh')
-    dt_proc_script = os.path.join(proj_sdt_dir, 'dt-processor.sh')
-    if not os.path.exists(sdt_sdk_file):
+    if not os.path.exists(plnx_vars.SDTPrestepFile):
         logger.error(
             'No Decouple-preset.sh file found in PetaLinxu installation area')
         sys.exit(255)
 
-    if not os.path.exists(dt_proc_script):
+    if not os.path.exists(plnx_vars.SDTSetupFile.format(proot)):
         logger.info('Extracting the decoupling setup sdk into %s' %
-                    proj_sdt_dir)
+                    plnx_vars.SDTSetupDir.format(proot))
         dt_proc_cmd = 'unset LD_LIBRARY_PATH;'
-        dt_proc_cmd += '%s -d %s -p -y' % dt_proc_script
+        dt_proc_cmd += '%s -d %s -p -y' % (
+                plnx_vars.SDTPrestepFile,
+                plnx_vars.SDTSetupDir.format(proot))
         plnx_utils.runCmd(dt_proc_cmd, proot, shell=True)
 
 
@@ -268,24 +264,21 @@ def run_genmachineconf(proot, xilinx_arch, config_args, add_layers=False, logfil
     extraenv = {'PYTHONDONTWRITEBYTECODE': '1'}
     if add_layers:
         extraenv['UPDATE_USER_LAYERS'] = '1'
-    user_rfsconfig = os.path.join(
-        proot, 'project-spec', 'meta-user', 'conf', 'user-rootfsconfig')
     hw_args = ''
     if plnx_utils.is_hwflow_sdt(proot) == 'sdt':
         hw_args = '--hw-description %s' % (
-            os.path.join(proot, 'project-spec', 'hw-description'))
-        hw_args += ' --sdt-sysroot %s' % (os.path.join(
-            proot, 'components', 'yocto', 'decoupling', 'setup'))
+            plnx_vars.HWDescDir.format(proot))
+        hw_args += ' --sdt-sysroot %s' % (
+            plnx_vars.SDTSetupDir.format(proot))
     else:
-        hw_args = '--hw-description %s' % (os.path.join(
-            proot, 'project-spec', 'hw-description', 'system.xsa'))
-        hw_args += ' --xsct-tool %s' % (os.path.join(
-            os.environ.get('PETALINUX', ''), 'tools', 'xsct'))
+        hw_args = '--hw-description %s' % (
+            plnx_vars.DefXsaPath.format(proot))
+        hw_args += ' --xsct-tool %s' % (plnx_vars.XsctPath)
 
     genconf_cmd = 'gen-machineconf --soc-family %s %s --output %s \
             --add-rootfsconfig %s --petalinux %s' % (
-        xilinx_arch, hw_args, os.path.join(
-            proot, 'project-spec', 'configs'), user_rfsconfig,
+        xilinx_arch, hw_args, plnx_vars.SysConfDir.format(proot),
+        plnx_vars.UsrRfsConfig.format(proot),
         config_args)
     run_bitbakecmd(genconf_cmd, proot, builddir=proot,
                    logfile=logfile, extraenv=extraenv, shell=True)
@@ -319,5 +312,5 @@ def run_bitbakecmd(command, proot, builddir=None, logfile='/dev/null', extraenv=
         sys.exit(255)
     except subprocess.CalledProcessError as e:
         append_bitbake_log(proot, logfile)
-        logger.error("Command %s failed with %s" % (cmd, e.output))
+        logger.error("Command %s failed" % (cmd))
         sys.exit(255)

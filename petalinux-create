@@ -15,10 +15,10 @@ import argparse
 scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
-import create_component
-import bitbake_utils
-import plnx_utils
 import logger_setup
+import plnx_utils
+import bitbake_utils
+import create_component
 
 logger, console_h = logger_setup.setup_logger('PetaLinux')
 
