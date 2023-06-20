@@ -309,7 +309,7 @@ def run_bitbakecmd(command, proot, builddir=None, logfile='/dev/null', extraenv=
         return bb_tasklog
     except (SystemExit, KeyboardInterrupt):
         append_bitbake_log(proot, logfile)
-        sys.exit(255)
+        raise KeyboardInterrupt
     except subprocess.CalledProcessError as e:
         append_bitbake_log(proot, logfile)
         logger.error("Command %s failed" % (cmd))
