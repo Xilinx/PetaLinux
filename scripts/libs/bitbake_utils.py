@@ -136,7 +136,7 @@ def setup_bitbake_env(proot, logfile):
             'EXTRA_IMAGE_FEATURES(.*)')
         plnx_utils.remove_str_from_file(
             plnx_vars.LocalConf.format(proot),
-            'SSTATE_MIRRORS(.*)')
+            'SSTATE_MIRRORS(.*)=(.*)"$')
         plnx_utils.remove_str_from_file(
             plnx_vars.LocalConf.format(proot),
             'include conf\/plnxbuild.conf')

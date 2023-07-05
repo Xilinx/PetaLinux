@@ -73,7 +73,7 @@ YoctoEnvPrefix = 'environment-setup'
 YoctoEnvFile = {
         'aarch64': 'cortexa72-cortexa53-xilinx-linux',
         'arm': 'cortexa9t2hf-neon-xilinx-linux-gnueabi',
-        'microblaze': 'microblazeel-v11.0-bs-cmp-re-mh-div-xilinx-linux'
+        'microblaze': 'microblazeel-v11.0-*-xilinx-linux'
         }
 
 LockedSigns = {
