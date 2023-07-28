@@ -1,0 +1,108 @@
+#!/usr/bin/env python3
+
+# Copyright (C) 2021-2022, Xilinx, Inc.  All rights reserved.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.  All rights reserved.
+#
+# Author:
+#       Raju Kumar Pothuraju <rajukumar.pothuraju@amd.com>
+#
+# SPDX-License-Identifier: MIT
+
+
+import os
+import sys
+import argparse
+import logging
+
+scripts_path = os.path.dirname(os.path.realpath(__file__))
+libs_path = scripts_path + '/libs'
+sys.path = sys.path + [libs_path]
+import logger_setup
+import plnx_vars
+import plnx_utils
+import package_boot
+
+logger, console_h = logger_setup.setup_logger('PetaLinux')
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='This command packages various image format, prebuilt and bsps',
+        formatter_class=argparse.RawTextHelpFormatter,
+        add_help=False,
+        epilog='Use %(prog)s <subcommand> --help to get help on a specific command',
+    )
+
+    # Global args
+    parser.add_argument('--force', action='store_true',
+                        help='Force overwriting an existing component directory')
+    parser.add_argument('-d', '--debug', action='store_true',
+                        help='Display the Debug prints')
+    parser.add_argument('-p', '--project', metavar='PROJECT_DIR', type=os.path.realpath,
+                        help='Specify full path to a PetaLinux project.'
+                        '\nDefault is the working project.')
+    global_args, unparsed_args = parser.parse_known_args()
+
+    parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
+                        help='Show this help message and exit')
+    subparsers = parser.add_subparsers(dest="command",
+                                       title='subcommands', metavar='<subcommand>')
+    subparsers.required = True
+
+    # --boot parser args
+    boot_parser = subparsers.add_parser('boot', help='Packages the boot file',
+                                        formatter_class=argparse.RawTextHelpFormatter)
+    package_boot.pkgboot_args(boot_parser)
+
+    # --bsp parser args
+    bsp_parser = subparsers.add_parser('bsp', help='Packages the BSP file',
+                                       formatter_class=argparse.RawTextHelpFormatter)
+
+    # --prebuilt parser args
+    prebuilt_parser = subparsers.add_parser('prebuilt', help='Packages prebuilts for project',
+                                            formatter_class=argparse.RawTextHelpFormatter)
+
+    # --sysroot parser args
+    sysroot_parser = subparsers.add_parser('sysroot', help='Install the SDK',
+                                           formatter_class=argparse.RawTextHelpFormatter)
+
+    # --wic parser args
+    wic_parser = subparsers.add_parser('wic', help='Packages the SD bootable image',
+                                       formatter_class=argparse.RawTextHelpFormatter)
+
+    # Display help if no args specified
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
+    args = parser.parse_args(unparsed_args, namespace=global_args)
+    proot = ''
+    if args.command != 'bsp':
+        # Exit if PROOT is not PetaLinux project
+        proot = plnx_utils.exit_not_plnx_project(args.project)
+
+    args.builddir = plnx_vars.BuildDir.format(proot)
+    plnx_utils.CreateDir(args.builddir)
+
+    args.logfile = plnx_vars.PackageLogFile.format(proot)
+    plnx_utils.RenameFile(args.logfile, args.logfile + '.old')
+
+    # Setup logger to file
+    logger_setup.setup_logger_file(args.logfile)
+
+    # Print debug prints if debug selected
+    if args.debug:
+        console_h.setLevel(logging.DEBUG)
+
+    ret = args.func(args, proot)
+    return ret
+
+
+if __name__ == "__main__":
+    try:
+        ret = main()
+    except Exception:
+        ret = 1
+        import traceback
+        traceback.print_exc()
+    sys.exit(ret)

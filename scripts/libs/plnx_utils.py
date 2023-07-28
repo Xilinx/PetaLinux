@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (C) 2021-2022, Xilinx, Inc.  All rights reserved.
 # Copyright (C) 2022-2023, Advanced Micro Devices, Inc.  All rights reserved.
@@ -138,6 +138,21 @@ def get_xilinx_arch(proot):
     return xilinx_arch
 
 
+def get_system_baseaddr(proot):
+    '''Get the System BaseAddress from the Sysconfig'''
+    baseaddr = get_config_value(plnx_vars.MemoryConfs['Prefix'],
+                                plnx_vars.SysConfFile.format(proot),
+                                'asterisk', plnx_vars.MemoryConfs['BaseAddr'])
+    return baseaddr
+
+
+def append_baseaddr(proot, offset):
+    '''Append the Given Offset to the Memory Baseaddress'''
+    baseaddr = get_system_baseaddr(proot)
+    addr = add_offsets(baseaddr, offset)
+    return addr
+
+
 def get_buildtools_path(Type=''):
     '''Return buildtools path from tool'''
     if Type == 'extended':
@@ -165,6 +180,74 @@ def get_workspace_path(proot):
     return workspace_path
 
 
+def get_xsaordts_path(proot, hw_file=''):
+    '''Return the xsa or dts file path from project'''
+    if hw_file and os.path.isfile(hw_file):
+        '''If HW file given check if exists and return'''
+        return hw_file
+
+    if os.path.exists(plnx_vars.HWDescDir.format(proot)):
+        '''Serach for xsa/dts in hw_description'''
+        for _file in os.listdir(plnx_vars.HWDescDir.format(proot)):
+            if _file.endswith('.xsa'):
+                hw_file = os.path.join(
+                    plnx_vars.HWDescDir.format(proot), _file)
+                break
+            if _file.endswith('.dts'):
+                hw_file = os.path.join(
+                    plnx_vars.HWDescDir.format(proot), _file)
+                break
+    return hw_file
+
+
+def GetFileFromXsa(proot, hw_file='', bootfile_ext=''):
+    '''Return the bit or pdi file name extracted from HW file'''
+    hw_file = get_xsaordts_path(proot, hw_file)
+    xilinx_arch = get_xilinx_arch(proot)
+    if not bootfile_ext:
+        if xilinx_arch in ['versal', 'versal-net']:
+            bootfile_ext = 'pdi'
+        else:
+            bootfile_ext = 'bit'
+    logger.info('Getting Default %s file' % bootfile_ext)
+    # In SDT no reference for bit/pdi so using glob
+    if is_hwflow_sdt(proot) == 'sdt':
+        import glob
+        bootfile = glob.glob(os.path.join(
+            plnx_vars.HWDescDir.format(proot),
+            '*.%s' % bootfile_ext))
+        if len(bootfile) > 1 and xilinx_arch in ['versal', 'versal-net']:
+            # To handle the new soc boot flow where design has two pdis
+		    # boot pdi with _soc.pdi and pl pdi as _pld.pdi.
+            bootfile = glob.glob(os.path.join(
+                plnx_vars.HWDescDir.format(proot),
+                '*_soc.%s' % bootfile_ext))
+        else:
+            bootfile = bootfile[0]
+        return bootfile
+
+    import tempfile
+    filehandle = tempfile.NamedTemporaryFile()
+    xsctfile = filehandle.name
+    add_str_to_file(xsctfile,
+                    plnx_vars.OpenHWCmd.format(hw_file) + '\n' +
+                    plnx_vars.GetHWFilesCmd.format(bootfile_ext,
+                                                   plnx_vars.HdfDataMacro))
+    stdout, stderr = runCmd(plnx_vars.XsctFileIn.format(xsctfile),
+                            os.getcwd(), shell=True)
+    logger.debug(stdout)
+    bootfile = ''
+    for line in stdout.splitlines():
+        try:
+            line = line.decode('utf-8')
+        except AttributeError:
+            pass
+        if line.startswith(plnx_vars.HdfDataMacro):
+            bootfile = line.split(plnx_vars.HdfDataMacro)[1]
+            break
+    return bootfile
+
+
 def config_initscripts(proot):
     '''Generate the configs for busyboxt, interfaces, wired.network'''
     '''files as per the user defined config values'''
@@ -172,13 +255,16 @@ def config_initscripts(proot):
                                plnx_vars.SysConfFile.format(proot), 'asterisk',
                                plnx_vars.EthConfs['IPConf'])
     ip_netmask = get_config_value(plnx_vars.EthConfs['Prefix'],
-                                  plnx_vars.SysConfFile.format(proot), 'asterisk',
+                                  plnx_vars.SysConfFile.format(
+                                      proot), 'asterisk',
                                   plnx_vars.EthConfs['IPNetMaskConf'])
     ip_gateway = get_config_value(plnx_vars.EthConfs['Prefix'],
-                                  plnx_vars.SysConfFile.format(proot), 'asterisk',
+                                  plnx_vars.SysConfFile.format(
+                                      proot), 'asterisk',
                                   plnx_vars.EthConfs['IPGetWay'])
     ip_dynamic = get_config_value(plnx_vars.EthConfs['Prefix'],
-                                  plnx_vars.SysConfFile.format(proot), 'asterisk',
+                                  plnx_vars.SysConfFile.format(
+                                      proot), 'asterisk',
                                   plnx_vars.EthConfs['Dhcp'])
     eth_manual = get_config_value(
         plnx_vars.EthManualConf, plnx_vars.SysConfFile.format(proot))
@@ -192,7 +278,7 @@ def config_initscripts(proot):
         add_str_to_file(plnx_vars.P_Interfaces.format(proot),
                         plnx_vars.ActInterfaceStr.format(
             ip_addr, ip_netmask, ip_gateway))
-        cidr_netmask = sum(bin(int(x)).count('1') 
+        cidr_netmask = sum(bin(int(x)).count('1')
                            for x in ip_netmask.split('.'))
         add_str_to_file(plnx_vars.P_SystemdWired.format(proot),
                         plnx_vars.ActWiredStr.format(
@@ -260,19 +346,9 @@ def gen_sysconf_dtsi_file(proot):
 
 def validate_hwchecksum(proot):
     '''Validate HW file checksum and info user if mismatched with the old one'''
-    hw_file = ''
-    if os.path.exists(plnx_vars.HWDescDir.format(proot)):
-        for _file in os.listdir(plnx_vars.HWDescDir.format(proot)):
-            if _file.endswith('.xsa'):
-                hw_file = os.path.join(
-                    plnx_vars.HWDescDir.format(proot), _file)
-                break
-            if _file.endswith('.dts'):
-                hw_file = os.path.join(
-                    plnx_vars.HWDescDir.format(proot), _file)
-                break
+    hw_file = get_xsaordts_path(proot)
     if not hw_file:
-        logger.error('No XSA is found in %s' %
+        logger.error('No XSA/DTS found in %s' %
                      plnx_vars.HWDescDir.format(proot))
         sys.exit(255)
     hw_checksum_old = get_config_value('HARDWARE_CHECKSUM',

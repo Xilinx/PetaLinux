@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (C) 2021-2022, Xilinx, Inc.  All rights reserved.
 # Copyright (C) 2022-2023, Advanced Micro Devices, Inc.  All rights reserved.
@@ -77,6 +77,18 @@ def add_offsets(start, end):
     '''Add given offsets and return the final offset'''
     offset = hex(int(start, base=16) + int(end, base=16))
     return offset
+
+
+def ToUpper(string):
+    '''Convert string to Upper case'''
+    return string.upper()
+
+
+def CheckFileExists(filepath, failed_msg=''):
+    '''Check if File exists or not and exit if not found'''
+    if not os.path.exists(filepath):
+        logger.error('%sFile "%s" doesnot exist.' % (failed_msg, filepath))
+        sys.exit(255)
 
 
 def runCmd(command, out_dir, extraenv=None, failed_msg='', shell=False):
@@ -246,3 +258,33 @@ def check_gcc_version():
                        'Please select Enable Buildtools Extended in petalinux-config --> Yocto Settings'
                        % required_version)
     return cur_version
+
+
+def check_tool(tools=[], failed_msg=''):
+    '''Check the tools exists in PATH variable or not and give error if not found'''
+    for tool in tools.split():
+        tool = tool.lower()
+        tool_path = shutil.which(tool)
+        if not tool_path:
+            logger.error(
+                'This tool requires "%s" and it is missing. %s' % (tool, failed_msg))
+            sys.exit(255)
+
+
+def add_dictkey(Dict, key, sub_key, value, append=False):
+    '''Add Elements to the given Dictionary'''
+    if sub_key:
+        if not append:
+            try:
+                Dict[key][sub_key] = value
+            except KeyError:
+                Dict[key] = {}
+                Dict[key][sub_key] = value
+        else:
+            try:
+                Dict[key][sub_key] += ', ' + value
+            except KeyError:
+                Dict[key][sub_key] = ''
+                Dict[key][sub_key] += value
+    else:
+        Dict[key] = value
