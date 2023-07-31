@@ -289,7 +289,7 @@ def run_bitbakecmd(command, proot, builddir=None, logfile='/dev/null', extraenv=
     cmd = command
     command = command.split() if not shell else command
     if not builddir:
-        os.path.join(proot, 'build')
+        builddir = os.path.join(proot, 'build')
     source_cmd = get_bitbake_env(proot, logfile)
     command = '%s%s' % (source_cmd, command)
     logger.debug(command)
