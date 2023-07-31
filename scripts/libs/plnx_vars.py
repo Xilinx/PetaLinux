@@ -151,8 +151,8 @@ pre-built/linux/
 *.o
 *.jou
 *.log
-/components/plnx_workspace
-/components/yocto
+components/plnx_workspace
+components/yocto
 '''
 ActInterfaceStr = '''
 # /etc/network/interfaces -- configuration file for ifup(8), ifdown(8)
