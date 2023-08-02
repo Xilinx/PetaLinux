@@ -79,6 +79,13 @@ def add_offsets(start, end):
     return offset
 
 
+def argreadlink(arg):
+    ''' Read the realpath if path exists '''
+    if os.path.exists(arg):
+        arg = os.path.realpath(arg)
+    return arg
+
+
 def ToUpper(string):
     '''Convert string to Upper case'''
     return string.upper()

@@ -53,13 +53,6 @@ def add_property_to_bootfile(bootparamkey='Path',
     return p
 
 
-def argreadlink(arg):
-    ''' Read the realpath if path exists '''
-    if os.path.exists(arg):
-        arg = os.path.realpath(arg)
-    return arg
-
-
 def add_bootfile(dict_key, sub_key='Path'):
     ''' Add bootfile param into Dict '''
     ''' Append random key if data files and bif attaributes '''
@@ -68,7 +61,7 @@ def add_bootfile(dict_key, sub_key='Path'):
             BootParamDisable.append(dict_key)
             arg = None
         elif arg:
-            arg = argreadlink(arg)
+            arg = plnx_utils.argreadlink(arg)
         if arg and dict_key:
             tmp_key = dict_key
             if dict_key in ['ADDFILE', 'ADDCDO', 'BIFATTR']:
@@ -307,7 +300,7 @@ def pkgboot_args(boot_parser):
                              help='Path to the kernel image location(fitImage)'
                              '\nNot valid for DOWNLOAD.BIT. Default: images/linux/image.ub'
                              )
-    boot_parser.add_argument('--qemu-rootfs', nargs='?', type=argreadlink,
+    boot_parser.add_argument('--qemu-rootfs', nargs='?', type=plnx_utils.argreadlink,
                              help='Path to the rootfs file location to create qemu_boot.img(cpio.gz.uboot)'
                              '\nDefault: images/linux/rootfs.cpio.gz.uboot'
                              '\nTo skip packing rootfs use --qemu-rootfs no or --qemu-rootfs none'
