@@ -284,7 +284,8 @@ def run_genmachineconf(proot, xilinx_arch, config_args, add_layers=False, logfil
                    logfile=logfile, extraenv=extraenv, shell=True)
 
 
-def run_bitbakecmd(command, proot, builddir=None, logfile='/dev/null', extraenv=None, shell=False):
+def run_bitbakecmd(command, proot, builddir=None, logfile='/dev/null',
+        extraenv=None, shell=False, checkcall=True):
     '''Source the env script and Run bitbake commands'''
     cmd = command
     command = command.split() if not shell else command
@@ -303,10 +304,16 @@ def run_bitbakecmd(command, proot, builddir=None, logfile='/dev/null', extraenv=
             env['BB_ENV_PASSTHROUGH_ADDITIONS'] = env.get(
                 'BB_ENV_PASSTHROUGH_ADDITIONS', '') + ' ' + k
     try:
-        output = subprocess.check_call(
-            command, env=env, cwd=builddir, shell=shell)
-        bb_tasklog = append_bitbake_log(proot, logfile)
-        return bb_tasklog
+        if checkcall:
+            output = subprocess.check_call(
+                command, env=env, cwd=builddir, shell=shell)
+            bb_tasklog = append_bitbake_log(proot, logfile)
+            return bb_tasklog
+        else:
+            output, error = plnx_utils.runCmd(command, out_dir=builddir,
+                    extraenv=env, shell=shell)
+            bb_tasklog = append_bitbake_log(proot, logfile)
+            return output, error
     except (SystemExit, KeyboardInterrupt):
         append_bitbake_log(proot, logfile)
         raise KeyboardInterrupt
