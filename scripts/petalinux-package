@@ -21,6 +21,7 @@ import logger_setup
 import plnx_vars
 import plnx_utils
 import package_boot
+import package_bsp
 
 logger, console_h = logger_setup.setup_logger('PetaLinux')
 
@@ -38,9 +39,6 @@ def main():
                         help='Force overwriting an existing component directory')
     parser.add_argument('-d', '--debug', action='store_true',
                         help='Display the Debug prints')
-    parser.add_argument('-p', '--project', metavar='PROJECT_DIR', type=os.path.realpath,
-                        help='Specify full path to a PetaLinux project.'
-                        '\nDefault is the working project.')
     global_args, unparsed_args = parser.parse_known_args()
 
     parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
@@ -57,6 +55,7 @@ def main():
     # --bsp parser args
     bsp_parser = subparsers.add_parser('bsp', help='Packages the BSP file',
                                        formatter_class=argparse.RawTextHelpFormatter)
+    package_bsp.pkgbsp_args(bsp_parser)
 
     # --prebuilt parser args
     prebuilt_parser = subparsers.add_parser('prebuilt', help='Packages prebuilts for project',
@@ -79,12 +78,18 @@ def main():
     proot = ''
     if args.command != 'bsp':
         # Exit if PROOT is not PetaLinux project
-        proot = plnx_utils.exit_not_plnx_project(args.project)
+        if args.project:
+            proot = plnx_utils.exit_not_plnx_project(args.project)
+        else:
+            proot = plnx_utils.exit_not_plnx_project(proot='')
+
 
     args.builddir = plnx_vars.BuildDir.format(proot)
     plnx_utils.CreateDir(args.builddir)
-
-    args.logfile = plnx_vars.PackageLogFile.format(proot)
+    args.command = os.path.basename(sys.argv[0])
+    args.logfile = plnx_vars.PkgFileName
+    if proot:
+        args.logfile = plnx_vars.PackageLogFile.format(proot)
     plnx_utils.RenameFile(args.logfile, args.logfile + '.old')
 
     # Setup logger to file

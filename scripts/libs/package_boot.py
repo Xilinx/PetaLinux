@@ -226,6 +226,9 @@ def PackageBootImage(args, proot):
 def pkgboot_args(boot_parser):
     boot_parser.add_argument('-o', '--output',
                              help='Generated boot image name', type=os.path.realpath)
+    boot_parser.add_argument('-p', '--project', metavar='PROJECT_DIR', type=os.path.realpath,
+                             help='Specify full path to a PetaLinux project.'
+                             '\nDefault is the working project.')
     boot_parser.add_argument('-f', '--fpga', nargs='?', default='',
                              const='Default', metavar='BIT/PDI_FILE',
                              help='Path to FPGA bitstream/pdi file location'
