@@ -34,7 +34,7 @@ def main():
     # Global args
     parser.add_argument('-f', '--force', action='store_true',
                         help='Force overwriting an existing component directory')
-    parser.add_argument('-d', '--debug', action='store_true',
+    parser.add_argument('-D', '--debug', action='store_true',
                         help='Display the Debug prints')
     parser.add_argument('--out', default=os.getcwd(), type=os.path.realpath,
                         help=argparse.SUPPRESS)
