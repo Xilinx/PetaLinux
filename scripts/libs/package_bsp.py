@@ -187,9 +187,4 @@ def pkgbsp_args(bsp_parser):
 
     bsp_parser.set_defaults(func=PackageBsp)
 
-    # Display help if no args specified
-    if len(sys.argv) == 2:
-        bsp_parser.print_help(sys.stderr)
-        sys.exit(1)
-
     return

@@ -51,7 +51,7 @@ def GenQemuBootImage(args, proot):
                               plnx_vars.BootFileNames['BOOTSCRIPT']
                               )
     if not os.path.isfile(Bootscript):
-        Bootscript = os.path.join(plnx_vars.PreBuildsDir.format(proot),
+        Bootscript = os.path.join(plnx_vars.PreBuildsImagesDir.format(proot),
                                   plnx_vars.BootFileNames['BOOTSCRIPT']
                                   )
     logger.info('Generating QEMU boot images...')

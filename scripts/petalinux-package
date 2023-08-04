@@ -75,6 +75,14 @@ def main():
         sys.exit(1)
 
     args = parser.parse_args(unparsed_args, namespace=global_args)
+
+    # Display help if no args specified for parser ex: petalinux-package bsp
+    # parser name should start with command to make this work
+    if len(sys.argv) == 2 and \
+            args.command == 'bsp':
+        eval('%s_parser.print_help(sys.stderr)' % args.command)
+        sys.exit(1)
+
     proot = ''
     if args.command != 'bsp':
         # Exit if PROOT is not PetaLinux project

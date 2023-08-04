@@ -15,7 +15,8 @@ import sys
 ProotSub = '{0:s}'
 ImagesDir = os.path.join('images', 'linux')
 BuildImagesDir = os.path.join(ProotSub, ImagesDir)
-PreBuildsDir = os.path.join(ProotSub, 'pre-built', 'linux', 'images')
+PreBuildsDir = os.path.join(ProotSub, 'pre-built', 'linux')
+PreBuildsImagesDir = os.path.join(PreBuildsDir, 'images')
 BuildDir = os.path.join(ProotSub, 'build')
 ConfDir = os.path.join(BuildDir, 'conf')
 DevtoolConfFile = os.path.join(ConfDir, 'devtool.conf')

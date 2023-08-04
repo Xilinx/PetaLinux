@@ -284,3 +284,20 @@ def CheckOutFile(OutFile, Force):
             logger.error('Output file "%s" already exists.'
                          'Please use --force to overwrite it.' % OutFile)
             sys.exit(255)
+
+
+def CheckOutDir(OutDir, Force):
+    ''' Check output dir and give error if exists and force not specified'''
+    if os.path.exists(OutDir):
+        if not os.path.isdir(OutDir):
+            logger.error(
+                'Expecting Output as folder, Please specify a valid --output File path')
+            sys.exit(255)
+        if Force:
+            logger.info('Cleaning %s folder' % os.path.basename(OutDir))
+            plnx_utils.RemoveDir(OutDir)
+        else:
+            logger.error('Output Dir "%s" already exists.'
+                         ' Please use --force to overwrite it.'
+                         % OutDir)
+            sys.exit(255)
