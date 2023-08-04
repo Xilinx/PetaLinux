@@ -98,7 +98,8 @@ def CheckFileExists(filepath, failed_msg=''):
         sys.exit(255)
 
 
-def runCmd(command, out_dir, extraenv=None, failed_msg='', shell=False):
+def runCmd(command, out_dir, extraenv=None,
+        failed_msg='', shell=False, checkcall=False):
     '''Run Shell commands from python'''
     command = command.split() if not shell else command
     logger.debug(command)
@@ -106,26 +107,29 @@ def runCmd(command, out_dir, extraenv=None, failed_msg='', shell=False):
     if extraenv:
         for k in extraenv:
             env[k] = extraenv[k]
-
-    process = subprocess.Popen(command,
+    if checkcall:
+        subprocess.check_call(
+                command, env=extraenv, cwd=out_dir, shell=shell)
+        return
+    else:
+        process = subprocess.Popen(command,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
                                env=env,
                                shell=shell,
                                cwd=out_dir)
-    stdout, stderr = process.communicate()
-
-    if process.returncode != 0:
-        raise Exception('\n%s\n%s\n%s' %
-                        (stdout.decode('utf-8'),
-                         stderr.decode('utf-8'),
-                         failed_msg))
-    else:
-        if not stdout is None:
-            stdout = stdout.decode("utf-8")
-        if not stderr is None:
-            stderr = stderr.decode("utf-8")
-    return stdout, stderr
+        stdout, stderr = process.communicate()
+        if process.returncode != 0:
+            raise Exception('\n%s\n%s\n%s' %
+                            (stdout.decode('utf-8'),
+                             stderr.decode('utf-8'),
+                             failed_msg))
+        else:
+            if not stdout is None:
+                stdout = stdout.decode("utf-8")
+            if not stderr is None:
+                stderr = stderr.decode("utf-8")
+        return stdout, stderr
 
 
 def replace_str_fromdir(dirpath, search_str, replace_str, include_dir_names=False):
