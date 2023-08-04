@@ -22,6 +22,7 @@ import plnx_vars
 import plnx_utils
 import package_boot
 import package_bsp
+import package_prebuilt
 
 logger, console_h = logger_setup.setup_logger('PetaLinux')
 
@@ -60,6 +61,7 @@ def main():
     # --prebuilt parser args
     prebuilt_parser = subparsers.add_parser('prebuilt', help='Packages prebuilts for project',
                                             formatter_class=argparse.RawTextHelpFormatter)
+    package_prebuilt.pkgprebuilt_args(prebuilt_parser)
 
     # --sysroot parser args
     sysroot_parser = subparsers.add_parser('sysroot', help='Install the SDK',
