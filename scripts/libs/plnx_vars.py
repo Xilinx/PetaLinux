@@ -70,6 +70,10 @@ BootMCSFile = os.path.join(BuildImagesDir, 'boot.mcs')
 BootMBMCSFile = os.path.join(BuildImagesDir, 'system.mcs')
 BootDOWNLOADBITFile = os.path.join(BuildImagesDir, 'download.bit')
 BifFile = os.path.join(BuildImagesDir, 'bootgen.bif')
+SdkFile = os.path.join(ImagesDir, 'sdk.sh')
+SdkOutFile = os.path.join(ProotSub, SdkFile)
+SdkDir = os.path.join(ImagesDir, 'sdk')
+SdkInstallDir = os.path.join(ProotSub, SdkDir)
 HsmOutFile = os.path.join(SysConfDir, 'flash_parts.txt')
 
 '''Tool Configurations'''

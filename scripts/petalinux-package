@@ -23,6 +23,7 @@ import plnx_utils
 import package_boot
 import package_bsp
 import package_prebuilt
+import package_sysroot
 
 logger, console_h = logger_setup.setup_logger('PetaLinux')
 
@@ -66,6 +67,7 @@ def main():
     # --sysroot parser args
     sysroot_parser = subparsers.add_parser('sysroot', help='Install the SDK',
                                            formatter_class=argparse.RawTextHelpFormatter)
+    package_sysroot.pkgsysroot_args(sysroot_parser)
 
     # --wic parser args
     wic_parser = subparsers.add_parser('wic', help='Packages the SD bootable image',
