@@ -118,7 +118,6 @@ def validate_hw_file(args, proot):
             'Please use --get-hw-description=<VIVADO_SDK_EXPORT_DIR> to specify \
                     the location of Vivado export to SDK directory.')
         sys.exit(255)
-    # petalinux-config+255
     return True
 
 
