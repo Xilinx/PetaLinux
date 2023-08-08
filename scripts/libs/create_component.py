@@ -22,19 +22,12 @@ import plnx_vars
 
 logger = logging.getLogger('PetaLinux')
 
-def get_filesystem_id(path):
-    '''Run stat command and get the filesystem ID'''
-    try:
-        return subprocess.check_output(["stat", "-f", "-c", "%t", path]).decode('utf-8').strip()
-    except subprocess.CalledProcessError:
-        return None
-
 
 def is_tmpdir_nfs(Tmpdir):
     '''Check if the FileSystem is located on NFS and exit if True'''
     if Tmpdir:
         plnx_utils.CreateDir(Tmpdir)
-        if get_filesystem_id(Tmpdir) == '6969':
+        if plnx_utils.get_filesystem_id(Tmpdir) == '6969':
             logger.error('% s directory is on NFS. Please set local storage for'
                          ' TMPDIR through petalinux-create using --tmpdir.' % Tmpdir)
             sys.exit(255)
@@ -43,7 +36,7 @@ def is_tmpdir_nfs(Tmpdir):
 def create_tmpdir_ifnfs(cpath, name, tmpdir):
     '''Create the TMPDIR if current filesystem is located in NFS.
     Default TMPDIR location will be /tmp and update system config file'''
-    if get_filesystem_id(cpath) == '6969' and not tmpdir:
+    if plnx_utils.get_filesystem_id(cpath) == '6969' and not tmpdir:
         logger.warning(
             'Project on NFS mount, trying to relocate TMPDIR to local storage (/tmp)')
         import time

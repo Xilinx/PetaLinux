@@ -271,6 +271,14 @@ def check_gcc_version():
     return cur_version
 
 
+def get_filesystem_id(path):
+    '''Run stat command and get the filesystem ID'''
+    try:
+        return subprocess.check_output(["stat", "-f", "-c", "%t", path]).decode('utf-8').strip()
+    except subprocess.CalledProcessError:
+        return None
+
+
 def check_tool(tools=[], failed_msg=''):
     '''Check the tools exists in PATH variable or not and give error if not found'''
     for tool in tools.split():
