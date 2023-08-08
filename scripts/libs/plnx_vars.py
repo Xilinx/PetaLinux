@@ -52,10 +52,12 @@ MetaUserDir = os.path.join(ProjectSpec, 'meta-user')
 HWDescDir = os.path.join(ProjectSpec, 'hw-description')
 DefXsaPath = os.path.join(HWDescDir, 'system.xsa')
 UsrRfsConfig = os.path.join(MetaUserDir, 'conf', 'user-rootfsconfig')
+PlnxBspConfig = os.path.join(MetaUserDir, 'conf', 'petalinuxbsp.conf')
 ConfigLogFile = os.path.join(BuildDir, 'config.log')
 PkgFileName = 'package.log'
 PackageLogFile = os.path.join(BuildDir, PkgFileName)
 CfgMemDir = os.path.join(BuildDir, 'package-boot')
+WicTmpWorkDir = os.path.join(BuildDir, 'wic')
 GenMachLogFile = os.path.join(SysConfDir, 'gen-machineconf.log')
 LockedSigsFile = os.path.join(EsdkInstalledDir, 'conf', 'locked-sigs.inc')
 DevtoolFile = os.path.join(EsdkInstalledDir, '.devtoolbase')
@@ -135,10 +137,13 @@ BootFileNames = {
     'UBOOT': 'u-boot.elf',
     'UBOOT_MICROBLAZE': 'u-boot-s.bin',
     'KERNEL': 'image.ub',
+    'KIMAGE_AARCH64' : 'Image',
+    'KIMAGE_ARM' : 'uImage',
     'BOOTSCRIPT': 'boot.scr',
     'RFS_FILE': 'rootfs.cpio.gz.u-boot',
     'TINY_RFS_FILE': 'ramdisk.cpio.gz.u-boot',
-    'BOOTBIN': 'BOOT.BIN'
+    'BOOTBIN': 'BOOT.BIN',
+    'OPENAMP' : 'dtbos/openamp.dtbo'
 }
 
 FPGA_Templates = [

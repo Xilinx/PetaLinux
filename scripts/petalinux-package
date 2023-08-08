@@ -24,6 +24,7 @@ import package_boot
 import package_bsp
 import package_prebuilt
 import package_sysroot
+import package_wic
 
 logger, console_h = logger_setup.setup_logger('PetaLinux')
 
@@ -72,6 +73,7 @@ def main():
     # --wic parser args
     wic_parser = subparsers.add_parser('wic', help='Packages the SD bootable image',
                                        formatter_class=argparse.RawTextHelpFormatter)
+    package_wic.pkgwic_args(wic_parser)
 
     # Display help if no args specified
     if len(sys.argv) == 1:
