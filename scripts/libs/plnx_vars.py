@@ -54,6 +54,7 @@ DefXsaPath = os.path.join(HWDescDir, 'system.xsa')
 UsrRfsConfig = os.path.join(MetaUserDir, 'conf', 'user-rootfsconfig')
 PlnxBspConfig = os.path.join(MetaUserDir, 'conf', 'petalinuxbsp.conf')
 ConfigLogFile = os.path.join(BuildDir, 'config.log')
+DevtoolLogFile = os.path.join(BuildDir, 'devtool.log')
 PkgFileName = 'package.log'
 PackageLogFile = os.path.join(BuildDir, PkgFileName)
 CfgMemDir = os.path.join(BuildDir, 'package-boot')

@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+
+# Copyright (C) 2021-2022, Xilinx, Inc.  All rights reserved.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.  All rights reserved.
+#
+# Author:
+#       Raju Kumar Pothuraju <rajukumar.pothuraju@amd.com>
+#
+# SPDX-License-Identifier: MIT
+
+import os
+import sys
+import argparse
+import logging
+
+scripts_path = os.path.dirname(os.path.realpath(__file__))
+libs_path = scripts_path + '/libs'
+sys.path = sys.path + [libs_path]
+import bitbake_utils
+import plnx_utils
+import plnx_vars
+import logger_setup
+
+logger, console_h = logger_setup.setup_logger('PetaLinux')
+
+
+def _Devtool(args, unknown_args, proot):
+    '''Run devtool setup for given component'''
+    gen_confargs = ''
+    config_target = 'silentconfig'
+    if args.debug:
+        gen_confargs += ' --debug'
+    devtool_cmd = 'devtool %s %s' % (
+        ' '.join(unknown_args), gen_confargs)
+    plnx_utils.setup_plnwrapper(args, proot, config_target, gen_confargs)
+    logger.info(devtool_cmd)
+    bitbake_utils.run_bitbakecmd(devtool_cmd,
+                                 proot, shell=True, logfile=args.logfile)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='PetaLinux wrapper to Run the Devtool Commands',
+        add_help=False,
+        formatter_class=argparse.RawTextHelpFormatter,
+        usage='Use %(prog)s [options]')
+
+    # Global args
+    parser.add_argument('-D', '--debug', action='store_true',
+                        help='Display the Debug prints')
+    parser.add_argument('-p', '--project', metavar='PROJECT_DIR', type=os.path.realpath,
+                        help='Specify full path to a PetaLinux project.'
+                             '\nDefault is the working project.')
+    parser.set_defaults(func=_Devtool)
+
+    args, unknown_args = parser.parse_known_args()
+
+    # Display help if no args specified
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
+    # Exit if PROOT is not PetaLinux project
+    proot = plnx_utils.exit_not_plnx_project(args.project)
+
+    # Exit if PetaLinux version mismatch
+    if not plnx_utils.petalinux_version_check(proot):
+        sys.exit(255)
+
+    args.command = os.path.basename(sys.argv[0])
+    args.builddir = plnx_vars.BuildDir.format(proot)
+    plnx_utils.CreateDir(args.builddir)
+
+    args.logfile = plnx_vars.DevtoolLogFile.format(proot)
+    plnx_utils.RenameFile(args.logfile, args.logfile + '.old')
+
+    # Setup logger to file
+    logger_setup.setup_logger_file(args.logfile)
+    # Print debug prints if debug selected
+    if args.debug:
+        console_h.setLevel(logging.DEBUG)
+
+    ret = args.func(args, unknown_args, proot)
+    return ret
+
+
+if __name__ == "__main__":
+    try:
+        ret = main()
+    except Exception:
+        ret = 1
+        import traceback
+        traceback.print_exc()
+    sys.exit(ret)
