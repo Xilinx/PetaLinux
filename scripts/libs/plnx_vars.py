@@ -138,13 +138,13 @@ BootFileNames = {
     'UBOOT': 'u-boot.elf',
     'UBOOT_MICROBLAZE': 'u-boot-s.bin',
     'KERNEL': 'image.ub',
-    'KIMAGE_AARCH64' : 'Image',
-    'KIMAGE_ARM' : 'uImage',
+    'KIMAGE_AARCH64': 'Image',
+    'KIMAGE_ARM': 'uImage',
     'BOOTSCRIPT': 'boot.scr',
     'RFS_FILE': 'rootfs.cpio.gz.u-boot',
     'TINY_RFS_FILE': 'ramdisk.cpio.gz.u-boot',
     'BOOTBIN': 'BOOT.BIN',
-    'OPENAMP' : 'dtbos/openamp.dtbo'
+    'OPENAMP': 'dtbos/openamp.dtbo'
 }
 
 FPGA_Templates = [
