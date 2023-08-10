@@ -115,8 +115,8 @@ def runCmd(command, out_dir, extraenv=None,
         process = subprocess.Popen(command,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
-                               env=env,
-                               shell=shell,
+                               env=env, shell=shell,
+                               executable='/bin/bash',
                                cwd=out_dir)
         stdout, stderr = process.communicate()
         if process.returncode != 0:

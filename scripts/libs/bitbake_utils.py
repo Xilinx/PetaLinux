@@ -307,7 +307,8 @@ def run_bitbakecmd(command, proot, builddir=None, logfile='/dev/null',
     try:
         if checkcall:
             output = subprocess.check_call(
-                command, env=env, cwd=builddir, shell=shell)
+                command, env=env, cwd=builddir, shell=shell,
+                executable='/bin/bash')
             bb_tasklog = append_bitbake_log(proot, logfile)
             return bb_tasklog
         else:
