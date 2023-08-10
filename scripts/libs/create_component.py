@@ -268,7 +268,7 @@ def CreateComponent(args, proot):
     else:
         recipes_path = 'recipes-%s' % (args.command)
         if args.command == 'apps' and \
-                args.template in plnx_vars.FPGA_Templates:
+                args.template in plnx_vars.DFX_Templates.keys():
             recipes_path = 'recipes-firmware'
             logger.warning(
                 'Creating "%s" template apps required FPGA Manager \

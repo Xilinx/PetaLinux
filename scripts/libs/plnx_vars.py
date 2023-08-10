@@ -147,10 +147,27 @@ BootFileNames = {
     'OPENAMP': 'dtbos/openamp.dtbo'
 }
 
-FPGA_Templates = [
-    'fpgamanager', 'fpgamanager_dtg',
-    'fpgamanager_dtg_dfx', 'fpgamanager_dtg_csoc'
-]
+DFX_Templates = {
+    'dfx_user_dts': 'Generates PL application with the user specified dtsi and with .pdi/.bit files.'
+                    '\nPack the .dtbo, .bin/.pdi, shell.json/accel.json and .xclbin into rootfs.'
+                    '\nNote: Supports for versal, zynqmp and zynq.',
+    'dfx_dtg_zynq_full': 'Generates the full PL application for zynq with specified flat xsa file.'
+                         '\nPack the .dtbo, and bit.bin files into rootfs.',
+    'dfx_dtg_zynqmp_full': 'Generates the full pl application for zynqmp with given flat xsa file.'
+                           '\nPack the .dtbo,.bin and shell.json files into rootfs.',
+    'dfx_dtg_zynqmp_static': 'Generates the static pl application for zynqmp with given dfx static xsa file.'
+                             '\nPack the .dtbo,.bin and shell.json files into rootfs.',
+    'dfx_dtg_zynqmp_partial': 'Generates the partial pl application for zynqmp with given dfx partial xsa file.'
+                              '\nPack the .dtbo, .bin and accel.json files into rootfs.'
+                              '\nNote: This has dependency on dfx_dtg_zynqmp_static template app',
+    'dfx_dtg_versal_full': 'Generates the full pl application for versal with given flat xsa file.'
+                           '\nPack the .dtbo,pl.pdi and shell.json files into rootfs.',
+    'dfx_dtg_versal_static': 'Generates the static pl application for versal with given dfx static xsa file.'
+                             '\nPack the .dtbo,.pdi and shell.json files into rootfs.',
+    'dfx_dtg_versal_partial': 'Generates the partial pl application for versal with given dfx partial xsa file.'
+                              '\nPack the .dtbo, .pdi and accel.json files into rootfs'
+                              '\nNote: This has dependency on dfx_dtg_versal_static template app.'
+}
 
 GitIgnoreStr = '''
 */*/config.old

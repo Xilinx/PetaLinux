@@ -18,6 +18,7 @@ libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
 import logger_setup
 import plnx_utils
+import plnx_vars
 import bitbake_utils
 import create_component
 
@@ -69,26 +70,22 @@ def main():
     apps_parser = subparsers.add_parser('apps', help='Create User applications',
                                         formatter_class=argparse.RawTextHelpFormatter)
     apps_parser.add_argument('--static-pn', metavar='',
-                             help='Specify the package name created with fpgamanager_dtg'
-                             '\nto use with in fpgamanager_dtg_dfx.'
-                             '\nNOTE: This supports only for versal and zynqmp.')
+                             help='Specify the package name created with '
+                             'dfx_dtg_zynqmp_static or dfx_dtg_versal_static'
+                             '\nto use with in dfx_dtg_zynqmp_partial or dfx_dtg_versal_partial.'
+                             '\nNote: This supports only for versal and zynqmp.')
     apps_parser.add_argument('--template', metavar='', default='c', type=str,
-                             choices=['c', 'c++', 'autoconf', 'install', 'fpgamanager',
-                                      'fpgamanager_dtg', 'fpgamanager_dtg_dfx', 'fpgamanager_dtg_csoc'],
+                             choices=['c', 'c++', 'autoconf', 'install'] +
+                             list(plnx_vars.DFX_Templates.keys()),
                              help='Specify the template name to create apps'
-                             '\nc                    : c user application(default)'
-                             '\nc++                  : c++ user application'
-                             '\nautoconf             : autoconf user application'
-                             '\ninstall              : install data only'
-                             '\nfpgamanager          : Pack the .dtbo,.bin/.pdi,shell.json/accel.json '
-                             '\n\t\t\tand .xclbin files into rootfs supports for versal,zynqmp and zynq.'
-                             '\nfpgamanger_dtg       : Extract the .xsa and pack the .dtbo,.bin/.pdi,shell.json '
-                             '\n\t\t\tand .xclbin files into rootfs, supports for versal,zynqmp and zynq.'
-                             '\nfpgamanager_dtg_dfx  : Extract the DFX partial .xsa and pack '
-                             '\n\t\t\tthe .dtbo,.bin/.pdi and accel.json files into rootfs.'
-                             '\n\t\t\tsupports only for versal and zynqmp.'
-                             '\nfpgamanager_dtg_csoc : Extract the Classic soc partial .xsa and pack '
-                             '\n\t\t\tthe .dtbo,.bin/.pdi and accel.json files into rootfs. supports only for versal.',
+                             '\nc                      : c user application(default)'
+                             '\nc++                    : c++ user application'
+                             '\nautoconf               : autoconf user application'
+                             '\ninstall                : install data only'
+                             '\n%s' % "\n".join(
+                                 ['{0}{1}: {2}'.format(k, ' '*(23-len(k)),
+                                                          v.replace('\n', '\n' + ' '*25))
+                                  for k, v in plnx_vars.DFX_Templates.items()])
                              )
     apps_parser.add_argument('--srcuri', nargs='*', default='',
                              help='This option is to specify the source files'
@@ -130,9 +127,10 @@ def main():
     if args.debug:
         console_h.setLevel(logging.DEBUG)
 
-    # static_pn name should be specified for fpgamanager_dtg_dfx
-    if args.command == 'apps' and \
-            args.template == 'fpgamanager_dtg_dfx' and not args.static_pn:
+    # static_pn name should be specified for dfx_dtg_zynqmp_partial
+    # or dfx_dtg_versal_partial
+    if args.command == 'apps' and not args.static_pn and \
+            args.template in ['dfx_dtg_zynqmp_partial', 'dfx_dtg_versal_partial']:
         logger.error('Creating "%s" template app requires '
                      '--static-pn <STATIC_PACKAGE_NAME> to be defined' % (args.template))
         sys.exit(255)
