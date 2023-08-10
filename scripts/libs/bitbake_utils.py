@@ -14,6 +14,7 @@ import re
 import sys
 import shutil
 import logging
+import signal
 
 logger = logging.getLogger('PetaLinux')
 
@@ -316,7 +317,7 @@ def run_bitbakecmd(command, proot, builddir=None, logfile='/dev/null',
             return output, error
     except (SystemExit, KeyboardInterrupt):
         append_bitbake_log(proot, logfile)
-        raise KeyboardInterrupt
+        os.killpg(0, signal.SIGTERM)
     except subprocess.CalledProcessError as e:
         append_bitbake_log(proot, logfile)
         logger.error("Command %s failed" % (cmd))
