@@ -253,8 +253,8 @@ def get_sdt_setup(proot):
                     plnx_vars.SDTSetupDir.format(proot))
         dt_proc_cmd = 'unset LD_LIBRARY_PATH;'
         dt_proc_cmd += '%s -d %s -p -y' % (
-                plnx_vars.SDTPrestepFile,
-                plnx_vars.SDTSetupDir.format(proot))
+            plnx_vars.SDTPrestepFile,
+            plnx_vars.SDTSetupDir.format(proot))
         plnx_utils.runCmd(dt_proc_cmd, proot, shell=True)
 
 
@@ -286,7 +286,7 @@ def run_genmachineconf(proot, xilinx_arch, config_args, add_layers=False, logfil
 
 
 def run_bitbakecmd(command, proot, builddir=None, logfile='/dev/null',
-        extraenv=None, shell=False, checkcall=True):
+                   extraenv=None, shell=False, checkcall=True):
     '''Source the env script and Run bitbake commands'''
     cmd = command
     command = command.split() if not shell else command
@@ -312,7 +312,7 @@ def run_bitbakecmd(command, proot, builddir=None, logfile='/dev/null',
             return bb_tasklog
         else:
             output, error = plnx_utils.runCmd(command, out_dir=builddir,
-                    extraenv=env, shell=shell)
+                                              extraenv=env, shell=shell)
             bb_tasklog = append_bitbake_log(proot, logfile)
             return output, error
     except (SystemExit, KeyboardInterrupt):
