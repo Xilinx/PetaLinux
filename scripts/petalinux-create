@@ -135,6 +135,18 @@ def main():
                      '--static-pn <STATIC_PACKAGE_NAME> to be defined' % (args.template))
         sys.exit(255)
 
+    # DFx-Template apps required srcuri to be specified or use force
+    if args.command == 'apps' and not args.srcuri and \
+            args.template in plnx_vars.DFX_Templates.keys():
+        if not args.force:
+            logger.error('Creating "%s" template app requires '
+                         '--srcuri to be specified or use --force to '
+                         'skip adding SRCURI' % (args.template))
+            sys.exit(255)
+        else:
+            logger.warning(
+                'Creating "%s" template app without SRCURI variable' % (args.template))
+
     proot = ''
     args.local_srcuris = ''
     args.network_srcuris = ''
