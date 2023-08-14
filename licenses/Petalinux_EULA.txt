@@ -1,0 +1,110 @@
+XILINX, INC.
+END USER LICENSE AGREEMENT FOR PETALINUX TOOLS 
+
+CAREFULLY READ THIS END USER LICENSE AGREEMENT FOR PETALINUX TOOLS ("AGREEMENT").  BY CLICKING THE "ACCEPT" OR "AGREE" BUTTON, ENTERING “YES” OR “Y” TO ACCEPT THIS AGREEMENT, OR OTHERWISE ACCESSING, DOWNLOADING, INSTALLING OR USING THE SOFTWARE, YOU AGREE ON BEHALF OF LICENSEE TO BE BOUND BY THIS AGREEMENT.
+
+IF LICENSEE DOES NOT AGREE TO ALL OF THE TERMS AND CONDITIONS OF THIS AGREEMENT, DO NOT CLICK THE "ACCEPT" OR "AGREE" BUTTON, ENTER “YES” OR “Y”, OR ACCESS, DOWNLOAD, INSTALL OR USE THE SOFTWARE.
+
+1.	Definitions
+
+
+"Bitstream" means a machine-executable, binary form of a core used to program a Xilinx Device.
+
+"Licensee" means the individual, corporation or other legal entity who has downloaded and installed the Software.
+
+"User" means a specific human being who is identified by Licensee as a person who is authorized to use the applicable Software on behalf of Licensee.  In cases where Licensee is an individual who has downloaded and installed the Software for his/her individual use, Licensee and User are one and the same.
+
+"Software" means Xilinx Petalinux Tools, as well as Updates (as defined below), but excluding any third-party files, programs or other materials governed by a separate license as mentioned in Section 3(b) (Third-Party Licenses) below.
+
+"Update" means any updates, bug fixes, maintenance releases and the like, if any, to the Software that Xilinx may, in its sole discretion, make generally available to all of its then-current licensees of the Software.
+
+"Xilinx" means Xilinx, Inc., a Delaware corporation, with a place of business at 2100 Logic Drive, San Jose, CA 95124.
+
+"Xilinx Device" means a silicon device manufactured and marketed by or for Xilinx.
+
+2.	RESERVED.
+
+3.	License Grants.
+
+	(a)	Xilinx Licenses.  Subject to the terms and conditions of this Agreement, Xilinx hereby grants to Licensee the following personal, non-exclusive, non-transferable, non-sublicensable licenses (under Xilinx' intellectual property rights as embodied in the applicable Software):
+
+		(1)	Use.  Licensee may install and use the Software for the sole purposes of developing, synthesizing, testing and verifying designs only for use with Xilinx Devices.
+
+		(2)	RESERVED.
+
+		(3)	Distributable Components License.
+
+			A.	Certain Definitions.  "Distributable Component(s)" means those files supplied by Xilinx that are contained within the Software and that are identified by Xilinx in such tool or its associated documentation as either (a) an IP core (or a LogiCORE product), which is designed for use in programming functionality onto a Xilinx Device (hereafter a "Core"), or (b) a software driver (or a device driver), which is designed for use in enabling a Xilinx Device to interoperate with other independent software programs such as an operating system as well as middleware, board support package (BSP) or other application software (collectively hereafter a "Driver").  Distributable Components may be supplied by Xilinx in either (y) source code form, such as a Core provided in VHDL or Verilog form or a Driver provided in C language source form (hereafter "Modifiable Form"), or (z) a format other than source code, such as a Core provided in netlist form or encrypted netlist form or a Driver provided in complied object code form (hereafter "Restricted Form").  For purposes of clarity, a "Core" as used herein includes only a "Core" provided by Xilinx in the Software tools listed above at no additional charge, and not any fee-based LogiCORE products which are licensed separately under other agreements.
+
+			B.	Modification Rights.  For Distributable Components supplied by Xilinx in Modifiable Form, Licensee may modify such Distributable Components, provided that such modifications are limited to enabling such Distributable Components to, in the case of a Core, program only a Xilinx Device, and in the case of a Driver, enable only a Xilinx Device to interoperate with other independent software programs such as an operating system.  Licensee shall have no right to modify a Distributable Component that is supplied by Xilinx in a Restricted Form. 
+
+			C.	Distribution Rights.  Licensee may distribute Distributable Components (including when modified per Section 3(a)(3)B (Modification Rights) above), provided that either (a) such Distributable Components have been converted into a machine executable form, such as in the case of a Core, a Bitstream, and in the case of a Driver, in compiled object code form; or (b) the recipient thereof has a valid license from Xilinx to use the same Software.  In all cases Distributable Components shall be distributed only for use to program a Xilinx Device.
+       
+	(b)	Third-Party Licenses.  Certain files, programs or other materials distributed in connection with the Software may originate from third-party licensors and are licensed to Licensee (not under the terms and conditions of this Agreement, but rather) pursuant to the terms and conditions of the applicable licenses that appear upon installation, acceptance and/or activation of the Software and/or are contained or described in the corresponding release notes or other documentation or header or source files.  Such files, programs or other materials may be subject to the terms of the GNU General Public License or other open source or free software licenses.  Licensee agrees to carefully review and abide by the terms and conditions of these licenses to the extent that they govern such files, programs or other materials.  Notwithstanding the foregoing, as between Xilinx and Licensee, to the maximum extent permitted by applicable law and if not prohibited by any such third-party licenses, all such third-party files, programs or other materials shall be deemed covered under Sections 10 (Disclaimers) and 11 (Limitation of Liability) and 14(c) (Governing Law) of this Agreement.
+
+4.	Restrictions.
+     
+	(a)	Special Use Restrictions.  No right is granted hereunder to use the Software or any Bitstream generated by use of the Software to program or develop designs for non-Xilinx Devices; however, Licensee may port ASIC designs to Xilinx Devices for the purpose of prototyping and verification.
+
+	(b)	General Restrictions.  Except only to the extent otherwise expressly allowed under Section 3 (License Grants) above (or under applicable laws notwithstanding these restrictions), Licensee is not licensed to, and agrees not to: (i) decompile, translate, reverse-engineer, disassemble, or otherwise reduce to human readable form the Software or the data files generated by the Software; (ii) transmit the Software or display the object code of the Software on any computer screen, or make any hard-copy memory dumps of the object code; (iii) publish or disclose the results of any benchmarking of the Software, or use such results for any other software development activities; (iv) make any copies of the Software, except to make one (1) copy of the Software in machine-readable form solely for backup purposes; (v) modify or prepare derivative works of the Software, in whole or in part; (vi) hypothecate, rent, lease, loan, lend, time-share, sublicense, distribute or otherwise transfer the Software to any other individual, corporation or other legal entity; or (vii) remove, alter or obscure any product identification, ownership or intellectual property rights notices on or in the Software.
+
+5.	RESERVED.
+
+6.	Ownership.  Licensee acknowledges and agrees that all intellectual property and industrial rights in and to the Software and all copies thereof are and will remain the sole property of Xilinx (or its licensors, as applicable).  Nothing contained in this Agreement will be construed as conferring by implication, estoppel or otherwise upon Licensee any license or other right except the licenses and rights expressly granted to Licensee in Section 3 (License Grants).  The Software is protected by laws and international treaty provisions covering intellectual property rights.  With respect to any files, programs or other materials distributed in connection with the Software that have been licensed to Xilinx from third parties and which are not governed by a separate license as mentioned in Section 3(b) (Third-Party Licenses) above, such third parties are intended third-party beneficiaries of the terms of this Agreement.
+
+7.	Confidentiality. Except as otherwise expressly permitted in Section 3 (License Grants), Licensee shall (a) maintain the confidentiality of the Software as the proprietary trade secrets of Xilinx (or its licensors, as applicable); and (b) not make the Software available in any form to any person other than to its Users who have a genuine "need to know" for purposes authorized by this Agreement, and who are bound by obligations of confidentiality no less protective of Xilinx (or its licensors, as applicable) than those contained herein.  Licensee represents to Xilinx that it maintains a system of confidentiality consistent with commonly accepted practices in the semiconductor industry to protect its own confidential business information, including written agreements with its Users, and that the Software will be protected by such a system to the same extent, but in no event with less than reasonable care.  Licensee agrees that a breach of this Agreement may result in irreparable and continuing damage to Xilinx for which there may be no adequate remedy at law, and Xilinx shall be entitled to seek injunctive relief and/or a decree for specific performance, and such other relief (including monetary damages) as may be proper.
+
+8.	Updates; Support.  Any Updates that are provided to Licensee shall be deemed and treated the same as the "Software" under this Agreement for which such Update applies.  Also, any support (whether provided via the Xilinx technical support website or otherwise) for the Software provided to Licensee shall be governed by the terms and conditions of this Agreement.
+
+9.	RESERVED.
+
+10.	DISCLAIMERS.
+
+	(A)	EXCEPT FOR THE EXPRESS LIMITED WARRANTY SET FORTH IN SECTION 9 ABOVE, THE SOFTWARE (INCLUDING SUPPORT, IF ANY) IS PROVIDED "AS-IS" WITHOUT WARRANTY OF ANY KIND.  XILINX AND ITS LICENSORS DISCLAIM ALL OTHER WARRANTIES AND CONDITIONS, EXPRESS, IMPLIED, STATUTORY OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, NON-INFRINGEMENT OF THIRD PARTY RIGHTS, AND FITNESS FOR A PARTICULAR PURPOSE.  XILINX DOES NOT WARRANT THAT THE FUNCTIONS CONTAINED IN THE SOFTWARE WILL MEET LICENSEE'S REQUIREMENTS, OR THAT THE OPERATION OF THE SOFTWARE WILL BE UNINTERRUPTED OR ERROR FREE, OR THAT THE DEFECTS IN THE SOFTWARE WILL BE CORRECTED.  FURTHERMORE, XILINX DOES NOT WARRANT OR MAKE ANY REPRESENTATIONS REGARDING USE OR THE RESULTS OF THE USE OF THE SOFTWARE (INCLUDING SUPPORT, IF ANY) IN TERMS OF CORRECTNESS, ACCURACY, RELIABILITY, OR OTHERWISE.
+
+	(B)	LICENSEE ACKNOWLEDGES THAT USE OF THE SOFTWARE IN COMBINATION WITH OTHER FUNCTIONALITY, SOFTWARE OR PROTOCOLS MAY REQUIRE LICENSES FROM THIRD PARTIES AND LICENSEE ACCEPTS SOLE RESPONSIBILITY FOR OBTAINING SUCH LICENSES.
+
+	(C)	 THE SOFTWARE IS NOT DESIGNED OR INTENDED TO BE FAIL-SAFE, OR FOR USE IN CONNECTION WITH ANY APPLICATION REQUIRING FAIL-SAFE PERFORMANCE, SUCH AS IN LIFE-SUPPORT OR SAFETY DEVICES OR SYSTEMS, CLASS III MEDICAL DEVICES, NUCLEAR FACILITIES, APPLICATIONS RELATED TO THE DEPLOYMENT OF AIRBAGS, OR ANY OTHER APPLICATIONS THAT COULD LEAD TO DEATH, PERSONAL INJURY OR SEVERE PROPERTY OR ENVIRONMENTAL DAMAGE (INDIVIDUALLY AND COLLECTIVELY, "CRITICAL APPLICATIONS").  FURTHERMORE, THE SOFTWARE IS NOT DESIGNED OR INTENDED FOR USE IN CONNECTION WITH ANY APPLICATIONS THAT AFFECT CONTROL OF A VEHICLE OR AIRCRAFT, UNLESS THERE IS A FAIL-SAFE OR REDUNDANCY FEATURE (WHICH DOES NOT INCLUDE USE OF SOFTWARE IN THE XILINX DEVICE TO IMPLEMENT THE REDUNDANCY) AND A WARNING SIGNAL UPON FAILURE TO THE OPERATOR.  LICENSEE AGREES, PRIOR TO USING OR DISTRIBUTING ANY SYSTEMS THAT WERE DEVELOPED BY USE OF THE SOFTWARE OR THAT INCORPORATE ANY PORTION OF THE SOFTWARE, TO THOROUGHLY TEST THE SAME FOR SAFETY PURPOSES.  TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, LICENSEE ASSUMES THE SOLE RISK AND LIABILITY OF ANY CRITICAL APPLICATIONS.
+
+11.	LIMITATION OF LIABILITY.  TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW:  (1) IN NO EVENT SHALL XILINX OR ITS LICENSORS BE LIABLE FOR ANY LOSS OF DATA, LOST PROFITS, OR COST OF PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, OR FOR ANY SPECIAL, INCIDENTAL, CONSEQUENTIAL OR INDIRECT DAMAGES ARISING UNDER, RELATED TO, OR IN CONNECTION WITH THIS AGREEMENT OR THE USE OR OPERATION OF THE SOFTWARE, IN WHOLE OR IN PART, HOWEVER CAUSED AND UNDER ANY THEORY OF LIABILITY; (2) IN NO EVENT SHALL XILINX' OR ITS LICENSORS' ENTIRE LIABILITY ARISING UNDER, RELATED TO, OR IN CONNECTION WITH THIS AGREEMENT, EXCEED THE AMOUNT OF LICENSE AND SUPPORT FEES RECEIVED BY XILINX FROM LICENSEE FOR THE APPLICABLE SOFTWARE IN THE TWELVE (12) MONTHS IMMEDIATELY PRECEDING THE EVENTS GIVING RISE TO SUCH LIABILITY; (3) THESE LIMITATIONS AND EXCLUSIONS SHALL APPLY EVEN IF SUCH LOSS WAS REASONABLY FORESEEABLE OR IF XILINX HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES; AND (4) THESE LIMITATIONS SHALL APPLY NOTWITHSTANDING THE FAILURE OF THE ESSENTIAL PURPOSE OF ANY LIMITED REMEDIES HEREIN.
+
+12.	Termination.  This Agreement shall be effective until terminated as follows.  Licensee may terminate this Agreement at any time by destroying the Software and all copies thereof.  This Agreement will terminate immediately without notice from Xilinx if Licensee fails to comply with any of the terms and conditions herein.  Upon termination of this Agreement for any reason, Licensee must destroy the Software and all copies thereof.  The following provisions of this Agreement survive its termination: 1 (Definitions) and all defined terms,  3(b) (Third-Party Licenses) to the extent not separately terminated according to the terms of such licenses, 4 (Restrictions), 6 (Ownership), 7 (Confidentiality), 10 (Disclaimers), 11 (Limitation of Liability), 12 (Termination) and 14 (General).
+
+13.	RESERVED. 
+     
+14.	General.
+
+	(a)	Governmental Use. The Software is comprised of commercial computer software developed exclusively at the expense of Xilinx.  Accordingly, pursuant to the Federal Acquisition Regulations (FAR) Section 12.212 and Defense FAR Supplement (DFARS) Section 227.7202, use, duplication and disclosure of the Software by or for the U.S. government is subject to the restrictions set forth in this Agreement.  Manufacturer is Xilinx, Inc., 2100 Logic Drive, San Jose, CA 95124.
+
+	(b)	Export Compliance.  Licensee shall adhere to all applicable import and export laws and regulations of Licensee's country and of the United States, without limitation.  This Agreement may involve items and information that are subject to the International Traffic in Arms Regulations (ITAR) of the U.S. Department of State or Export Administration Regulations (EAR) of the U.S. Department of Commerce, Bureau of Industry and Security.  The importer/exporter of record shall not export, reexport, resell, transfer, or disclose, directly or indirectly, any products or technical data, to any proscribed person, entity, or country, or foreign persons thereof, unless properly authorized by the U.S. government and/or any other applicable or relevant government or regulatory body.
+
+	(c)	Governing Law.  This Agreement shall be governed by the laws of the State of California, without reference to conflict of laws principles.
+
+	(d)	Assignment.  Licensee shall not assign this Agreement or transfer any of the rights or obligations under this Agreement, in whole or in part, by operation of law or otherwise, without Xilinx' prior written consent.  Any merger, acquisition, reorganization, change of control, or the like, involving Licensee shall be deemed an assignment in violation of the foregoing.  Subject to the foregoing, this Agreement will be for the benefit of Xilinx and its successors and assigns, and will be binding on Licensee's permitted assignees.
+
+	(e)	Allocation of Risk.  Licensee acknowledges and agrees that each provision of this Agreement that provides for a disclaimer of warranties or an exclusion or limitation of damages represents an express allocation of risk, and is part of the consideration of this Agreement.
+
+	(f)	Waiver; Amendment.  No waiver, express or implied, by either party of any right or remedy for any breach by the other party of any provision of this Agreement will be deemed or construed to be a waiver of any succeeding breach of such provision or as a waiver of the provision itself or of any other breach or provision.  No waiver of or amendment to this Agreement will be effective unless reduced to writing and executed by authorized representatives of the parties.
+
+	(g)	Severability.  If, for any reason, a court of competent jurisdiction finds any provision of this Agreement, or portion thereof, to be invalid, illegal or unenforceable, then such provision shall be enforced to the maximum extent permissible to carry out the intent of the parties, otherwise stricken, and the remainder of this Agreement shall continue in full force and effect.
+
+	(h)	Notices.  Any notices required or permitted by this Agreement shall be in writing and shall be delivered as follows, with notice deemed given as indicated:  (i) by personal delivery, when delivered personally; (ii) by overnight courier, upon written verification of receipt; (iii) by facsimile transmission, upon acknowledgment of receipt of electronic transmission, provided that notice is also provided by one of the other methods herein within five (5) days thereafter; or (iv) by certified or registered mail, return receipt requested, upon verification of receipt.  Notice shall be sent to the addresses provided by each party to the other in connection with this Agreement, or to such other address as either party may specify in writing.  Notices to Xilinx shall be addressed to the attention of: Xilinx, Inc., Attn: General Counsel, Legal Department, 2100 Logic Drive, San Jose, CA 95124.
+
+	(i)	Entire Agreement.  This Agreement constitutes the entire agreement between the parties with respect to the Software, and supersedes all prior or contemporaneous discussions, understandings or agreements, written or oral, regarding the subject matter hereof.  No additional terms or modifications proposed by Licensee shall be binding on Xilinx unless expressly agreed to in writing and signed by Xilinx.  All terms and conditions of any purchase order or other document issued by Licensee in connection with this Agreement or the Software shall be void and of no force or effect to add to or modify this Agreement.
+
+	(j)	Interpretation.  By clicking to "accept" or "agree" or entering “yes” or “y” to this Agreement, Licensee acknowledges and agrees that it has read and understood this Agreement, has had an opportunity to discuss this Agreement with its legal and other advisors, and agrees to be bound by the terms and conditions of this Agreement.  This Agreement shall be interpreted fairly in accordance with its terms and without any strict construction in favor of or against either party.
+
+
+2021.09.16
+
+
+
+
+
+
+
+
+
+
+
+

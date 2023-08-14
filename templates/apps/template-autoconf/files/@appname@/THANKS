@@ -1,0 +1,17 @@
+[ This is a fictious sample THANKS file ]
+@appname@ THANKS file
+This hello package was originally written by Ima Koder.
+Many people further contributed to hello by reporting problems,
+suggesting various improvements or submitting actual code.
+Here is a list of these people.  Please help me keep it
+complete and accurate by reporting any additions and
+corrections to the current maintainer at:
+
+    hello-maintainer@fake.org
+
+ My apologies to anyone I've inadverntently overlooked!
+
+Contributors:
+    Kode Vicious
+    The Shell Answer Man
+    Nathan Detroit

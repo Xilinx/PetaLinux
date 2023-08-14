@@ -1,0 +1,32 @@
+PetaLinux Firmware Application Template
+===================================
+
+This directory contains a PetaLinux firmware application created from a template.
+
+Adding a xsa to srcuri,  the dfx_dtg_versal_static class will assume no
+other dependencies and automatically pack the ${PN}.dtbo ${PN}.bit.bin into rootfs.
+
+1.Before building the application, you will need to enable the application
+from PetaLinux menuconfig by running below command if you do not specify --enable option
+while creating the application.
+    "petalinux-config -c rootfs"
+You will see your application in the "User Packages --->" submenu
+to pack this firmware artifacts as part of rootfs.
+
+2.You will need to rebuild PetaLinux bootable images so that the images
+is updated with the updated target filesystem copy, run this command:
+    "petalinux-build -c rootfs"
+              or
+You can also run one PetaLinux command to install the application to the
+target filesystem host copy and update the bootable images as follows:
+    "petailinux-build"
+
+To generate only rpm with firmware artifacts and not packing in rootfs
+no need to give --enable option while creating, run this command:
+    "petalinux-build -c @appname@"
+you can find the rpm in build/tmp/deploy/rpm directory.
+
+Based on the design type shell.json content
+"shell_type" and num_slots might vary please refer below dfx_mgr doc
+for more details.
+https://github.com/Xilinx/dfx-mgr/blob/master/README.md

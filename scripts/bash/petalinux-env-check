@@ -1,0 +1,334 @@
+#!/bin/bash
+#
+# Copyright (C) 2021-2022, Xilinx, Inc.  All rights reserved.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.  All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+
+COMMON_TOOLS="bash
+gcc:7
+xterm
+autoconf
+libtool
+python3
+tar
+tail
+less
+rsync
+bc"
+
+UBUNTU_TOOLS="
+texinfo
+zlib1g-dev
+gcc-multilib
+lsb_release
+build-essential"
+
+CENTOS_TOOLS="
+perl
+zlib-devel
+cpp
+gcc-c++
+glibc-devel
+texinfo
+automake
+glib2-devel"
+
+ALMALINUX_TOOLS="$CENTOS_TOOLS"
+
+SUSE_TOOLS="$CENTOS_TOOLS
+lsb_release"
+
+NEEDED_HEADERS="zlib.h ncurses.h"
+
+UBUNTUVERSIONS="18.04.1 18.04.2 18.04.3 18.04.4 \
+		18.04.5 18.04.6 20.04.2 20.04.3 \
+		20.04.4 20.04.5 20.04.6 22.04 \
+		22.04.1 22.04.2"
+
+SUSEVERSIONS="15.3 15.4"
+
+ALMALINUXVERSIONS="8.7 9.1"
+
+function find_dist {
+	Dist=$(lsb_release -i 2>/dev/null)
+	if [ ! -z "$Dist" ]; then
+		IFS=':' read -ra List <<<"$Dist"      #Convert string to array
+		IFS=' ' read -ra List <<<"${List[1]}" #Convert string to array
+		Dist=$(echo ${List[0]} | tr -d ' ')
+	else
+		Dist=$(cat /etc/os-release | grep "^NAME" | cut -d '"' -f 2 | tr -d ' ' 2>/dev/null)
+	fi
+	echo "$Dist"
+}
+
+function find_release {
+	OS_TYPE=$1
+	if [ $OS_TYPE = "Ubuntu" ]; then
+		release=$(lsb_release -d 2>/dev/null)
+		IFS=':' read -ra List <<<"$release" #Convert string to array
+		release=$(echo "${List[1]}" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+		[ -z "${release}" ] && release=$(echo "${List[1]}" | grep -oE '[0-9]+\.[0-9]+')
+	elif [ $OS_TYPE = "openSUSELeap" ] || [ $OS_TYPE = "openSUSE" ]; then
+		release=$(lsb_release -r 2>/dev/null)
+		IFS=':' read -ra List <<<"$release" #Convert string to array
+		release=$(echo "${List[1]}" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+		[ -z "${release}" ] && release=$(echo "${List[1]}" | grep -oE '[0-9]+\.[0-9]+')
+	else
+		release=$(grep -oE '[0-9]+\.[0-9]+' /etc/redhat-release 2>/dev/null)
+	fi
+	echo "$release"
+}
+
+dpkg_check() {
+	install_status=$(dpkg -s "$1" 2>/dev/null | grep Status | awk -F ":" '{print $2}' | awk -F " " '{print $1}')
+	[ "$install_status" == "install" ] && return 0 || return 255
+}
+
+function test_tool_installed {
+	tool=$1
+	Dist=$(find_dist)
+	if [ $Dist = "Ubuntu" ]; then
+		if which ${tool} 1>/dev/null 2>/dev/null; then
+			return 0
+		elif dpkg_check "$tool"; then
+			return 0
+		fi
+		return 255
+	else
+		if which ${tool} 1>/dev/null 2>/dev/null; then
+			return 0
+		elif rpm -qi "$tool" 1>/dev/null 2>/dev/null; then
+			return 0
+		fi
+		return 255
+	fi
+}
+
+function check_os {
+	OSTYPE=$(find_dist)
+	release=$(find_release $OSTYPE)
+	if echo "$OSTYPE" | grep -i "ubuntu" >/dev/null; then
+		VERSIONS=$UBUNTUVERSIONS
+	elif echo "$OSTYPE" | grep -i "almalinux" >/dev/null; then
+		VERSIONS=$ALMALINUXVERSIONS
+	elif echo "$OSTYPE" | grep -i "opensuse" >/dev/null; then
+		VERSIONS=$SUSEVERSIONS
+
+	else
+		return 1
+	fi
+	if ! echo $VERSIONS | grep -w $release >/dev/null; then
+		return 1
+	fi
+}
+
+
+function test_tool_version {
+	local tool=$1
+	local req_version=$2
+	if [ -z "${version}" ]; then
+		return 0
+	fi
+	local version_ins=""
+	Dist=$(find_dist)
+	# gcc dpkg not giving actual tool version so using --version in ubuntu also
+	if [ $Dist = "Ubuntu" ] && [ "$tool" != "gcc" ]; then
+		version_ins=$(dpkg -s "$tool" | grep "Version" | awk '{print $2}')
+	else
+		version_ins=$(${tool} --version | head -1 | awk '{print $NF}')
+	fi
+	act_version=$(echo $version_ins | cut -d'-' -f 1 | cut -d~ -f 1 | tr -d [a-z])
+
+	if [[ $act_version == $req_version ]]; then
+		return 0
+	fi
+	local IFS=.
+	local i ver1=($act_version) ver2=($req_version)
+	# fill empty fields in ver1 with zeros
+	for ((i = ${#ver1[@]}; i < ${#ver2[@]}; i++)); do
+		ver1[i]=0
+	done
+
+	for ((i = 0; i < ${#ver1[@]}; i++)); do
+		if [[ -z ${ver2[i]} ]]; then
+			# fill empty fields in ver2 with zeros
+			ver2[i]=0
+		fi
+		if ((10#${ver1[i]} > 10#${ver2[i]})); then
+			return 0
+		fi
+		if ((10#${ver1[i]} < 10#${ver2[i]})); then
+			return 255
+		fi
+	done
+	return 0
+
+}
+
+function check_tools {
+	plnx_info "Checking installed tools"
+	Dist=$(find_dist)
+	if [ $Dist == "Ubuntu" ]; then
+		COMMON_TOOLS=$COMMON_TOOLS$UBUNTU_TOOLS
+	elif [ $Dist == "AlmaLinux" ]; then
+		COMMON_TOOLS=$COMMON_TOOLS$ALMALINUX_TOOLS
+	elif [ $Dist = "openSUSELeap" ] || [ $Dist = "openSUSE" ]; then
+		COMMON_TOOLS=$COMMON_TOOLS$SUSE_TOOLS
+
+	fi
+
+	local MISSING=""
+	local INVALID_VERSION=""
+	while read -r line; do
+		local tools=${line%%:*}
+		local version=${line##*:}
+		if [ "${version}" == "${tools}" ]; then
+			version=""
+		fi
+		local is_tool_installed=""
+		for t in ${tools}; do
+			if ! test_tool_installed ${t}; then
+				continue
+			elif ! test_tool_version ${t} ${version}; then
+				INVALID_VERSION="${INVALID_VERSION}\n -Detected ${t} version ${act_version} is less than the expected ${version}"
+				is_tool_installed=y
+				break
+			else
+				is_tool_installed=y
+			fi
+		done
+		if [ -z "${is_tool_installed}" ]; then
+			local missing_tools=$(echo "${tools}" | tr " " "/")
+			MISSING="${MISSING}\n - ${missing_tools}"
+		fi
+	done < <(echo "${COMMON_TOOLS}")
+
+	local has_error=""
+	if [ -n "${MISSING}" ]; then
+		plnx_err "You are missing the following system tools required by PetaLinux:"
+		echo -e $MISSING
+		echo "Please check PetaLinux installation guide - required tools and libraries package section for detailed information" | tee -a ${INSTALL_LOG}
+		echo ""
+		has_error=y
+	fi
+
+	if [ -n "${INVALID_VERSION}" ]; then
+		plnx_err "You have tools that don't meet the version requirements:"
+		echo -e ${INVALID_VERSION}
+		echo ""
+		has_error=y
+	fi
+
+	if [ -z "${has_error}" ]; then
+		return 0
+	else
+		return 255
+	fi
+}
+
+function add_file_cleanup {
+	CLEANUP_FILES="${CLEANUP_FILES} $*"
+}
+
+function do_file_cleanup {
+	rm -rf ${CLEANUP_FILES}
+}
+
+function plnx_info {
+	echo "[INFO] $@"
+}
+
+function plnx_err {
+	echo "[ERROR] $@" 1>&2
+}
+
+function plnx_err_exit {
+	echo "[ERROR] $@" 1>&2
+	exit 255
+}
+
+function plnx_warning {
+	echo "[WARNING] $@" 2>&1
+}
+
+function check_libs {
+	plnx_info "Checking installed development libraries"
+	local MISSING=
+	for l in ${NEEDED_HEADERS}; do
+		local lib_name=${l##*:}
+		if [ "${lib_name}" == "$l" ]; then
+			lib_name=$(basename $l .h)
+		fi
+		local lib_header=${l%%:*}
+		local out=$(mktemp) || plnx_err_exit "Failed to create temp file, Temp folder is full or is inaccessible"
+		add_file_cleanup "${out}"
+		mv ${out} ${out}.c
+		add_file_cleanup "${out}.c"
+		out=${out}.c
+		cat >${out} <<__EOF
+#include <${lib_header}>
+int main(void)
+{ return 0; }
+__EOF
+		local obj="/tmp/$$"
+		add_file_cleanup "${obj}"
+		gcc -o "${obj}" ${out} 2>/dev/null 1>/dev/null
+		if [ $? != 0 ]; then
+			MISSING="${MISSING}\n - ${lib_name}"
+		fi
+		rm -f "${out}" "${obj}"
+	done
+
+	if [ -n "${MISSING}" ]; then
+		plnx_err "You are missing these development libraries required by PetaLinux:"
+		echo -e $MISSING
+		echo ""
+		return 255
+	fi
+
+	return 0
+}
+
+function check_services {
+	plnx_info "Checking network and other services"
+	# In latest distro's netstat deprecated so using ss
+	netstat_util=`which netstat`
+	if [ -z "$netstat_util" ]; then
+		netstat_util=`which ss`
+	fi
+	# Check for tftp
+	if [ -n "$netstat_util" ]; then
+		if ! $netstat_util -l 2>/dev/null | grep tftp 2>/dev/null 1>/dev/null; then
+			plnx_warning "No tftp server found - please refer to \"UG1144 $PETALINUX_VER PetaLinux Tools Documentation Reference Guide\" for its impact and solution"
+		fi
+	fi
+
+	return 0
+}
+
+function warn_free_space {
+	plnx_info "Checking free disk space"
+
+	DF=$(df -B 1M . | tail -1 | awk '{print $4}')
+
+	if [ ${DF} -le 1024 ]; then
+		plnx_warning "You have less than 1Gbyte free space on the installation drive"
+	fi
+}
+
+trap do_file_cleanup EXIT KILL QUIT SEGV INT HUP TERM ERR
+
+check_os
+[ $? -ne 0 ] && plnx_warning "This is not a supported OS"
+
+warn_free_space || exit 255
+
+# Check tools and libs
+check_tools
+rc1=$?
+check_libs
+rc2=$?
+[ $rc1 -ne 0 -o $rc2 -ne 0 ] && echo "Please install them with your operating system package manager, and try again" && exit 255
+
+check_services || exit 255

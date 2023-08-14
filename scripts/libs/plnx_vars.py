@@ -87,9 +87,9 @@ YoctoSrcPath = os.path.join(PetaLinux, 'components', 'yocto')
 EsdkSrcPath = os.path.join(YoctoSrcPath, 'source')
 SDTPrestepFile = os.path.join(
     YoctoSrcPath, 'decoupling', 'decouple-prestep.sh')
-XsctPath = os.path.join(PetaLinux, 'tools', 'xsct')
-XsctBinPath = os.path.join(PetaLinux, 'tools', 'xsct', 'bin')
-TemplateDir = os.path.join(PetaLinux, 'etc', 'template')
+XsctPath = os.path.join(PetaLinux, 'components', 'xsct')
+XsctBinPath = os.path.join(XsctPath, 'bin')
+TemplateDir = os.path.join(PetaLinux, 'templates')
 TemplateCommon = os.path.join(TemplateDir, '{0:s}', 'common')
 TemplateDir_C = os.path.join(TemplateDir, '{0:s}', 'template-{1:s}')
 

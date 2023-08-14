@@ -1,0 +1,19 @@
+[ Sample AUTHORS file as suggested by the "Learning the GNU
+  development tools", written originallly by Eleftherios
+  Gkioulekas, and later maintained by  Marcelo Roberto Jimenez
+  This tutorial can be found at:
+  http://autotoolset.sourceforge.net/tutorial.html
+]
+
+Authors of hello
+
+The following contributions warranted legal paper exchanges 
+with the Free Software Foundation.  Also see files ChangeLog
+and THANKS.
+
+Ima Koder <hello-maintainer@fake.org>
+entire files  -> @appname@.c
+modifications -> all
+
+Kode Vicious <kvivious@some.fake.place.org>
+ modifications-> @appname@.c (specific changes here)

@@ -1,0 +1,24 @@
+This package is designed as a sample GNU build, to
+learn GNU auto* tools and procedures.  It is
+adapted from the "Learning the GNU development tools",
+written by Eleftherios Gkioulekas.  This tutorial can
+be found at:
+  http://autotoolset.sourceforge.net/tutorial.html
+
+The README file contains the information an experienced
+developer needs to know about the package in general
+and any special steps on how to build and/or configure it.
+(New developers should read the standard INSTALL file,
+and run "./configure --help" to see which options are
+available.)
+
+This package produces a simple hello world program.
+You can build it the usual way:
+    ./configure
+    make
+    make install
+(It is suggested you use the "--prefix" option to
+configure to install in your home directory, like this:
+    ./configure --prefix=/home/rkakarla
+
+-Ima Koder, anytown USA.  2/11/2005

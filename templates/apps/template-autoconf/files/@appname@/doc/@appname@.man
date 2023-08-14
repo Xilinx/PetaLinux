@@ -1,0 +1,22 @@
+.\" This is a man page for the hello command.  It is intended to
+.\" be a model for writting man pages.
+.
+.\" Written by Ima Koder, Tampa Florida USA, 3/2005.
+.TH HELLO 1 "3/27/2005" "(C) IK ShellScript Co." "Ima Koder"
+.
+.SH NAME
+hello \- Display a friendly greeting
+.
+.SH SYNOPSIS
+.B hello
+.
+.SH DESCRIPTION
+The
+.B hello
+command simply displays a short greeting to the world.
+.
+.SH AUTHOR
+Ima Koder <hello-maintainer@fake.org
+.
+.SH SEE ALSO
+greet(1)
