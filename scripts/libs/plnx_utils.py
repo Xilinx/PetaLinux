@@ -217,11 +217,11 @@ def GetFileFromXsa(proot, hw_file='', bootfile_ext=''):
             plnx_vars.HWDescDir.format(proot),
             '*.%s' % bootfile_ext))
         if len(bootfile) > 1 and xilinx_arch in ['versal', 'versal-net']:
-            # To handle the new soc boot flow where design has two pdis
-		    # boot pdi with _soc.pdi and pl pdi as _pld.pdi.
+            # To handle the segmented boot flow where design has two pdis
+		    # boot pdi with _boot.pdi and pl pdi as _pld.pdi.
             bootfile = glob.glob(os.path.join(
                 plnx_vars.HWDescDir.format(proot),
-                '*_soc.%s' % bootfile_ext))
+                '*_boot.%s' % bootfile_ext))
         else:
             bootfile = bootfile[0]
         return bootfile
