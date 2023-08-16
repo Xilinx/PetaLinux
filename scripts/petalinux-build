@@ -1,0 +1,349 @@
+#!/usr/bin/env python3
+
+# Copyright (C) 2021-2022, Xilinx, Inc.  All rights reserved.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.  All rights reserved.
+#
+# Author:
+#       Ashwini Lomate <ashwini.lomate@xilinx.com>
+#
+# SPDX-License-Identifier: MIT
+
+import os
+import sys
+import logging
+import argparse
+import glob
+
+scripts_path = os.path.dirname(os.path.realpath(__file__))
+libs_path = scripts_path + '/libs'
+sys.path = sys.path + [libs_path]
+import logger_setup
+import bitbake_utils
+import plnx_vars
+import plnx_utils
+
+logger, console_h = logger_setup.setup_logger('PetaLinux')
+
+
+MapBuildComp = {
+    'component': {
+        'project': 'petalinux-image-minimal',
+        'kernel': 'virtual/kernel',
+        'u-boot': 'virtual/bootloader',
+        'rootfs': 'petalinux-image-minimal',
+        'pmufw': 'virtual/pmu-firmware',
+        'plm': 'virtual/plm',
+        'psmfw': 'virtual/psm-firmware',
+        'arm-trusted-firmware': 'virtual/arm-trusted-firmware',
+        'device-tree': 'virtual/dtb',
+        'bootloader': 'virtual/fsbl',
+        'bootloader_microblaze': 'virtual/fsboot'
+    },
+    'task': {
+        'distclean': 'cleansstate',
+        'sdk': 'do_populate_sdk',
+        'esdk': 'do_populate_sdk_ext'
+    }
+}
+
+
+def CleanProject(args, proot):
+    ''' Remove build, workspace , .conf and config file'''
+    tmpdir_path = plnx_utils.get_config_value(plnx_vars.TmpDirConf,
+                                              plnx_vars.SysConfFile.format(proot))
+    tmpdir_path = tmpdir_path.replace(
+        '${PROOT}', proot).replace('$PROOT', proot)
+    workspace_path = plnx_utils.get_workspace_path(proot)
+    notempty = False
+    # if sources dir is present in workspace then list the file in sources dir
+    if os.path.exists(os.path.join(workspace_path, 'sources')) and \
+            os.listdir(os.path.join(workspace_path, 'sources')):
+        notempty = True
+    # if appends dir is present in workspace then list the file in appends dir
+    if os.path.exists(os.path.join(workspace_path, 'appends')) and \
+            os.listdir(os.path.join(workspace_path, 'appends')):
+        notempty = True
+    # if notempty is true and if user specify -f then below warning will display
+    if notempty and args.force:
+        logger.warning('Workspace directory not empty: "%s"'
+                       'Use -f/--force to clean it... (or)'
+                       'Use petalinux-devtool finish <component>'
+                       '/project-spec/meta-user to Add your changes.' % (workspace_path))
+    # remove tmp dir, multiconfig,images dir ,.conf file,
+    # configs and rootfsconfig when user specify mrproper
+    plnx_utils.RemoveDir(tmpdir_path)
+    plnx_utils.RemoveFile(os.path.join(tmpdir_path, '-multiconfig'))
+    plnx_utils.RemoveDir(args.builddir)
+    plnx_utils.RemoveDir(os.path.join(proot, 'images'))
+    plnx_utils.RemoveDir(plnx_vars.PlnxWorkspace.format(proot))
+    for file in glob.glob(os.path.join(plnx_vars.SysConfDir.format(proot), '*.conf')):
+        plnx_utils.RemoveFile(file)
+    plnx_utils.RemoveDir(os.path.join(
+        plnx_vars.SysConfDir.format(proot), 'configs'))
+    plnx_utils.RemoveDir(os.path.join(
+        plnx_vars.SysConfDir.format(proot), 'rootfsconfigs'))
+    sys.exit(0)
+
+
+def CreateArchiver(execute_task, proot):
+    ''' Run create archiver function to create archiver.conf'''
+    # Create archiver.conf file in build/conf/archiver.conf
+    plnx_utils.CreateFile(plnx_vars.ArchiverConfFile.format(proot))
+    # Add the ArchiverStr strings into archiver.conf file
+    plnx_utils.add_str_to_file(plnx_vars.ArchiverConfFile.format(proot),
+                               plnx_vars.ArchiverStr)
+    # when user specify -s with -a option the below code will execute
+    if execute_task == 'do_populate_sdk':
+        # Add the ArchiverconfStr strings as append mode in archiver.conf file
+        plnx_utils.add_str_to_file(plnx_vars.ArchiverConfFile.format(proot),
+                                   plnx_vars.ArchiverconfStr, mode='a+')
+    # when local.conf file exist then add LocalConfStr string into archiver.conf file
+    if os.path.exists(plnx_vars.LocalConf.format(proot)):
+        plnx_utils.add_str_to_file(plnx_vars.LocalConf.format(proot),
+                                   plnx_vars.LocalConfStr, mode='a+')
+
+
+def GetSourcesLicences(proot):
+    ''' Run source and license function to get'''
+    ''' achiver.tar.gz into images/linux directory'''
+    tmpdir_path = plnx_utils.get_config_value(plnx_vars.TmpDirConf,
+                                              plnx_vars.SysConfFile.format(proot))
+    tmpdir_path = tmpdir_path.replace(
+        '${PROOT}', proot).replace('$PROOT', proot)
+    deploy_path = os.path.join(tmpdir_path, 'deploy')
+    tmpdir_tar = os.path.join(plnx_vars.BuildImagesDir.format(proot),
+                              'archiver.tar.gz')
+    # Creating images/linux directory
+    plnx_utils.CreateDir(plnx_vars.BuildImagesDir.format(proot))
+    logger.info('Generating tar file for sources and license')
+    # Running the tar command to compress both sources and licenses
+    # nto archiver.tar.gz file in images/linux directory
+    tar_cmd = 'tar -zcvf  %s -C %s sources/ licenses/' % (
+        tmpdir_tar, deploy_path)
+    plnx_utils.runCmd(tar_cmd, out_dir=os.getcwd(), shell=True)
+    # Removing include conf/archiver.conf file from local.conf
+    plnx_utils.remove_str_from_file(plnx_vars.LocalConf.format(proot),
+                                    '^include conf\/archiver.conf')
+
+
+def CopyToTftpDir(proot):
+    ''' Copy Final Output Files to TFTP Directory '''
+    # when user enable or specify copy to tftp option in config
+    copy_to_tftp = plnx_utils.get_config_value('CONFIG_SUBSYSTEM_COPY_TO_TFTPBOOT',
+                                               plnx_vars.SysConfFile.format(proot))
+    if copy_to_tftp:
+        # when user enable tftp dir option in config
+        tftp_dir = plnx_utils.get_config_value('CONFIG_SUBSYSTEM_TFTPBOOT_DIR',
+                                               plnx_vars.SysConfFile.format(proot))
+        # if tftp dir not not exists
+        if not os.path.isdir(tftp_dir) and os.access(os.path.dirname(tftp_dir), os.W_OK):
+            # create tftp_dir and give write access
+            plnx_utils.CreateDir(tftp_dir)
+        if os.path.isdir(tftp_dir) and os.access(tftp_dir, os.W_OK):
+            image_dir = os.listdir(plnx_vars.BuildImagesDir.format(proot))
+            # copy all images in tftp_dir path
+            rsync_cmd = 'rsync -a "%s" "%s"' % (
+                plnx_vars.BuildImagesDir.format(proot), tftp_dir)
+            plnx_utils.runCmd(rsync_cmd, out_dir=os.getcwd(), shell=True)
+            logger.info(
+                'Successfully copied built images to tftp dir: %s' % tftp_dir)
+        else:
+            logger.info(
+                'Failed to copy built images to tftp dir: %s' % tftp_dir)
+    else:
+        logger.info('copy to TFTP-boot directory is not enabled')
+
+
+def BuildComponent(args, proot):
+    ''' Run config setup for given component'''
+    gen_confargs = ''
+    build_task = ''
+    xilinx_arch = plnx_utils.get_xilinx_arch(proot)
+    # Print debug logs while executing the project
+    if args.debug:
+        gen_confargs += ' --debug'
+
+    # Setup plnxwrapper funtion will execute config command
+    plnx_utils.setup_plnwrapper(args, proot, 'silentconfig', gen_confargs)
+
+    # Get component from dictonary to build
+    build_comp = MapBuildComp['component'].get(
+        '%s_%s' % (args.component, xilinx_arch))
+    if not build_comp:
+        build_comp = MapBuildComp['component'].get(
+            args.component, args.component)
+    if build_comp == 'petalinux-image-minimal':
+        if args.execute == 'package':
+            build_comp = MapBuildComp['component'].get('kernel')
+    if args.component == 'rootfs' and args.help:
+        build_comp += ' -g'
+
+    # Get task from dictonary to build
+    build_task = MapBuildComp['task'].get(args.execute, args.execute)
+    if args.component == 'rootfs':
+        if not args.execute or args.execute == 'build':
+            build_task = 'do_image_complete'
+    if args.sdk:
+        build_task = MapBuildComp['task'].get('sdk')
+    if args.esdk:
+        build_task = MapBuildComp['task'].get('esdk')
+    # BitBake debug logs
+    if args.debug:
+        build_task += ' -DDD -v'
+
+    # build_task contain some value then only it will append to bitbake command
+    if build_task:
+        build_comp += ' -c %s' % build_task
+        args.execute = build_task
+    # while using -f/--force to the components this check will execute
+    if args.force:
+        if build_comp == 'petalinux-image-minimal':
+            logger.error('Force building is not supported for image targets')
+            sys.exit(255)
+        build_comp += ' -f'
+    # while using -a/--archiver option the CreateArchiver function will call and execute
+    if args.archiver:
+        CreateArchiver(args.execute, proot)
+        logger.info(
+            'Build may take more time to generate archiver.tar.gz. Please wait for sometime!')
+
+    # all components and task values will get assign to
+    # build_comp variable and then it will execute bitbake command
+    bitbake_cmd = 'bitbake %s' % build_comp
+    logger.info(bitbake_cmd)
+    bitbake_utils.run_bitbakecmd(bitbake_cmd, proot,
+                                 logfile=args.logfile, extraenv=None, shell=True)
+
+    # when component is equal to project and archiver option is given in command line
+    if args.component == 'project' and args.archiver:
+        # calling GetSourcesLicences funtion
+        GetSourcesLicences(proot)
+    tmpdir_path = plnx_utils.get_config_value(
+        plnx_vars.TmpDirConf, plnx_vars.SysConfFile.format(proot))
+    tmpdir_path = tmpdir_path.replace(
+        '${PROOT}', proot).replace('$PROOT', proot)
+    # when user specify -s/--sdk or -e/--esdk then the below code will execute
+    if build_task == 'do_populate_sdk' or build_task == 'do_populate_sdk_ext':
+        logger.info('Copying SDK Installer...')
+        SDKOutFile = plnx_vars.SdkFile.format(proot)
+        if build_task == 'do_populate_sdk_ext':
+            SDKOutFile = plnx_vars.ESdkFile.format(proot)
+        deploy_path = os.path.join(tmpdir_path, 'deploy')
+        sdk_dir = os.path.join(deploy_path, 'sdk')
+        # if sdk directory is exists in build/tmp/deploy/sdk then below code will execute
+        if os.path.isdir(sdk_dir):
+            if build_task == 'do_populate_sdk':
+                sdk_src = glob.glob(os.path.join(
+                    sdk_dir, 'petalinux-glibc-x86_64-petalinux-image-minimal-*.sh'))
+            if build_task == 'do_populate_sdk_ext':
+                sdk_src = glob.glob(os.path.join(
+                    sdk_dir, 'petalinux-glibc-x86_64-petalinux-image-minimal-*ext*.sh'))
+            # if .sh files are exists then it will create sdk.sh/esdk.sh file and copy .sh files into images/linux
+            if sdk_src:
+                plnx_utils.CreateDir(plnx_vars.BuildImagesDir.format(proot))
+                plnx_utils.CopyFile(sdk_src[0], SDKOutFile)
+        else:
+            logger.error('Failed to copy SDK')
+            sys.exit(255)
+    # when user does not specify -x option with clean,cleansstate,cleanall and configure then below will execute
+    if args.execute not in ['clean', 'cleansstate', 'cleanall', 'configure']:
+        CopyToTftpDir(proot)
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Builds the project or the specified components',
+        add_help=False,
+        formatter_class=argparse.RawTextHelpFormatter,
+        usage='Use %(prog)s [options]')
+    # Global args
+    parser.add_argument('-D', '--debug', action='store_true',
+                        help='Display the Debug prints.')
+    parser.add_argument('-h', '--help', action='store_true',
+                        help='Show this help message and exit')
+    parser.add_argument('-p', '--project', metavar='PROJECT_DIR', type=os.path.realpath,
+                        help='path to PetaLinux SDK project.'
+                        '\nDefault is working project.')
+    parser.add_argument('-c', '--component', metavar='COMPONENT', default='',
+                        help='Specify the component'
+                        '\nit will build the specified component and its dependencies.'
+                        '\nE.g. -c rootfs.'
+                        '\nE.g. -c myapp.')
+    parser.add_argument('-x', '--execute', metavar='<tasks of BitBake>', default='',
+                        help='Specify a bitbake task of the component'
+                        '\nTo know the list tasks for a component:'
+                        '\nE.g. -x do_listtasks.')
+    parser.add_argument('-f', '--force', action='store_true',
+                        help='Force run a specific task ignoring the stamps'
+                        '\nForce run has to be for a component or its tasks'
+                        '\nE.g. -c myapp -f'
+                        '\nE.g. -c myapp -x compile -f.')
+    parser.add_argument('-s', '--sdk', action='store_true',
+                        help='Build SDK ==> do_populate_sdk.')
+    parser.add_argument('-e', '--esdk', action='store_true',
+                        help='Build Minimal eSDK ==> do_populate_sdk_ext.')
+    parser.add_argument('-a', '--archiver', action='store_true',
+                        help='This will create archiver.tar.gz in the images/linux folder'
+                        '\nwhich contains sources and licenses.')
+    parser.set_defaults(func=BuildComponent)
+
+    args = parser.parse_args()
+
+    # Print help if -h and not -c rootfs
+    if args.help and args.component != 'rootfs':
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
+    # Exit if PROOT is not PetaLinux project
+    proot = plnx_utils.exit_not_plnx_project(args.project)
+
+    # Exit if PetaLinux version mismatch
+    if not plnx_utils.petalinux_version_check(proot):
+        sys.exit(255)
+
+    args.command = os.path.basename(sys.argv[0])
+    # Get build dir and create build.log and build.log.old
+    args.builddir = plnx_vars.BuildDir.format(proot)
+    plnx_utils.CreateDir(args.builddir)
+
+    args.logfile = plnx_vars.BuildLogFile.format(proot)
+    plnx_utils.RenameFile(args.logfile, args.logfile + '.old')
+
+    # Do clean if not component and task mrproper
+    if not args.component and args.execute == 'mrproper':
+        CleanProject(args, proot)
+    # Default is project
+    if not args.component:
+        args.component = 'project'
+
+    # validate if design/xsa got changed using the below function
+    plnx_utils.validate_hwchecksum(proot)
+    logger.info('Building %s' % args.component)
+
+    # Setup logger to file
+    logger_setup.setup_logger_file(args.logfile)
+    # Print debug prints if debug selected
+    if args.debug:
+        console_h.setLevel(logging.DEBUG)
+
+    ret = args.func(args, proot)
+
+    # Based on return value it will print failed or success message
+    if ret != 0:
+        logger.error('Failed to build %s. Check the %s file for more details...' %
+                     (args.component, args.logfile))
+    else:
+        logger.info('Successfully built %s' % args.component)
+
+    return ret
+
+
+if __name__ == "__main__":
+    try:
+        ret = main()
+    except Exception:
+        ret = 1
+        import traceback
+        traceback.print_exc()
+    sys.exit(ret)
