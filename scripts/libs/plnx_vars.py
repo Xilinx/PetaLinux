@@ -19,6 +19,7 @@ PreBuildsDir = os.path.join(ProotSub, 'pre-built', 'linux')
 PreBuildsImagesDir = os.path.join(PreBuildsDir, 'images')
 BuildDir = os.path.join(ProotSub, 'build')
 ConfDir = os.path.join(BuildDir, 'conf')
+ArchiverConfFile = os.path.join(ConfDir, 'archiver.conf')
 DevtoolConfFile = os.path.join(ConfDir, 'devtool.conf')
 BBLayersConf = os.path.join(ConfDir, 'bblayers.conf')
 LocalConf = os.path.join(ConfDir, 'local.conf')
@@ -54,6 +55,7 @@ DefXsaPath = os.path.join(HWDescDir, 'system.xsa')
 UsrRfsConfig = os.path.join(MetaUserDir, 'conf', 'user-rootfsconfig')
 PlnxBspConfig = os.path.join(MetaUserDir, 'conf', 'petalinuxbsp.conf')
 ConfigLogFile = os.path.join(BuildDir, 'config.log')
+BuildLogFile = os.path.join(BuildDir, 'build.log')
 DevtoolLogFile = os.path.join(BuildDir, 'devtool.log')
 PkgFileName = 'package.log'
 PackageLogFile = os.path.join(BuildDir, PkgFileName)
@@ -183,6 +185,23 @@ pre-built/linux/
 components/plnx_workspace
 components/yocto
 '''
+
+ArchiverStr = '''
+INHERIT += "archiver"
+ARCHIVER_MODE[src] = "original"
+COPYLEFT_LICENSE_INCLUDE = ""
+COPYLEFT_LICENSE_EXCLUDE = ""
+'''
+
+ArchiverconfStr = '''
+do_populate_sdk[recrdeptask] += "do_populate_lic"
+do_populate_sdk[recrdeptask] += "do_populate_lic"
+'''
+
+LocalConfStr = '''
+include conf/archiver.conf
+'''
+
 BspFilesExcludeStr = '''
 RCS\nSCCS\nCVS\nCVS.adm\nRCSLOG\ncvslog.*\ntags\nTAGS\n.make.state\n.nse_depinfo
 *~\n.#*\n,*\n_\$*\n*\$\n*.old\n*.bak\n*.BAK\n*.orig\n*.rej\n.del-*\n*.olb\n*.o
