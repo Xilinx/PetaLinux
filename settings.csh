@@ -75,6 +75,12 @@ if ( $SHELL != "/bin/bash" ) then
 	echo "/bin/bash is Petalinux recommended SHELL variable. Please set your SHELL variable to /bin/bash."
 endif
 
+# Add buildtools path
+set NATIVE_SYSROOT_PATH="${PETALINUX}/components/yocto/buildtools/sysroots/x86_64-petalinux-linux"
+if ( -d ${NATIVE_SYSROOT_PATH} ) then
+	setenv PATH "${NATIVE_SYSROOT_PATH}/usr/bin:${NATIVE_SYSROOT_PATH}/usr/sbin:${NATIVE_SYSROOT_PATH}/sbin:$PATH"
+endif
+
 # Has this installation been completed?
 ${PETALINUX}/scripts/bash/petalinux-env-check
 #

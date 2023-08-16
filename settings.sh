@@ -74,9 +74,6 @@ PATH=`echo ${PATH} | tr ":" "\n" | grep -v '^\./*$' | tr "\n" ":"`
 # Strip any trailing or multi-colons - they are interpreted as '.'
 PATH=$(echo ${PATH} | sed -e 's/:*$//g' -e 's/::*/:/g')
 
-export PATH
-
-
 echo PetaLinux environment set to \'${PETALINUX}\'
 
 for s in /bin/sh sh; do
@@ -91,6 +88,14 @@ if ! echo $SHELL | grep -q "bash"; then
 	echo "WARNING: $SHELL is not bash! "
 	echo "/bin/bash is Petalinux recommended SHELL variable. Please set your SHELL variable to /bin/bash."
 fi
+
+# Add buildtools path
+NATIVE_SYSROOT_PATH="${PETALINUX}/components/yocto/buildtools/sysroots/x86_64-petalinux-linux"
+if [ -d ${NATIVE_SYSROOT_PATH} ]; then
+	PATH="${NATIVE_SYSROOT_PATH}/usr/bin:${NATIVE_SYSROOT_PATH}/usr/sbin:${NATIVE_SYSROOT_PATH}/sbin:$PATH"
+fi
+
+export PATH
 
 "${PETALINUX}"/scripts/bash/petalinux-env-check
 #
