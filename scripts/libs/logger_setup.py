@@ -15,6 +15,19 @@ logger = None
 format = logging.Formatter("[%(levelname)s] %(message)s")
 
 
+def plain(self, message, *args, **kwargs):
+    print(message)
+
+
+def note(self, message, *args, **kwargs):
+    self._log(logging.INFO + 2, message, args, **kwargs)
+
+
+logging.addLevelName(logging.INFO + 2, 'NOTE')
+logging.Logger.plain = plain
+logging.Logger.note = note
+
+
 def setup_logger(name):
     global logger
     if logger:
