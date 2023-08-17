@@ -29,7 +29,28 @@ import package_wic
 logger, console_h = logger_setup.setup_logger('PetaLinux')
 
 
+def PreProcessArgs():
+    # Shell used to support --boot|--bsp|--prebuilt|--sysroot|--wic
+    # To support those adding preprocessor for args
+    # which will read the args and find any deprecated args
+    # and rearrange them as per the python argparser
+    DeprecatedArgs = ['--boot', '--bsp', '--prebuilt', '--sysroot', '--wic']
+    parser_value = ''
+    for arg in DeprecatedArgs:
+        if arg in sys.argv:
+            parser_value = sys.argv[sys.argv.index(arg)].replace('-', '')
+            logger.note('Argument: "%s" has been deprecated. '
+                        'It is recommended to start using new python command line Argument.'
+                        % (sys.argv[sys.argv.index(arg)]))
+            logger.note('Use: %s %s [OPTIONS]' % (os.path.basename(sys.argv[0]),
+                                                  parser_value))
+            del sys.argv[sys.argv.index(arg)]
+    if parser_value:
+        sys.argv.insert(1, parser_value)
+
+
 def main():
+    PreProcessArgs()
     parser = argparse.ArgumentParser(
         description='This command packages various image format, prebuilt and bsps',
         formatter_class=argparse.RawTextHelpFormatter,
