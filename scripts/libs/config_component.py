@@ -56,12 +56,8 @@ def get_hw_file(hw_file, hw_ext, proot):
                                    plnx_vars.MetaDataFile.format(proot))
     if hw_ext == 'sdt':
         plnx_utils.CopyDir(os.path.dirname(hw_file),
-                           plnx_vars.HWDescDir.format(proot))
-        # CopyDir doesnot support exclude option so removing xsa's
-        for _file in os.listdir(plnx_vars.HWDescDir.format(proot)):
-            if _file.endswith('.xsa'):
-                plnx_utils.RemoveFile(
-                    os.path.join(plnx_vars.HWDescDir.format(proot), _file))
+                           plnx_vars.HWDescDir.format(proot),
+                           exclude='*.xsa')
     else:
         plnx_utils.CopyFile(hw_file, plnx_vars.HWDescDir.format(proot))
         base_filename = os.path.basename(hw_file)

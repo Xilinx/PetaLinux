@@ -58,13 +58,17 @@ def RemoveFile(filepath):
         os.remove(filepath)
 
 
-def CopyDir(indir, outdir):
-    '''Copy Directory to Directory'''
+def CopyDir(indir, outdir, exclude=''):
+    '''Copy Directory to Directory
+    Using tar command to copy dirs which is twice
+    faster than shutil.copytree and support exclude option'''
     if os.path.exists(indir):
         if not os.path.exists(outdir):
             CreateDir(outdir)
-        import distutils.dir_util
-        distutils.dir_util.copy_tree(indir, outdir)
+        copycmd = "tar --xattrs --xattrs-include='*' --exclude='%s' \
+                -cf - -S -C %s -p . | tar --xattrs --xattrs-include='*' \
+                -xf - -C %s" % (exclude, indir, outdir)
+        runCmd(copycmd, os.getcwd(), shell=True)
 
 
 def CopyFile(infile, dest, follow_symlinks=False):
