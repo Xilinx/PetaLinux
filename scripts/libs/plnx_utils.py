@@ -218,7 +218,7 @@ def GetFileFromXsa(proot, hw_file='', bootfile_ext=''):
             '*.%s' % bootfile_ext))
         if len(bootfile) > 1 and xilinx_arch in ['versal', 'versal-net']:
             # To handle the segmented boot flow where design has two pdis
-		    # boot pdi with _boot.pdi and pl pdi as _pld.pdi.
+            # boot pdi with _boot.pdi and pl pdi as _pld.pdi.
             bootfile = glob.glob(os.path.join(
                 plnx_vars.HWDescDir.format(proot),
                 '*_boot.%s' % bootfile_ext))
@@ -297,14 +297,18 @@ def config_initscripts(proot):
 
 def gen_sysconf_dtsi_file(proot):
     '''Generate sysconf.dtsi file for SDT flow'''
-    sdt_machine = get_config_value('MACHINE ',
-                                   plnx_vars.SdtAutoConf.format(proot)).strip()
+    dts_dir = get_config_value(
+        'CONFIG_SUBSYSTEM_DT_XSCT_WORKSPACE',
+        plnx_vars.SysConfFile.format(proot))
+    dts_dir = dts_dir.replace('${PROOT}', proot)
+    dts_dir = dts_dir.replace('$PROOT', proot)
+    SdtSystemConfDtsi = os.path.join(dts_dir, 'system-conf.dtsi')
     bootargs = get_config_value(plnx_vars.AutoBootArgsConf,
                                 plnx_vars.SysConfFile.format(proot))
     if not bootargs:
         bootargs = get_config_value(plnx_vars.BootArgsCmdLineConf,
                                     plnx_vars.SysConfFile.format(proot))
-    add_str_to_file(plnx_vars.SdtSystemConfDtsi.format(proot, sdt_machine),
+    add_str_to_file(SdtSystemConfDtsi,
                     plnx_vars.SystemconfBootargs.format(bootargs))
     eth_ipname = get_config_value(
         plnx_vars.EthConfs['Prefix'], plnx_vars.SysConfFile.format(proot),
@@ -313,17 +317,17 @@ def gen_sysconf_dtsi_file(proot):
         plnx_vars.EthConfs['Prefix'], plnx_vars.SysConfFile.format(proot),
         'asterisk', plnx_vars.EthConfs['Mac']).replace(':', ' ')
     if eth_ipname != 'manual':
-        add_str_to_file(plnx_vars.SdtSystemConfDtsi.format(proot, sdt_machine),
+        add_str_to_file(SdtSystemConfDtsi,
                         plnx_vars.SystemconfEth.format(
-            eth_ipname, eth_mac), mode='a')
+                            eth_ipname, eth_mac), mode='a')
     flash_ipname = get_config_value(plnx_vars.FlashIpConf,
                                     plnx_vars.SysConfFile.format(proot))
     if flash_ipname:
         prev_part_offset = '0x0'
         prev_part_size = '0x0'
-        add_str_to_file(plnx_vars.SdtSystemConfDtsi.format(proot, sdt_machine),
+        add_str_to_file(SdtSystemConfDtsi,
                         plnx_vars.SystemconfFlash.format(
-            flash_ipname), mode='a')
+                            flash_ipname), mode='a')
         for num in range(0, 19):
             part_offset = add_offsets(prev_part_offset, prev_part_size)
             part_name = get_config_value('%s%s%s' % (
@@ -335,12 +339,12 @@ def gen_sysconf_dtsi_file(proot):
             prev_part_offset = part_offset
             prev_part_size = part_size
             if part_name:
-                add_str_to_file(plnx_vars.SdtSystemConfDtsi.format(proot, sdt_machine),
+                add_str_to_file(SdtSystemConfDtsi,
                                 plnx_vars.FlashPartNode.format(
-                    num, part_name, part_offset, part_size), mode='a')
+                                    num, part_name, part_offset, part_size), mode='a')
             else:
                 break
-        add_str_to_file(plnx_vars.SdtSystemConfDtsi.format(proot, sdt_machine),
+        add_str_to_file(SdtSystemConfDtsi,
                         plnx_vars.FlashendSymbols, mode='a')
 
 
