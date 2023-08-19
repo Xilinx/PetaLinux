@@ -8,17 +8,17 @@
 #
 # SPDX-License-Identifier: MIT
 
+import logging
 import os
 import sys
-import logging
 
 scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
 import plnx_utils
 import plnx_vars
-from package_common import BootParams, BootFilesSeq, \
-                AddedSubBootId, AddedLinuxId
+from package_common import (AddedLinuxId, AddedSubBootId, BootFilesSeq,
+                            BootParams)
 
 logger = logging.getLogger('PetaLinux')
 

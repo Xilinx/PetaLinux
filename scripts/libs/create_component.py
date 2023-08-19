@@ -8,10 +8,10 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
-import sys
-import subprocess
 import logging
+import os
+import subprocess
+import sys
 
 scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'
@@ -39,9 +39,9 @@ def create_tmpdir_ifnfs(cpath, name, tmpdir):
     if plnx_utils.get_filesystem_id(cpath) == '6969' and not tmpdir:
         logger.warning(
             'Project on NFS mount, trying to relocate TMPDIR to local storage (/tmp)')
-        import time
-        import string
         import random
+        import string
+        import time
         current_time = time.strftime('%Y.%m.%d-%H.%M.%S', time.localtime())
         def_tmp = '/tmp'
         tmp_dir_name = '%s-%s-%s' % (name, current_time,

@@ -8,10 +8,10 @@
 #
 # SPDX-License-Identifier: MIT
 
+import argparse
+import logging
 import os
 import sys
-import logging
-import argparse
 
 scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'

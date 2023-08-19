@@ -8,18 +8,17 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
-import sys
-import subprocess
 import logging
+import os
 import re
+import sys
 
 scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
+import bitbake_utils
 import plnx_utils
 import plnx_vars
-import bitbake_utils
 
 logger = logging.getLogger('PetaLinux')
 
@@ -125,7 +124,7 @@ def config_yocto_component(proot, component, config_target, logfile):
         if component in plnx_vars.GUI_Components.keys():
             component = plnx_vars.GUI_Components[component]
         if component in plnx_vars.CMD_Components.keys():
-            component =  plnx_vars.CMD_Components[component]
+            component = plnx_vars.CMD_Components[component]
         if component == 'bootloader':
             if arch == 'microblaze':
                 component = 'virtual/fsboot'
@@ -133,8 +132,8 @@ def config_yocto_component(proot, component, config_target, logfile):
                 component = 'virtual/fsbl'
         bitbake_task = 'menuconfig'
         if config_target == 'silentconfig' or \
-                component in  plnx_vars.CMD_Components.keys() or \
-                component in  plnx_vars.CMD_Components.values():
+                component in plnx_vars.CMD_Components.keys() or \
+                component in plnx_vars.CMD_Components.values():
             bitbake_task = 'configure'
         bitbake_cmd = ''
         if component == 'virtual/kernel':

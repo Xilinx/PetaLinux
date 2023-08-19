@@ -8,19 +8,19 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
-import sys
-import logging
 import argparse
 import glob
+import logging
+import os
 import re
+import sys
 
 scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
+import bitbake_utils
 import plnx_utils
 import plnx_vars
-import bitbake_utils
 
 logger = logging.getLogger('PetaLinux')
 

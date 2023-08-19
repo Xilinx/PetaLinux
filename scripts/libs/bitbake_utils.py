@@ -8,13 +8,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
-import subprocess
-import re
-import sys
-import shutil
 import logging
+import os
+import re
 import signal
+import subprocess
+import sys
 
 logger = logging.getLogger('PetaLinux')
 
@@ -26,8 +25,7 @@ import plnx_vars
 
 
 def bb_updatevar(recipename, bbvar, value, append=False):
-    ''' 
-    bb_updatevar will update the bbvar with given value
+    ''' bb_updatevar will update the bbvar with given value
     recipename - bb file path
     bbvar - variable that needs to be update(Ex: SRC_URI)
     value - value for the bbvar

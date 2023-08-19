@@ -8,12 +8,13 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
-import subprocess
-import re
-import sys
-import shutil
 import logging
+import os
+import re
+import shutil
+import subprocess
+import sys
+
 logger = logging.getLogger('PetaLinux')
 
 
@@ -195,8 +196,8 @@ def concate_files(fromfile, tofile):
 
 def get_filehashvalue(filename):
     '''Get sha256 for given file'''
-    import mmap
     import hashlib
+    import mmap
     method = hashlib.sha256()
     with open(filename, "rb") as f:
         try:

@@ -8,19 +8,19 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
-import sys
-import logging
 import argparse
-import tempfile
+import logging
+import os
 import random
 import string
+import sys
+import tempfile
 
 scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
-import package_common
 import bitbake_utils
+import package_common
 import plnx_utils
 import plnx_vars
 

@@ -8,19 +8,19 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
-import sys
-import logging
 import argparse
 import glob
+import logging
+import os
+import sys
 
 scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
-import logger_setup
 import bitbake_utils
-import plnx_vars
+import logger_setup
 import plnx_utils
+import plnx_vars
 
 logger, console_h = logger_setup.setup_logger('PetaLinux')
 
@@ -140,7 +140,6 @@ def CopyToTftpDir(proot):
             # create tftp_dir and give write access
             plnx_utils.CreateDir(tftp_dir)
         if os.path.isdir(tftp_dir) and os.access(tftp_dir, os.W_OK):
-            image_dir = os.listdir(plnx_vars.BuildImagesDir.format(proot))
             # copy all images in tftp_dir path
             rsync_cmd = 'rsync -a "%s" "%s"' % (
                 plnx_vars.BuildImagesDir.format(proot), tftp_dir)

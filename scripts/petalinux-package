@@ -9,22 +9,22 @@
 # SPDX-License-Identifier: MIT
 
 
-import os
-import sys
 import argparse
 import logging
+import os
+import sys
 
 scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
 import logger_setup
-import plnx_vars
-import plnx_utils
 import package_boot
 import package_bsp
 import package_prebuilt
 import package_sysroot
 import package_wic
+import plnx_utils
+import plnx_vars
 
 logger, console_h = logger_setup.setup_logger('PetaLinux')
 
@@ -117,7 +117,6 @@ def main():
             proot = plnx_utils.exit_not_plnx_project(args.project)
         else:
             proot = plnx_utils.exit_not_plnx_project(proot='')
-
 
     args.builddir = plnx_vars.BuildDir.format(proot)
     plnx_utils.CreateDir(args.builddir)
