@@ -48,15 +48,15 @@ def PackageSysroot(args, proot):
 
 def pkgsysroot_args(sysroot_parser):
     sysroot_parser.add_argument('-p', '--project', metavar='PROJECT_DIR', type=os.path.realpath,
-                                 help='Specify full path to a PetaLinux project.'
-                                 '\nDefault is the working project.')
+                                help='Specify full path to a PetaLinux project.'
+                                '\nDefault is the working project.')
     sysroot_parser.add_argument('-s', '--sdk', metavar='<SDK installer path>',
-                                 nargs='?', const=plnx_vars.SdkFile,
-                                 type=os.path.realpath, help='SDK installer path'),
+                                nargs='?', const=plnx_vars.SdkFile,
+                                type=os.path.realpath, help='SDK installer path'),
     sysroot_parser.add_argument('-d', '--dir', metavar='<directory path>',
-                                 nargs='?', const=plnx_vars.SdkDir,
-                                 type=os.path.realpath, help='Directory path'
-                                 )
+                                nargs='?', const=plnx_vars.SdkDir,
+                                type=os.path.realpath, help='Directory path'
+                                )
 
     sysroot_parser.set_defaults(func=PackageSysroot)
 

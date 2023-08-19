@@ -34,7 +34,7 @@ def ValidateFlashSize(flash_size_arg, flash_type, flash_size):
                            'to detect the size of the system flash, will use the default value '
                            '"16 Mbytes".')
         else:
-            flash_size = int(int(flash_size, base=16)/1024/1024)
+            flash_size = int(int(flash_size, base=16) / 1024 / 1024)
             logger.info('User hasnot specified flash size, will use the auto '
                         'detected system flash size: %s MBytes.' % (flash_size))
     else:
@@ -71,7 +71,7 @@ def GetFlashInterface(flash_intf_arg, flash_type, flash_width, bitfile):
                             pass
                         if line.upper().startswith('FFFFFFFFFFFFFFFFAA99556620000000'):
                             n = 2
-                            spi_width_ = [(line[i:i+n])
+                            spi_width_ = [(line[i:i + n])
                                           for i in range(0, len(line), n)]
                             if spi_width_:
                                 spi_width = '0x%s' % spi_width_[22]
@@ -167,7 +167,7 @@ def CreateMBBootBin(args, proot):
             continue
         file_path = BootParams[file_].get('Path')
         plnx_utils.CheckFileExists(
-                    file_path, 'Failed to generate %s file, ' % args.format)
+            file_path, 'Failed to generate %s file, ' % args.format)
         if not BootParams[file_].get('Offset'):
             bootfile_offset = ''
             bootfile_size = ''
@@ -197,7 +197,7 @@ def CreateMBBootBin(args, proot):
         file_offset = BootParams[file_].get('Offset')
         if flash_intf == 'BPIx16':
             # Devide offset by 2 if BPIx16
-            file_offset = hex(int(int(file_offset, base=16)/2))
+            file_offset = hex(int(int(file_offset, base=16) / 2))
 
         logger.info('Add File %s at %s' % (file_path, file_offset))
         if file_ == 'FPGA':

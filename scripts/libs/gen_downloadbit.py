@@ -72,13 +72,14 @@ def CreateDownloadbit(args, proot, download_bit_out):
     if args.updatemem_extra_args:
         logger.info('Updatemem Extra Args: %s' % (args.updatemem_extra_args))
     proc_ipname = plnx_utils.get_config_value(
-        plnx_vars.ProcConfs['Prefix'] + '_', plnx_vars.SysConfFile.format(proot),
+        plnx_vars.ProcConfs['Prefix'] +
+        '_', plnx_vars.SysConfFile.format(proot),
         'choice', plnx_vars.ProcConfs['Select']
     ).lower()
     proc_ipindex = plnx_utils.get_config_value(
         plnx_vars.ProcConfs['Prefix'], plnx_vars.SysConfFile.format(proot),
         'choice', '%s="%s"' % (plnx_vars.ProcConfs['IpName'],
-                     proc_ipname)
+                               proc_ipname)
     )
     proc_inst_name = plnx_utils.get_config_value(
         '%s%s%s' % (plnx_vars.ProcConfs['Prefix'], proc_ipindex,

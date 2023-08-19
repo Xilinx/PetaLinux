@@ -34,13 +34,13 @@ def PreProcessArgs():
     parser_value = ''
     for arg in DeprecatedArgs:
         if arg in sys.argv:
-            parser_value = sys.argv[sys.argv.index(arg)+1]
+            parser_value = sys.argv[sys.argv.index(arg) + 1]
             logger.note('Argument: "%s %s" has been deprecated. '
                         'It is recommended to start using new python command line Argument.'
-                        % (sys.argv[sys.argv.index(arg)], sys.argv[sys.argv.index(arg)+1]))
+                        % (sys.argv[sys.argv.index(arg)], sys.argv[sys.argv.index(arg) + 1]))
             logger.note('Use: %s %s [OPTIONS]' % (os.path.basename(sys.argv[0]),
-                                                 sys.argv[sys.argv.index(arg)+1]))
-            del sys.argv[sys.argv.index(arg)+1]
+                                                  sys.argv[sys.argv.index(arg) + 1]))
+            del sys.argv[sys.argv.index(arg) + 1]
             del sys.argv[sys.argv.index(arg)]
     if parser_value:
         sys.argv.insert(1, parser_value)
@@ -105,8 +105,8 @@ def main():
                              '\nautoconf               : autoconf user application'
                              '\ninstall                : install data only'
                              '\n%s' % "\n".join(
-                                 ['{0}{1}: {2}'.format(k, ' '*(23-len(k)),
-                                                          v.replace('\n', '\n' + ' '*25))
+                                 ['{0}{1}: {2}'.format(k, ' ' * (23 - len(k)),
+                                                          v.replace('\n', '\n' + ' ' * 25))
                                   for k, v in plnx_vars.DFX_Templates.items()])
                              )
     apps_parser.add_argument('--srcuri', nargs='*', default='',

@@ -203,7 +203,7 @@ def AddDefaultBootAttributes(proot, xilinx_arch):
                             # Search the Default Attribute with user specified Attribute
                             # if match dont add Default one
                             if BootParams[BootParam].get(DefAttrKey).find(AttrPrefix) != -1:
-                               continue
+                                continue
                         plnx_utils.add_dictkey(
                             BootParams, BootParam, DefAttrKey, Attr, append)
 
@@ -235,13 +235,13 @@ def AddDefaultBootFile(args, proot):
     keyfileslist = list(set(keyfileslist))
     # Add Dependent files for uboot and kernel
     # specified in ParamDepKeys
-    # will add default image files 
+    # will add default image files
     # if (depfile key not found in Dict or key value is Default) and not no/none
     for depfile in keyfileslist:
         if depfile not in BootParamDisable and \
-            (depfile not in BootParams.keys() or \
-                (depfile in BootParams.keys() and \
-                BootParams[depfile].get('Path') == 'Default')):
+            (depfile not in BootParams.keys() or
+                (depfile in BootParams.keys() and
+                 BootParams[depfile].get('Path') == 'Default')):
             depfilekey = depfile
             archkey = '%s_%s' % (depfile, args.xilinx_arch.upper())
             if plnx_vars.BootFileNames.get(archkey):

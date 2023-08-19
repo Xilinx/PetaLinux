@@ -113,7 +113,7 @@ def PackageWic(args, proot):
         WicDefaultFiles = GetDefaultWicFiles(args, proot)
 
     WicTmpRootfs = os.path.join(
-            plnx_vars.WicTmpWorkDir.format(proot), 'rootfs')
+        plnx_vars.WicTmpWorkDir.format(proot), 'rootfs')
 
     WicRfsFile = args.rootfs_file
     if not WicRfsFile:
@@ -178,8 +178,8 @@ def PackageWic(args, proot):
         if not os.path.exists(WicRfsFile):
             logger.error('%s File doesnot exists' % WicRfsFile)
             sys.exit(255)
-        if os.path.exists(os.path.join(PseudoPrefix,  'var')):
-            plnx_utils.RemoveDir(os.path.join(PseudoPrefix,  'var'))
+        if os.path.exists(os.path.join(PseudoPrefix, 'var')):
+            plnx_utils.RemoveDir(os.path.join(PseudoPrefix, 'var'))
 
         TarCmd = PseudoCmd.format(plnx_vars.WicTmpWorkDir.format(proot),
                                   PseudoPrefix, Pseudo)

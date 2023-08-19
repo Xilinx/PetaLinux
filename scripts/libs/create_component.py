@@ -50,18 +50,18 @@ def create_tmpdir_ifnfs(cpath, name, tmpdir):
         plnx_utils.CreateDir(random_tmpdir)
         logger.info('Project TMPDIR is redirecting to %s' % (random_tmpdir))
         plnx_utils.update_config_value(plnx_vars.TmpDirConf, '"%s"' %
-                            random_tmpdir, plnx_vars.SysConfFile.format(cpath))
+                                       random_tmpdir, plnx_vars.SysConfFile.format(cpath))
     elif tmpdir:
         logger.info('Project TMPDIR is redirecting to %s' % (tmpdir))
         plnx_utils.update_config_value(plnx_vars.TmpDirConf, '"%s"' %
-                            tmpdir, plnx_vars.SysConfFile.format(cpath))
+                                       tmpdir, plnx_vars.SysConfFile.format(cpath))
 
 
 def remove_if_component_exists(command, cpath, name):
     '''Take the backup of old directory or file.
     Remove if andy backup copies present already'''
     if command != 'project' or name:
-        cpath_backup = cpath.rstrip('/')+'_old'
+        cpath_backup = cpath.rstrip('/') + '_old'
         # Delete any earlier backup copy
         plnx_utils.RemoveDir(cpath_backup)
         # Rename the current dir
@@ -69,9 +69,9 @@ def remove_if_component_exists(command, cpath, name):
         # Rename bb file
         if command != 'project':
             plnx_utils.RenameFile(
-                    os.path.join(cpath_backup, name+'.bb'),
-                    os.path.join(cpath_backup, name+'.bb.old')
-                    )
+                os.path.join(cpath_backup, name + '.bb'),
+                os.path.join(cpath_backup, name + '.bb.old')
+            )
         plnx_utils.CreateDir(cpath)
 
 
@@ -103,8 +103,8 @@ def SetupAppsModules(args, template_path, cpath, proot):
     recipe_name = args.name
     config_string = 'CONFIG_%s\n' % (args.name)
     plnx_utils.add_str_to_file(
-            plnx_vars.UsrRfsConfig.format(proot),
-            config_string, ignore_if_exists=True, mode='a+')
+        plnx_vars.UsrRfsConfig.format(proot),
+        config_string, ignore_if_exists=True, mode='a+')
     if args.command == 'apps':
         map_str = '@appname@'
     else:
@@ -185,10 +185,10 @@ def Createproject(args, proot, cpath):
 
                     if args.force or user_force:
                         # Delete any earlier backup copy
-                        plnx_utils.RemoveDir(os.path.join(cpath, p)+'_old')
+                        plnx_utils.RemoveDir(os.path.join(cpath, p) + '_old')
                         # Rename the current dir
                         plnx_utils.RenameDir(os.path.join(cpath, p),
-                                             os.path.join(cpath, p)+'_old')
+                                             os.path.join(cpath, p) + '_old')
                         projects2extract.append(p)
                 else:
                     projects2extract.append(p)
@@ -225,7 +225,8 @@ def Createproject(args, proot, cpath):
                 'Neither target project name nor PetaLinux project source BSP is specified!')
             sys.exit(255)
         plnx_utils.CreateDir(cpath)
-        plnx_utils.CopyDir(plnx_vars.TemplateCommon.format(args.command), cpath)
+        plnx_utils.CopyDir(
+            plnx_vars.TemplateCommon.format(args.command), cpath)
         plnx_utils.CopyDir(plnx_vars.TemplateDir_C.format(
             args.command, args.template),
             cpath)
@@ -244,20 +245,21 @@ def Createapps(args, proot, cpath):
     ''' Create Apps for Project'''
     if not os.path.exists(
         plnx_vars.TemplateDir_C.format(args.command, args.template)
-        ):
+    ):
         logger.error('Invalid template %s for %s' % (
             args.command, args.template))
         sys.exit(255)
-    SetupAppsModules(args, 
-        plnx_vars.TemplateDir_C.format(args.command, args.template),
-        cpath, proot)
+    SetupAppsModules(args,
+                     plnx_vars.TemplateDir_C.format(
+                         args.command, args.template),
+                     cpath, proot)
 
 
 def Createmodules(args, proot, cpath):
     ''' Create Modules for Project'''
-    SetupAppsModules(args, 
-        plnx_vars.TemplateDir_C.format(args.command, 'c'),
-        cpath, proot)
+    SetupAppsModules(args,
+                     plnx_vars.TemplateDir_C.format(args.command, 'c'),
+                     cpath, proot)
 
 
 def CreateComponent(args, proot):

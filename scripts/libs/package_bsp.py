@@ -147,8 +147,8 @@ def PackageBsp(args, proot):
                                            '"${PROOT}/build/tmp"',
                                            plnx_vars.SysConfFile.format(TmpProjDir))
             plnx_utils.remove_str_from_file(
-                                plnx_vars.MetaDataFile.format(TmpProjDir),
-                                'HARDWARE_PATH')
+                plnx_vars.MetaDataFile.format(TmpProjDir),
+                'HARDWARE_PATH')
             # Add Hwprojects
             for HwDir in PackageBspDict[projkey].get('HWSource', '').split():
                 TmpHwProjDir = os.path.join(TmpProjDir, 'hardware')

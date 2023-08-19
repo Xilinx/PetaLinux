@@ -295,7 +295,7 @@ def run_bitbakecmd(command, proot, builddir=None, logfile='/dev/null',
     logger.debug(command)
     env = os.environ.copy()
     if proot and not extraenv:
-        extraenv = {'PROOT':  proot}
+        extraenv = {'PROOT': proot}
     if extraenv:
         extraenv['PROOT'] = proot
         for k in extraenv:

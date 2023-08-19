@@ -217,7 +217,7 @@ def PackageBootImage(args, proot):
             gen_mbbootbin.CreateMBBootBin(args, proot)
     elif args.format == 'DOWNLOAD.BIT':
         gen_downloadbit.CreateDownloadbit(args, proot, args.output)
-    
+
     logger.info('Successfully Generated %s File' % args.format)
     # Copy Output files to TFTP directory
     CopyImageToTftp(args, proot)

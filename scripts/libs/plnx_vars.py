@@ -289,7 +289,7 @@ EthConfs = {
 }
 FlashConfs = {
     'Prefix': 'CONFIG_SUBSYSTEM_FLASH_QSPI_BANKLESS_PART',
-    'Name': '_NAME',  'Size': '_SIZE'
+    'Name': '_NAME', 'Size': '_SIZE'
 }
 MemoryConfs = {
     'Prefix': 'CONFIG_SUBSYSTEM_MEMORY_',

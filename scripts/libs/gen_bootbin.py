@@ -113,7 +113,7 @@ def RunBootGen(biffile, args, proot):
         bootgen_arch, plnx_vars.BifFile.format(proot),
         args.output, extra_bootargs)
     stdout = plnx_utils.runCmd(BootGenCmd, os.getcwd(),
-                      failed_msg='Fail to create BOOT image', shell=True)
+                               failed_msg='Fail to create BOOT image', shell=True)
     logger.info(''.join(stdout))
     if args.xilinx_arch in ['versal', 'versal-net'] and \
             args.format == 'BIN':
