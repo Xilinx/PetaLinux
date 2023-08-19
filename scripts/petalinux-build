@@ -141,9 +141,7 @@ def CopyToTftpDir(proot):
             plnx_utils.CreateDir(tftp_dir)
         if os.path.isdir(tftp_dir) and os.access(tftp_dir, os.W_OK):
             # copy all images in tftp_dir path
-            rsync_cmd = 'rsync -a "%s" "%s"' % (
-                plnx_vars.BuildImagesDir.format(proot), tftp_dir)
-            plnx_utils.runCmd(rsync_cmd, out_dir=os.getcwd(), shell=True)
+            plnx_vars.CopyDir(plnx_vars.BuildImagesDir.format(proot), tftp_dir)
             logger.info(
                 'Successfully copied built images to tftp dir: %s' % tftp_dir)
         else:

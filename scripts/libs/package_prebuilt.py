@@ -40,13 +40,10 @@ def PackagePrebuilt(args, proot):
                          Dir)
         )
     logger.info('Installing software images')
-    rsync_cmd = 'rsync -avu "%s"/* "%s"' % (
-        plnx_vars.BuildImagesDir.format(proot),
-        plnx_vars.PreBuildsImagesDir.format(proot),
-    )
     if os.path.exists(plnx_vars.BuildImagesDir.format(proot)) and \
             os.listdir(plnx_vars.BuildImagesDir.format(proot)):
-        plnx_utils.runCmd(rsync_cmd, os.getcwd(), shell=True)
+        plnx_utils.CopyDir(plnx_vars.BuildImagesDir.format(proot),
+                           plnx_vars.PreBuildsImagesDir.format(proot))
     else:
         logger.error(
             'Fail to update the pre-built, No images/linux folder found.')
