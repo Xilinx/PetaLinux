@@ -130,6 +130,7 @@ def PackageWic(args, proot):
                                                plnx_vars.SysConfFile.format(proot))
     ConfigTmpDir = ConfigTmpDir.replace(
         '${PROOT}', proot).replace('$PROOT', proot)
+    ConfigTmpDir = os.path.expandvars(ConfigTmpDir)
 
     # Check Yocto SDK env script exists or not
     if not os.path.exists(plnx_vars.EsdkInstalledDir.format(proot)) or \
