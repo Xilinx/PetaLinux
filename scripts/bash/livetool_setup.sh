@@ -19,9 +19,8 @@ if [ -z $PetaLinuxTool ] || [ ! -e $PetaLinuxTool ]; then
 	exit 255
 fi
 
-LINK_DIRS="components/yocto/source components/yocto/decoupling \
-	components/yocto/buildtools components/yocto/buildtools_extended \
-	components/xsct tools/xsct:components/xsct \
+LINK_DIRS="components/yocto components/xsct \
+	.environment-setup-x86_64-petalinux-linux sysroots \
 	"
 
 echo "INFO: Unlinking existing tool links if any"
@@ -37,7 +36,7 @@ echo "INFO: Linking the components"
 for Dir in $LINK_DIRS; do
 	Input=${Dir%%:*}
 	Output=${Dir##*:}
-	if [ -d $PetaLinuxTool/$Input ]; then
+	if [ -e $PetaLinuxTool/$Input ]; then
 		if [ ! -d $(dirname $Output) ]; then
 			mkdir -p $(dirname $Output)
 		fi
