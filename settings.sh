@@ -41,7 +41,7 @@ if echo "${PETALINUX}" | grep -q ' '; then
 	echo "WARNING: You are STRONGLY recommend to fix this".
 	echo "********************************************************"
 fi
-export PETALINUX_VER=@@petalinux-version@@
+export PETALINUX_VER=2024.1
 export PETALINUX_MAJOR_VER=${PETALINUX_VER%%.*}
 
 export XSCT_TOOLCHAIN="${PETALINUX}/components/xsct"
