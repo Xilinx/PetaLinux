@@ -85,8 +85,9 @@ HsmOutFile = os.path.join(SysConfDir, 'flash_parts.txt')
 PetaLinux = os.environ.get('PETALINUX', '')
 PetaLinux_Ver_Str = 'PETALINUX_VER'
 PetaLinux_Ver = os.environ.get(PetaLinux_Ver_Str, '')
+BuildToolsEnvPath = os.path.join(PetaLinux,
+                                 '.environment-setup-x86_64-petalinux-linux')
 YoctoSrcPath = os.path.join(PetaLinux, 'components', 'yocto')
-EsdkSrcPath = os.path.join(YoctoSrcPath, 'source')
 SDTPrestepFile = os.path.join(
     YoctoSrcPath, 'decoupling', 'decouple-prestep.sh')
 XsctPath = os.path.join(PetaLinux, 'components', 'xsct')

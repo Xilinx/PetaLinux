@@ -154,21 +154,11 @@ def append_baseaddr(proot, offset):
     return addr
 
 
-def get_buildtools_path(Type=''):
-    '''Return buildtools path from tool'''
-    if Type == 'extended':
-        return os.path.join(plnx_vars.YoctoSrcPath, 'buildtools_extended',
-                            'environment-setup-x86_64-petalinux-linux')
-    else:
-        return os.path.join(plnx_vars.YoctoSrcPath, 'buildtools',
-                            'environment-setup-x86_64-petalinux-linux')
-
-
 def get_yocto_path(proot, arch):
     '''Return yocto sdk path and arch'''
     if is_hwflow_sdt(proot) == 'sdt':
         arch = 'aarch64_dt'
-    yocto_path = os.path.join(plnx_vars.EsdkSrcPath, arch)
+    yocto_path = os.path.join(plnx_vars.YoctoSrcPath, arch)
     return yocto_path, arch
 
 

@@ -95,18 +95,12 @@ def get_bitbake_env(proot, logfile):
     env_scirpt = '%s-%s' % (
         plnx_vars.YoctoEnvPrefix, plnx_vars.YoctoEnvFile[arch]
     )
-    buildtools_ext = plnx_utils.get_config_value(
-        plnx_vars.BuildToolsExtConf, plnx_vars.SysConfFile.format(proot)
-    )
     source_cmd = 'unset LD_LIBRARY_PATH;'
     source_cmd += 'source %s &>> %s;' % (
         os.path.join(plnx_vars.EsdkInstalledDir.format(proot),
                      env_scirpt), logfile
     )
-    if buildtools_ext == 'y':
-        source_cmd += 'source %s;' % plnx_utils.get_buildtools_path('extended')
-    else:
-        source_cmd += 'source %s;' % plnx_utils.get_buildtools_path()
+    source_cmd += 'source %s;' % plnx_vars.BuildToolsEnvPath
     source_cmd += 'source %s %s &>> %s;' % (
         os.path.join(plnx_vars.OeInitEnv.format(proot)),
         plnx_vars.BuildDir.format(proot), logfile)
@@ -170,15 +164,8 @@ def get_yocto_source(proot):
 
     esdk_metadata_file = os.path.join(os.path.dirname(yocto_esdkpath),
                                       '.statistics', arch)
-    buildtools_ext = plnx_utils.get_config_value(plnx_vars.BuildToolsExtConf,
-                                                 plnx_vars.SysConfFile.format(proot))
     sdk_command = ''
-    if buildtools_ext == 'y':
-        sdk_command += 'unset LD_LIBRARY_PATH;'
-        sdk_command += 'source %s;' % plnx_utils.get_buildtools_path(
-            'extended')
-    else:
-        plnx_utils.check_gcc_version()
+    plnx_utils.check_gcc_version()
     sdk_cksumproj = plnx_utils.get_config_value(
         'YOCTO_SDK', plnx_vars.MetaDataFile.format(proot))
     sdk_cksumtool = plnx_utils.get_config_value('BASE_SDK', esdk_metadata_file)
