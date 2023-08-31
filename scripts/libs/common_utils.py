@@ -268,11 +268,11 @@ def check_gcc_version():
     ''' Check GCC version of the Host machine v/s required version'''
     gcc_cmd = 'gcc --version | sed -ne "s/.* \([0-9]\+\.[0-9]\+\)\.[0-9]\+.*/\\1/p"'
     cur_version = runCmd(gcc_cmd, os.getcwd(), shell=True)
-    required_version = 6
+    required_version = 7
     if float(cur_version[0].strip()) <= required_version:
-        logger.warning('Seems like Host machine does not have gcc %s or greater version.'
-                       'Please select Enable Buildtools Extended in petalinux-config --> Yocto Settings'
-                       % required_version)
+        logger.error('Seems like Host machine does not have gcc %s or greater version.'
+                     % required_version)
+        sys.exit(255)
     return cur_version
 
 
