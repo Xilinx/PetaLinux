@@ -76,7 +76,7 @@ if ( $SHELL != "/bin/bash" ) then
 endif
 
 # Add buildtools path
-set NATIVE_SYSROOT_PATH="${PETALINUX}/components/yocto/buildtools/sysroots/x86_64-petalinux-linux"
+set NATIVE_SYSROOT_PATH="${PETALINUX}/sysroots/x86_64-petalinux-linux"
 if ( -d ${NATIVE_SYSROOT_PATH} ) then
 	setenv PATH "${NATIVE_SYSROOT_PATH}/usr/bin:${NATIVE_SYSROOT_PATH}/usr/sbin:${NATIVE_SYSROOT_PATH}/sbin:$PATH"
 endif

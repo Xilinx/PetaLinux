@@ -90,7 +90,7 @@ if ! echo $SHELL | grep -q "bash"; then
 fi
 
 # Add buildtools path
-NATIVE_SYSROOT_PATH="${PETALINUX}/components/yocto/buildtools/sysroots/x86_64-petalinux-linux"
+NATIVE_SYSROOT_PATH="${PETALINUX}/sysroots/x86_64-petalinux-linux"
 if [ -d ${NATIVE_SYSROOT_PATH} ]; then
 	PATH="${NATIVE_SYSROOT_PATH}/usr/bin:${NATIVE_SYSROOT_PATH}/usr/sbin:${NATIVE_SYSROOT_PATH}/sbin:$PATH"
 fi
