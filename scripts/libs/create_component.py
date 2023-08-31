@@ -204,7 +204,7 @@ def Createproject(args, proot, cpath):
                 tar_extraargs = '-C "%s"' % (cpath)
             elif args.name:
                 tar_extraargs = '--strip-components=1'
-            tar_cmd = 'tar -xzf "%s" "%s" %s' % (
+            tar_cmd = 'tar -xJf "%s" "%s" %s' % (
                 args.source, project, tar_extraargs)
             msgonfail = 'Failed to extract %s from BSP %s!' % (
                 project, args.source)

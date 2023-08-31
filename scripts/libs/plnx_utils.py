@@ -36,7 +36,7 @@ def is_hwflow_sdt(proot):
 
 def get_plnx_projects_from_bsp(source):
     '''Get the Projects from BSP tar ball'''
-    contents_cmd = 'tar --exclude="*/*/*" -tzf "%s"' % (source)
+    contents_cmd = 'tar --exclude="*/*/*" -tf "%s"' % (source)
     contents, stderr = runCmd(contents_cmd, os.getcwd(), shell=True)
     projects = []
     for content in contents.split():
