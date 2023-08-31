@@ -164,8 +164,8 @@ def PackageBsp(args, proot):
     logger.info('Creating BSP')
     logger.info('Generating package %s' % os.path.basename(PackageName))
     plnx_utils.CreateDir(os.path.dirname(PackageName))
-    tar_cmd = 'tar -C "%s" -czf %s %s' % (TmpBspDir,
-                                          PackageName, ProjBaseNames)
+    tar_cmd = 'tar -C "%s" -cf - %s | xz -9 -T%s > %s' % (
+        TmpBspDir, ProjBaseNames, args.threads, PackageName)
     plnx_utils.runCmd(tar_cmd, out_dir=os.getcwd(), shell=True)
 
 
@@ -184,7 +184,10 @@ def pkgbsp_args(bsp_parser):
     bsp_parser.add_argument('--exclude-workspace', action='store_true',
                             help='Excludes the changes in workspace'
                             )
-
+    bsp_parser.add_argument('-T', '--threads', metavar='NUM', type=int, default=0,
+                            help='Use at most NUM threads while packaging the BSP.'
+                            '\nDefault is 0 which uses as many threads as there are processor cores.'
+                            )
     bsp_parser.set_defaults(func=PackageBsp)
 
     return
