@@ -18,6 +18,7 @@ scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
 import bitbake_utils
+import examples
 import logger_setup
 import plnx_utils
 import plnx_vars
@@ -251,7 +252,7 @@ def BuildComponent(args, proot):
 def main():
     parser = argparse.ArgumentParser(
         description='Builds the project or the specified components',
-        add_help=False,
+        add_help=False, epilog=examples.PBuild,
         formatter_class=argparse.RawTextHelpFormatter,
         usage='Use %(prog)s [options]')
     # Global args

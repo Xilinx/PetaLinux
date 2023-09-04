@@ -115,3 +115,55 @@ Examples:
     Configure rootfs:
     $ petalinux-config -c rootfs
 '''
+
+PBuild = '''
+Examples:
+    Build the project:
+    $ petalinux-build
+    The bootable images are in <PROJECT>/images/linux/.
+
+    Build SDK:
+    $ petalinux-build -s | --sdk
+    The equivalent bitbake task is do_populate_sdk, Built sdk is deployed at <PROJECT>/images/linux/sdk.sh
+
+    Build Minimal eSDK:
+    $ petalinux-build -e | --esdk
+    The equivalent bitbake task is do_populate_sdk_ext, Built esdk is deployed at <PROJECT>/images/linux/esdk.sh
+    This can be imported to petalinux tool with user source changes
+
+    Build project with archiver:
+    $ petalinux-build -a | --archiver
+
+    Build SDK with archiver:
+    $ petalinux-build --sdk --archiver
+
+    Build kernel only:
+    $ petalinux-build -c kernel
+
+    Compile kernel forcefully:
+    $ petalinux-build -c kernel -x compile -f
+
+    Deploy kernel forcefully:
+    $ petalinux-build -c kernel -x deploy -f
+
+    Build rootfs only:
+    $ petalinux-build -c rootfs
+
+    Build myapp of rootfs only:
+    $ petalinux-build -c myapp
+
+    List all rootfs sub-components:
+    $ petalinux-build -c rootfs -h
+
+    Clean up u-boot and build again:
+    $ petalinux-build -c u-boot -x distclean
+    Above command will remove tmp files and sstate cache of u-boot.
+
+    $ petalinux-build -x distclean
+    Above command will remove tmp files and sstate cache files.
+
+    Clean up the project build and the generated bootable images:
+    $ petalinux-build -x mrproper
+    Above command will remove tmp files, <PROJECT>/images/,  <PROJECT>/build/
+		and <PROJECT>/components/plnx_workspace directories
+'''
