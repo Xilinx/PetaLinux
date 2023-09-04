@@ -158,13 +158,13 @@ DFX_Templates = {
                          '\nPack the .dtbo, and bit.bin files into rootfs.',
     'dfx_dtg_zynqmp_full': 'Generates the full pl application for zynqmp with given flat xsa file.'
                            '\nPack the .dtbo,.bin and shell.json files into rootfs.',
+    'dfx_dtg_versal_full': 'Generates the full pl application for versal with given flat xsa file.'
+                           '\nPack the .dtbo,pl.pdi and shell.json files into rootfs.',
     'dfx_dtg_zynqmp_static': 'Generates the static pl application for zynqmp with given dfx static xsa file.'
                              '\nPack the .dtbo,.bin and shell.json files into rootfs.',
     'dfx_dtg_zynqmp_partial': 'Generates the partial pl application for zynqmp with given dfx partial xsa file.'
                               '\nPack the .dtbo, .bin and accel.json files into rootfs.'
                               '\nNote: This has dependency on dfx_dtg_zynqmp_static template app',
-    'dfx_dtg_versal_full': 'Generates the full pl application for versal with given flat xsa file.'
-                           '\nPack the .dtbo,pl.pdi and shell.json files into rootfs.',
     'dfx_dtg_versal_static': 'Generates the static pl application for versal with given dfx static xsa file.'
                              '\nPack the .dtbo,.pdi and shell.json files into rootfs.',
     'dfx_dtg_versal_partial': 'Generates the partial pl application for versal with given dfx partial xsa file.'
