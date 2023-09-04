@@ -96,3 +96,22 @@ Examples:
     Create an module with source files:
     $ petalinux-create modules -n mymodule --enable --srcuri "<path>/mymoudle.c <path>/Makefile"
 '''
+
+PConfig = '''
+Examples:
+    Sync hardware description from Vivado export to PetaLinux BSP project:
+    $ petalinux-config --get-hw-description <Vivado_Export_to_SDK_Directory>
+    It will sync up the XSA file from <Vivado_Export_to_SDK_Directory> to project-spec/hw-description/ directory.
+
+    If more than one XSA files in <Vivado_Export_to_SDK_Directory> specify the exact file path using
+    $ petalinux-config --get-hw-description <Vivado_Export_to_SDK_Directory>/system.xsa
+
+    Configure PetaLinux project:
+    $ petalinux-config
+
+    Configure kernel:
+    $ petalinux-config -c kernel
+
+    Configure rootfs:
+    $ petalinux-config -c rootfs
+'''

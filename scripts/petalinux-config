@@ -17,6 +17,7 @@ scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
 import config_component
+import examples
 import logger_setup
 import plnx_utils
 import plnx_vars
@@ -48,7 +49,8 @@ def main():
     parser = argparse.ArgumentParser(
         description='Configures the project or the specified component with menuconfig',
         formatter_class=argparse.RawTextHelpFormatter,
-        usage='Use %(prog)s [options] {--component <COMPONENT> |--get-hw-description[=SRC]}')
+        usage='Use %(prog)s [options] {--component <COMPONENT> |--get-hw-description[=SRC]}',
+        epilog=examples.PConfig)
 
     # Global args
     parser.add_argument('-D', '--debug', action='store_true',
