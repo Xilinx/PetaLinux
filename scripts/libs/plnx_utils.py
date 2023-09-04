@@ -107,7 +107,7 @@ def petalinux_version_check(proot):
             'Please input "y/Y" to continue. Otherwise it will exit![n]')
         if userchoice in ['y', 'Y', 'yes', 'Yes', 'YEs', 'YES']:
             update_config_value(plnx_vars.PetaLinux_Ver_Str,
-                                petalinux_ver, metadata_file)
+                                plnx_vars.PetaLinux_Ver, plnx_vars.MetaDataFile.format(proot))
             return True
         else:
             return False
