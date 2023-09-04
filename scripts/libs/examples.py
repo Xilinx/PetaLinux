@@ -167,3 +167,39 @@ Examples:
     Above command will remove tmp files, <PROJECT>/images/,  <PROJECT>/build/
 		and <PROJECT>/components/plnx_workspace directories
 '''
+
+PPackageBoot = '''
+Examples:
+    Package BOOT.BIN:
+    $ petalinux-package boot --u-boot
+    It will add all the dependencies into BOOT.BIN to boot u-boot.
+    
+    Package boot.mcs file for MicroBlaze,Zynq,ZynqMP,versal and versal-net:
+    $ petalinux-package boot --uboot --kernel --offset 0xF40000 --format MCS
+    It will add all the dependencies into boot.mcs to boot upto kernel.
+
+    $ petalinux-package boot --plm <PLM_ELF> --psmfw <PSMFW_ELF> --u-boot --dtb
+    It will generate BOOT.BIN,BOOT_bh.bin and qemu_boot.img in specified directory.
+    The default dtb load address will be 0x1000. To change the dtb load address Use below command
+
+    $ petalinux-package boot --plm <PLM_ELF> --psmfw <PSMFW_ELF> --u-boot --dtb --load <load_address>
+    It will generate a BOOT.BIN with specifed load address for dtb.
+
+    $ petalinux-package boot --plm no --psmfw no.
+    It will skip the plm and psmfw to pack into BOOT.BIN.
+
+    $ petalinux-package boot --bif <BIF_FILE>
+    It will generate a BOOT.BIN with specifed bif file, It will overrides all other settings.
+
+    $ petalinux-package boot --fsbl <FSBL_ELF> --fpga <BITSTREAM> --u-boot --pmufw <PMUFW_ELF>
+    It will generate a BOOT.BIN in your working directory with:
+        * specified <BITSTREAM>
+        * specified <FSBL_ELF>
+        * specified < PMUFW_ELF > *
+        * newly built u-boot image which is <PROJECT>/images/linux/u-boot.elf
+
+    Generate bitstream merged with fsbl
+    $ petalinux-package boot --fsbl <FSBL_ELF> --fpga <BITSTREAM> --format DOWNLOAD.BIT
+    It will generate a download.bit in <PROJECT>/images/linux, with specified <BITSTREAM> and <FSBL_ELF>.
+'''
+

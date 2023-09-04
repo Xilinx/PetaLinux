@@ -17,6 +17,7 @@ import sys
 scripts_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = scripts_path + '/libs'
 sys.path = sys.path + [libs_path]
+import examples
 import logger_setup
 import package_boot
 import package_bsp
@@ -73,6 +74,7 @@ def main():
 
     # --boot parser args
     boot_parser = subparsers.add_parser('boot', help='Packages the boot file',
+                                        epilog=examples.PPackageBoot,
                                         formatter_class=argparse.RawTextHelpFormatter)
     package_boot.pkgboot_args(boot_parser)
 
