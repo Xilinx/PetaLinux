@@ -92,6 +92,7 @@ def main():
 
     # --sysroot parser args
     sysroot_parser = subparsers.add_parser('sysroot', help='Install the SDK',
+                                           epilog=examples.PPackageSysroot,
                                            formatter_class=argparse.RawTextHelpFormatter)
     package_sysroot.pkgsysroot_args(sysroot_parser)
 

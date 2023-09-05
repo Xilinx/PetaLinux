@@ -246,3 +246,13 @@ Examples:
     $ petalinux-package prebuilt --add myfile:images/myfile
     Besides copying the images, it will copy myfile to <PROJECT>/pre-built/linux/images/myfile
 '''
+
+PPackageSysroot = '''
+Examples:
+    Install defaults
+    $ petalinux-package sysroot
+    It will install <PROJECT>/images/linux/sdk.sh to <PROJECT>/images/linux/sdk
+
+    Install Custom SDK to specified directory
+    $ petalinux-package sysroot --sdk|-s <SDK installer path> --dir|-d <directory path>
+'''
