@@ -231,3 +231,18 @@ Examples:
     It excludes the Changes done in workspace and pack the BSP.
 '''
 
+PPackagePrebuilts = '''
+Examples:
+    Package prebuilt images:
+    $ petalinux-package prebuilt
+    It will create a pre-built/ directory in <PROJECT>/, and copy all the files
+    from <PROJECT>/images to <PROJECT>/pre-built/linux/images/ directory:
+
+    Package prebuilt images and specified bitstream:
+    $ petalinux-package prebuilt --fpga <BITSTREAM>
+    Besides copying the images, it will copy the bitstream to <PROJECT>/pre-built/linux/implentation/
+
+    Package prebuilt images and add myfile to prebuilt:
+    $ petalinux-package prebuilt --add myfile:images/myfile
+    Besides copying the images, it will copy myfile to <PROJECT>/pre-built/linux/images/myfile
+'''

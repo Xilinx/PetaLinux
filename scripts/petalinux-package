@@ -86,6 +86,7 @@ def main():
 
     # --prebuilt parser args
     prebuilt_parser = subparsers.add_parser('prebuilt', help='Packages prebuilts for project',
+                                            epilog=examples.PPackagePrebuilts,
                                             formatter_class=argparse.RawTextHelpFormatter)
     package_prebuilt.pkgprebuilt_args(prebuilt_parser)
 
