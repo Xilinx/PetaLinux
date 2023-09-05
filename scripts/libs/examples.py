@@ -203,3 +203,31 @@ Examples:
     It will generate a download.bit in <PROJECT>/images/linux, with specified <BITSTREAM> and <FSBL_ELF>.
 '''
 
+PPackageBsp = '''
+Examples:
+    Package BSP with a PetaLinux project:
+    $ petalinux-package bsp -p <PATH_TO_PROJECT> --output MY.BSP
+    It will generate MY.BSP including:
+        * <PROJECT>/.petalinux
+        * <PROJECT>/.gitignore
+        * <PROJECT>/README
+        * <PROJECT>/README.hw
+        * <PROJECT>/pre-built
+        * <PROJECT>/project-spec
+        * <PROJECT>/components
+    from the specified project.
+
+    Package BSP with hardware source:
+    $ petalinux-package bsp -p <PATH_TO_PROJECT> --hwsource <PATH_TO_HARDWARE_PROJECT> --output MY.BSP
+    It will not modify the specified PetaLinux project <PATH_TO_PROJECT>. It will
+    put the specified hardware project source to <PROJECT>/hardware/ inside MY.BSP archive.
+
+    Package BSP excluding some files:
+    $ petalinux-package bsp -p <PATH_TO_PROJECT> --exclude-from-file <EXCLUDE_FILE> --output MY.BSP.
+    It excludes the files specified in EXCLUDE_FILE from MY.BSP
+
+    Package BSP excluding workspace directory:
+    $ petalinux-package bsp -p <PATH_TO_PROJECT> --exclude-workspace --output MY.BSP.
+    It excludes the Changes done in workspace and pack the BSP.
+'''
+

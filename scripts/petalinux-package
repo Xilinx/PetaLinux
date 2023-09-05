@@ -80,6 +80,7 @@ def main():
 
     # --bsp parser args
     bsp_parser = subparsers.add_parser('bsp', help='Packages the BSP file',
+                                       epilog=examples.PPackageBsp,
                                        formatter_class=argparse.RawTextHelpFormatter)
     package_bsp.pkgbsp_args(bsp_parser)
 
