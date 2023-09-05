@@ -112,7 +112,7 @@ def main():
                                                           v.replace('\n', '\n' + ' ' * 25))
                                   for k, v in plnx_vars.DFX_Templates.items()])
                              )
-    apps_parser.add_argument('--srcuri', nargs='*', default='',
+    apps_parser.add_argument('--srcuri', nargs='*', action='append',
                              help='This option is to specify the source files'
                              '\nfrom outside project.This will copy specified'
                              '\nfiles into recipe files directory and add to'
@@ -129,7 +129,7 @@ def main():
     modules_parser = subparsers.add_parser('modules', help='Create Linux user module',
                                            epilog=examples.PCreateModules,
                                            formatter_class=argparse.RawTextHelpFormatter)
-    modules_parser.add_argument('--srcuri', nargs='*', default='',
+    modules_parser.add_argument('--srcuri', nargs='*', action='append',
                                 help='This option is to specify the source files'
                                 '\nfrom outside project.This will copy specified'
                                 '\nfiles into recipe files directory and add to'
@@ -196,6 +196,9 @@ def main():
 
         # Validate SRCURI given by users
         if args.srcuri:
+            # Convert nested list to list elements [[file files1] [file3] to
+            # [file files1 file3]
+            args.srcuri = [item for args in args.srcuri for item in args]
             args.local_srcuris, args.network_srcuris = bitbake_utils.validate_srcuri(
                 args.srcuri)
     else:

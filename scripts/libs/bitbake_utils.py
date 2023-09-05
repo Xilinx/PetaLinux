@@ -73,11 +73,11 @@ def validate_pn(pn):
     return ''
 
 
-def validate_srcuri(srcuris=[]):
+def validate_srcuri(srcuris):
     '''Validate srcuri and differentiate the local and network uri's and return'''
     localfiles = []
     networkfiles = []
-    for srcuri in srcuris:
+    for srcuri in ' '.join(srcuris).split():
         if srcuri.startswith(('gitsm://', 'git://', 'hg://', 'svn://', 'https:', 'http://')):
             networkfiles.append(srcuri)
         else:
