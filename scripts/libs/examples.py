@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (C) 2021-2022, Xilinx, Inc.  All rights reserved.
 # Copyright (C) 2022-2023, Advanced Micro Devices, Inc.  All rights reserved.
@@ -255,4 +255,60 @@ Examples:
 
     Install Custom SDK to specified directory
     $ petalinux-package sysroot --sdk|-s <SDK installer path> --dir|-d <directory path>
+'''
+
+PPackageWic = '''
+Examples:
+    Package wic image using default images:
+    $ petalinux-package wic
+    This will generate the wic image in images/linux folder with
+    the default images from images/linux dir with name petalinux-sdimage.wic.
+
+    Package wic image in specified folder:
+    $ petalinux-package wic --outdir wicimage/
+    This will generate the wic image in wicimage/ folder as petalinux-sdimage.wic.
+
+    Package wic image with specified images path:
+    $ petalinux-package wic --images-dir custom-imagespath/
+    This will pack all bootfiles from custom-imagespath/ dir.
+
+    Package wic image with custom size:
+    $ petalinux-package wic --size 2G,2G
+    This will generate the wic image with boot partition 2G and root partition 2G
+    $ petalinux-package wic --size 4G
+    This will generate the wic image with boot partition 4G and root partition 4G(default)
+    $ petalinux-package wic --size ,6G
+    This will generate the wic image with boot partition 2G(default) and root partition 6G
+
+    Package custom bootfiles into /boot dir:
+    $ petalinux-package wic --bootfiles "boot.bin userfile1 userfile2"
+    This will generate the wic image with specified files copied into /boot dir.
+    Make sure these files should be part of images dir.
+
+    $ petalinux-package wic --extra-bootfiles "uImage:kernel"
+    This copy file uImage to /boot dir with the name kernel
+
+    $ petalinux-package wic --bootfiles "userfiles/*"
+    This will copy files default bootfiles and specified bootfiles by user into /boot dir.
+
+    $ petalinux-package wic --extra-bootfiles "userfiles/*:user_boot"
+    This will copy all files in userfiles/ dir to the /boot/user_boot dir.
+    Make sure userfiles directory should be in images dir.
+
+    Package custom rootfile system:
+    $ petalinux-package wic --rootfs-file custom-rootfs.tar.gz
+    This will unpack your custom-rootfs.tar.gz file and copy to the /rootfs dir.
+
+    $ petalinux-package wic --wic-extra-args="-c xz"
+    This will compress the wic image with sprecified compressor.
+    Supported compressors are: {gzip,bzip2,xz}
+
+    Decompress the wic image:
+    $ xz -d petalinux-sdimage.wic.xz
+    $ gzip -d petalinux-sdimage.wic.gz
+    $ bzip2 -d petalinux-sdimage.wic.bz2
+
+    Copying the image SD card:
+    $ dd if=petalinux-sdimage.wic of=/dev/sd<X> conv=fsync
+    You need sudo access to do this.
 '''

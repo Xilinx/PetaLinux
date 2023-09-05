@@ -98,6 +98,7 @@ def main():
 
     # --wic parser args
     wic_parser = subparsers.add_parser('wic', help='Packages the SD bootable image',
+                                       epilog=examples.PPackageWic,
                                        formatter_class=argparse.RawTextHelpFormatter)
     package_wic.pkgwic_args(wic_parser)
 
