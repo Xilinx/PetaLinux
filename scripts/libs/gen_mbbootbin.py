@@ -166,6 +166,8 @@ def CreateMBBootBin(args, proot):
         if file_ in ['FSBL', 'DTB']:
             continue
         file_path = BootParams[file_].get('Path')
+        if not os.path.isabs(file_path):
+            file_path = os.path.join(proot, file_path)
         plnx_utils.CheckFileExists(
             file_path, 'Failed to generate %s file, ' % args.format)
         if not BootParams[file_].get('Offset'):
