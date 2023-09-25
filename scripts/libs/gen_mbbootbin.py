@@ -12,10 +12,6 @@ import logging
 import os
 import shutil
 import sys
-
-scripts_path = os.path.dirname(os.path.realpath(__file__))
-libs_path = scripts_path + '/libs'
-sys.path = sys.path + [libs_path]
 import gen_downloadbit
 import plnx_utils
 import plnx_vars

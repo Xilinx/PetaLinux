@@ -8,6 +8,8 @@
 #
 # SPDX-License-Identifier: MIT
 
+import plnx_vars
+import plnx_utils
 import logging
 import os
 import re
@@ -16,12 +18,6 @@ import subprocess
 import sys
 
 logger = logging.getLogger('PetaLinux')
-
-scripts_path = os.path.dirname(os.path.realpath(__file__))
-libs_path = scripts_path + '/libs'
-sys.path = sys.path + [libs_path]
-import plnx_utils
-import plnx_vars
 
 
 def bb_updatevar(recipename, bbvar, value, append=False):

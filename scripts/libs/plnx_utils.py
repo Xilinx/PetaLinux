@@ -14,15 +14,11 @@ import re
 import shutil
 import subprocess
 import sys
-
-logger = logging.getLogger('PetaLinux')
-
-scripts_path = os.path.dirname(os.path.realpath(__file__))
-libs_path = scripts_path + '/libs'
-sys.path = sys.path + [libs_path]
 import bitbake_utils
 import plnx_vars
 from common_utils import *
+
+logger = logging.getLogger('PetaLinux')
 
 
 def is_hwflow_sdt(proot):

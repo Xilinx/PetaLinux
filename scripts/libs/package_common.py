@@ -12,10 +12,6 @@ import argparse
 import logging
 import os
 import sys
-
-scripts_path = os.path.dirname(os.path.realpath(__file__))
-libs_path = scripts_path + '/libs'
-sys.path = sys.path + [libs_path]
 import plnx_utils
 import plnx_vars
 
