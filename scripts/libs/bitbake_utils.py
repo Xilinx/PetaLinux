@@ -222,23 +222,6 @@ def append_bitbake_log(proot, logfile):
     return ''
 
 
-def get_sdt_setup(proot):
-    '''Install SDT SDL file into project'''
-    if not os.path.exists(plnx_vars.SDTPrestepFile):
-        logger.error(
-            'No Decouple-preset.sh file found in PetaLinxu installation area')
-        sys.exit(255)
-
-    if not os.path.exists(plnx_vars.SDTSetupFile.format(proot)):
-        logger.info('Extracting the decoupling setup sdk into %s' %
-                    plnx_vars.SDTSetupDir.format(proot))
-        dt_proc_cmd = 'unset LD_LIBRARY_PATH;'
-        dt_proc_cmd += '%s -d %s -p -y' % (
-            plnx_vars.SDTPrestepFile,
-            plnx_vars.SDTSetupDir.format(proot))
-        plnx_utils.runCmd(dt_proc_cmd, proot, shell=True)
-
-
 def run_genmachineconf(proot, xilinx_arch, config_args, add_layers=False, logfile=None):
     '''Run genmachineconf command to configure the project'''
     if xilinx_arch == 'versal-net':
@@ -250,8 +233,8 @@ def run_genmachineconf(proot, xilinx_arch, config_args, add_layers=False, logfil
     if plnx_utils.is_hwflow_sdt(proot) == 'sdt':
         hw_args = '--hw-description %s' % (
             plnx_vars.HWDescDir.format(proot))
-        hw_args += ' --sdt-sysroot %s' % (
-            plnx_vars.SDTSetupDir.format(proot))
+        hw_args += ' --localconf %s' % (
+                plnx_vars.SdtAutoConf.format(proot))
     else:
         hw_args = '--hw-description %s' % (
             plnx_vars.DefXsaPath.format(proot))
@@ -262,6 +245,7 @@ def run_genmachineconf(proot, xilinx_arch, config_args, add_layers=False, logfil
         xilinx_arch, hw_args, plnx_vars.SysConfDir.format(proot),
         plnx_vars.UsrRfsConfig.format(proot),
         config_args)
+    plnx_utils.RemoveFile(plnx_vars.SdtAutoConf.format(proot))
     run_bitbakecmd(genconf_cmd, proot, builddir=proot,
                    logfile=logfile, extraenv=extraenv, shell=True)
 

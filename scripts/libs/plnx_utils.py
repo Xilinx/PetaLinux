@@ -369,8 +369,6 @@ def setup_plnwrapper(args, proot, config_target, gen_confargs):
     '''Setting up the PetaLinux wrapper to generate the configs'''
     validate_hwchecksum(proot)
     bitbake_utils.get_yocto_source(proot)
-    if is_hwflow_sdt(proot) == 'sdt':
-        bitbake_utils.get_sdt_setup(proot)
     bitbake_utils.setup_bitbake_env(proot, args.logfile)
     add_layers = False
     if args.command == 'petalinux-config' and args.component != 'rootfs':
