@@ -226,7 +226,8 @@ def run_genmachineconf(proot, xilinx_arch, config_args, add_layers=False, logfil
     '''Run genmachineconf command to configure the project'''
     if xilinx_arch == 'versal-net':
         xilinx_arch = 'versal'
-    extraenv = {'PYTHONDONTWRITEBYTECODE': '1'}
+    extraenv = {'PYTHONDONTWRITEBYTECODE': '1',
+                'SKIP_BBPATH_SEARCH': '1'}
     if add_layers:
         extraenv['UPDATE_USER_LAYERS'] = '1'
     hw_args = ''
