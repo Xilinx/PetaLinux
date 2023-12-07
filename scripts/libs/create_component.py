@@ -114,6 +114,7 @@ def SetupAppsModules(args, template_path, cpath, proot):
         srcuri2add.extend(args.network_srcuris)
     for srcuri in args.local_srcuris:
         files_dir = os.path.join(cpath, 'files')
+        plnx_utils.CreateDir(files_dir)
         plnx_utils.CopyFile(os.path.realpath(srcuri), files_dir)
         srcuri2add.append('file://%s' % (os.path.basename(srcuri)))
 
