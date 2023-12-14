@@ -52,6 +52,7 @@ export XSCT_TOOLCHAIN="${PETALINUX}/components/xsct"
 #
 # Add toolchains to user's search path
 #
+PATH="${XSCT_TOOLCHAIN}/bin:${PATH}"
 PATH="${XSCT_TOOLCHAIN}/gnu/aarch32/lin/gcc-arm-none-eabi/bin:${PATH}"
 PATH="${XSCT_TOOLCHAIN}/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin:${PATH}"
 PATH="${XSCT_TOOLCHAIN}/gnu/aarch64/lin/aarch64-none/bin:${PATH}"
