@@ -103,6 +103,14 @@ def CheckFileExists(filepath, failed_msg=''):
         sys.exit(255)
 
 
+def IsElfFile(filepath):
+    cmd = 'file %s' % filepath
+    stdout = runCmd(cmd, os.getcwd(), shell=True)
+    if bool(re.search('ELF', stdout[0])):
+        return True
+    return False
+
+
 def runCmd(command, out_dir, extraenv=None,
            failed_msg='', shell=False, checkcall=False):
     '''Run Shell commands from python'''
