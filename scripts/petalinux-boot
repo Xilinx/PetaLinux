@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+
+# Copyright (C) 2021-2022, Xilinx, Inc.  All rights reserved.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.  All rights reserved.
+#
+# Author:
+#       Raju Kumar Pothuraju <rajukumar.pothuraju@amd.com>
+#
+# SPDX-License-Identifier: MIT
+
+
+import argparse
+import logging
+import os
+import sys
+
+scripts_path = os.path.dirname(os.path.realpath(__file__))
+libs_path = scripts_path + '/libs'
+sys.path = sys.path + [libs_path]
+import boot_common
+import boot_jtag
+import boot_qemu
+import examples
+import logger_setup
+import plnx_utils
+import plnx_vars
+
+
+logger, console_h = logger_setup.setup_logger('PetaLinux')
+
+
+def PreProcessArgs():
+    # Shell used to support --qemu|--jtag
+    # To support those adding preprocessor for args
+    # which will read the args and find any deprecated args
+    # and rearrange them as per the python argparser
+    DeprecatedArgs = ['--qemu', '--jtag']
+    parser_value = ''
+    for arg in DeprecatedArgs:
+        if arg in sys.argv:
+            parser_value = sys.argv[sys.argv.index(arg)].replace('-', '')
+            logger.note('Argument: "%s" has been deprecated. '
+                        'It is recommended to start using new python command line Argument.'
+                        % (sys.argv[sys.argv.index(arg)]))
+            logger.note('Use: %s %s [OPTIONS]' % (os.path.basename(sys.argv[0]),
+                                                  parser_value))
+            del sys.argv[sys.argv.index(arg)]
+    if parser_value:
+        sys.argv.insert(1, parser_value)
+
+
+def main():
+    PreProcessArgs()
+    parser = argparse.ArgumentParser(
+        description='This command boots the MicroBlaze, Zynq , Zynq UltraScale+ ,'
+        'versal and versal-net systems with Petalinux images through JTAG/QEMU.',
+        formatter_class=argparse.RawTextHelpFormatter,
+        add_help=False,
+        epilog='Use %(prog)s <subcommand> --help to get help on a specific command',
+    )
+
+    # Global args
+    parser.add_argument('-D', '-v', '--debug', '--verbose', action='store_true',
+                        help='Display the Debug prints')
+    parser.add_argument('-p', '--project', metavar='PROJECT_DIR', type=os.path.realpath,
+                        help='Specify full path to a PetaLinux project.')
+    global_args, unparsed_args = parser.parse_known_args()
+
+    parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
+                        help='Show this help message and exit')
+    subparsers = parser.add_subparsers(dest="command",
+                                       title='subcommands', metavar='<subcommand>')
+    subparsers.required = True
+
+    # --jtag parser args
+    jtag_parser = subparsers.add_parser('jtag', help='Load images via JTAG',
+                                        formatter_class=argparse.RawTextHelpFormatter)
+    boot_jtag.JtagBootArgs(jtag_parser)
+
+    # --qemu parser args
+    qemu_parser = subparsers.add_parser('qemu', help='Load images via QEMU',
+                                       formatter_class=argparse.RawTextHelpFormatter)
+    boot_qemu.QemuBootArgs(qemu_parser)
+
+    # Display help if no args specified
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
+    args = parser.parse_args(unparsed_args, namespace=global_args)
+
+    # Display help if no args specified for parser ex: petalinux-boot jtag
+    # parser name should start with command to make this work
+    if len(sys.argv) == 2:
+        eval('%s_parser.print_help(sys.stderr)' % args.command)
+        logger.error('Image type not specified to boot.')
+        sys.exit(1)
+
+    proot = ''
+    # Exit if PROOT is not PetaLinux project
+    if args.project:
+        proot = plnx_utils.exit_not_plnx_project(args.project)
+    else:
+        proot = plnx_utils.exit_not_plnx_project(proot='')
+
+    # Print debug prints if debug selected
+    if args.debug:
+        console_h.setLevel(logging.DEBUG)
+
+    ret = args.func(args, proot)
+    return ret
+
+
+if __name__ == "__main__":
+    try:
+        ret = main()
+    except Exception:
+        ret = 1
+        import traceback
+        traceback.print_exc()
+    sys.exit(ret)

@@ -16,7 +16,9 @@ ProotSub = '{0:s}'
 ImagesDir = os.path.join('images', 'linux')
 BuildImagesDir = os.path.join(ProotSub, ImagesDir)
 PreBuildsDir = os.path.join(ProotSub, 'pre-built', 'linux')
+ImpPreBuildsDir = os.path.join(ProotSub, 'pre-built', 'linux', 'implementation')
 PreBuildsImagesDir = os.path.join(PreBuildsDir, 'images')
+PreBuildsSysConf = os.path.join(PreBuildsImagesDir, 'config')
 BuildDir = os.path.join(ProotSub, 'build')
 ConfDir = os.path.join(BuildDir, 'conf')
 ArchiverConfFile = os.path.join(ConfDir, 'archiver.conf')
@@ -141,6 +143,7 @@ BootFileNames = {
     'KERNEL': 'image.ub',
     'KIMAGE_AARCH64': 'Image',
     'KIMAGE_ARM': 'uImage',
+    'KIMAGE_MICROBLAZE': 'linux.bin.ub',
     'BOOTSCRIPT': 'boot.scr',
     'RFS_FILE': 'rootfs.cpio.gz.u-boot',
     'TINY_RFS_FILE': 'ramdisk.cpio.gz.u-boot',
