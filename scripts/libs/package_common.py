@@ -175,7 +175,7 @@ def AddDefaultBootAttributes(proot, xilinx_arch):
                         if archload:
                             Loadwithbase = plnx_utils.append_baseaddr(proot,
                                                                       ''.join(archload))
-                            DefAttr[xilinx_arch] = [archload]
+                            DefAttr[xilinx_arch] = [Loadwithbase]
                     append = False
                 if isinstance(DefAttr, dict):
                     # If Dict read the arch specific attributes
