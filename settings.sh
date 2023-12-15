@@ -75,6 +75,11 @@ PATH=`echo ${PATH} | tr ":" "\n" | grep -v '^\./*$' | tr "\n" ":"`
 # Strip any trailing or multi-colons - they are interpreted as '.'
 PATH=$(echo ${PATH} | sed -e 's/:*$//g' -e 's/::*/:/g')
 
+plnxbanner=" The PetaLinux source code and images provided/generated are for demonstration purposes only."
+printf "%${#plnxbanner}s\n" | tr " " "*"
+printf "${plnxbanner}\n"
+printf "%${#plnxbanner}s\n" | tr " " "*"
+
 echo PetaLinux environment set to \'${PETALINUX}\'
 
 for s in /bin/sh sh; do

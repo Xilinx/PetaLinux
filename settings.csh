@@ -60,6 +60,12 @@ setenv PATH `echo ${PATH} | tr ":" "\n" | grep -v '^\./*$' | tr "\n" ":"`
 # Strip any trailing or multi-colons - they are interpreted as '.'
 setenv PATH `echo ${PATH} | sed -e 's/:*$//g' -e 's/::*/:/g'`
 
+set plnxbanner=" The PetaLinux source code and images provided/generated are for demonstration purposes only."
+set length=`expr "$plnxbanner" : '.*'`
+printf '%*s\n' $length | tr ' ' '*'
+printf "${plnxbanner}\n"
+printf '%*s\n' $length | tr ' ' '*'
+
 echo PetaLinux environment set to \'${PETALINUX}\'
 
 foreach s (/bin/sh sh)
