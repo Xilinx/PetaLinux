@@ -175,6 +175,10 @@ def AddTfaFile(proot, bootmode, prebuilt=''):
 
 def AddDtbFile(proot, dtb_arg, bootmode, xilinx_arch, prebuilt=''):
     ''' Add DTB File'''
+    sysconf = plnx_vars.SysConfFile.format(proot)
+    # Use Prebuilt conf if exists
+    if prebuilt and os.path.exists(plnx_vars.PreBuildsSysConf.format(proot)):
+        sysconf = plnx_vars.PreBuildsSysConf.format(proot)
     images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if prebuilt \
         else plnx_vars.BuildImagesDir.format(proot)
     if not dtb_arg or dtb_arg == 'Default':
@@ -188,7 +192,9 @@ def AddDtbFile(proot, dtb_arg, bootmode, xilinx_arch, prebuilt=''):
             dtb_offset = '0x1E00000'
         if not BootParams['DTB'].get('LoadAddr'):
             plnx_utils.add_dictkey(BootParams, 'DTB', 'LoadAddr',
-                                   plnx_utils.append_baseaddr(proot, dtb_offset))
+                                   plnx_utils.append_baseaddr(proot,
+                                                              plnx_vars.UbootConfs['JtagDtbOffset'],
+                                                              dtb_offset, sysconf))
         if xilinx_arch == 'zynq':
             before_load = 'after 3000\n'
             before_load += 'stop\n'
@@ -223,13 +229,17 @@ def AddUbootFile(proot, uboot_arg, xilinx_arch, targetcpu, bootmode, prebuilt=''
 
 def AddKernelFile(proot, kernel_arg, sys_arch, xilinx_arch, bootmode, prebuilt=''):
     ''' Add KERNEL File'''
+    sysconf = plnx_vars.SysConfFile.format(proot)
+    # Use Prebuilt conf if exists
+    if prebuilt and os.path.exists(plnx_vars.PreBuildsSysConf.format(proot)):
+        sysconf = plnx_vars.PreBuildsSysConf.format(proot)
     images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if prebuilt \
         else plnx_vars.BuildImagesDir.format(proot)
     if not kernel_arg or kernel_arg == 'Default':
         key = 'KIMAGE_%s' % sys_arch.upper()
         KernelFile = os.path.join(images_dir, plnx_vars.BootFileNames[key])
         plnx_utils.add_dictkey(BootParams, 'KERNEL', 'Path', KernelFile)
-    #JTAG settings for KERNEL
+    # JTAG settings for KERNEL
     if bootmode == 'jtag':
         if xilinx_arch in ['versal', 'versal-net']:
             before_load = 'targets -set -nocase -filter {name =~ "*%s*"}\n' % (
@@ -239,7 +249,9 @@ def AddKernelFile(proot, kernel_arg, sys_arch, xilinx_arch, bootmode, prebuilt='
         if not BootParams['KERNEL'].get('LoadAddr'):
             kernel_offset = '0x0' if sys_arch == 'microblaze' else '0x200000'
             plnx_utils.add_dictkey(BootParams, 'KERNEL', 'LoadAddr',
-                                   plnx_utils.append_baseaddr(proot, kernel_offset))
+                                   plnx_utils.append_baseaddr(proot,
+                                                              plnx_vars.UbootConfs['JtagKernelOffset'],
+                                                              kernel_offset, sysconf))
 
 
 def AddRootfsFile(proot, rootfs_file, sys_arch, bootmode, prebuilt=''):
@@ -260,12 +272,14 @@ def AddRootfsFile(proot, rootfs_file, sys_arch, bootmode, prebuilt=''):
             Rootfs = os.path.join(
                 images_dir, plnx_vars.BootFileNames['RFS_FILE'])
         plnx_utils.add_dictkey(BootParams, 'ROOTFS', 'Path', Rootfs)
-    #JTAG settings for ROOTFS
+    # JTAG settings for ROOTFS
     if bootmode == 'jtag':
         rfs_offset = '0x2E00000' if sys_arch == 'microblaze' else '0x04000000'
         if not BootParams['ROOTFS'].get('LoadAddr'):
             plnx_utils.add_dictkey(BootParams, 'ROOTFS', 'LoadAddr',
-                                   plnx_utils.append_baseaddr(proot, rfs_offset))
+                                   plnx_utils.append_baseaddr(proot,
+                                                              plnx_vars.UbootConfs['JtagRootfsOffset'],
+                                                              rfs_offset, sysconf))
 
 
 def AddBootScriptFile(proot, xilinx_arch, bootscr_arg, bootmode, targetcpu, prebuilt=''):
@@ -280,7 +294,7 @@ def AddBootScriptFile(proot, xilinx_arch, bootscr_arg, bootmode, targetcpu, preb
         images_dir, plnx_vars.BootFileNames['BOOTSCRIPT'])
     if not bootscr_arg or bootscr_arg == 'Default':
         plnx_utils.add_dictkey(BootParams, 'BOOTSCRIPT', 'Path', BootScrFile)
-    #JTAG settings for BOOT.SCR
+    # JTAG settings for BOOT.SCR
     if bootmode == 'jtag':
         bootscr_offset = '0x3000000' if xilinx_arch == 'zynq' else '0x20000000'
         if xilinx_arch == 'microblaze':
@@ -290,7 +304,9 @@ def AddBootScriptFile(proot, xilinx_arch, bootscr_arg, bootmode, targetcpu, preb
             bootscr_offset = hex(int(memory_size, base=16) - 0xE00000)
         if not BootParams['BOOTSCRIPT'].get('LoadAddr'):
             plnx_utils.add_dictkey(BootParams, 'BOOTSCRIPT', 'LoadAddr',
-                                   plnx_utils.append_baseaddr(proot, bootscr_offset))
+                                   plnx_utils.append_baseaddr(proot,
+                                                              plnx_vars.UbootConfs['JtagBootScrOffset'],
+                                                              bootscr_offset, sysconf))
         if xilinx_arch != 'zynqmp':
             after_load = ''
             if xilinx_arch in ['versal', 'versal-net']:

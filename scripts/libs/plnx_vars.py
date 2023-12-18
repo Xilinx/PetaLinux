@@ -16,7 +16,8 @@ ProotSub = '{0:s}'
 ImagesDir = os.path.join('images', 'linux')
 BuildImagesDir = os.path.join(ProotSub, ImagesDir)
 PreBuildsDir = os.path.join(ProotSub, 'pre-built', 'linux')
-ImpPreBuildsDir = os.path.join(ProotSub, 'pre-built', 'linux', 'implementation')
+ImpPreBuildsDir = os.path.join(
+    ProotSub, 'pre-built', 'linux', 'implementation')
 PreBuildsImagesDir = os.path.join(PreBuildsDir, 'images')
 PreBuildsSysConf = os.path.join(PreBuildsImagesDir, 'config')
 BuildDir = os.path.join(ProotSub, 'build')
@@ -301,6 +302,13 @@ ProcConfs = {
     'Prefix': 'CONFIG_SUBSYSTEM_PROCESSOR',
     'Select': '_SELECT=y', 'IpName': '_IP_NAME',
     'InstanceName': '_INSTANCE_PATH'
+}
+UbootConfs = {
+    'AppendBase': 'CONFIG_SUBSYSTEM_UBOOT_APPEND_BASEADDR',
+    'JtagDtbOffset': 'CONFIG_SUBSYSTEM_UBOOT_DEVICETREE_OFFSET',
+    'JtagKernelOffset': 'CONFIG_SUBSYSTEM_UBOOT_KERNEL_OFFSET',
+    'JtagRootfsOffset': 'CONFIG_SUBSYSTEM_UBOOT_RAMDISK_IMAGE_OFFSET',
+    'JtagBootScrOffset': 'CONFIG_SUBSYSTEM_UBOOT_BOOTSCR_OFFSET'
 }
 
 '''XSCT commands'''

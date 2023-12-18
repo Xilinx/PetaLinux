@@ -135,19 +135,32 @@ def get_xilinx_arch(proot):
     return xilinx_arch
 
 
-def get_system_baseaddr(proot):
+def get_system_baseaddr(proot, sysconffile=''):
     '''Get the System BaseAddress from the Sysconfig'''
     baseaddr = get_config_value(plnx_vars.MemoryConfs['Prefix'],
-                                plnx_vars.SysConfFile.format(proot),
+                                sysconffile if sysconffile else plnx_vars.SysConfFile.format(
+                                    proot),
                                 'asterisk', plnx_vars.MemoryConfs['BaseAddr'])
     return baseaddr
 
 
-def append_baseaddr(proot, offset):
-    '''Append the Given Offset to the Memory Baseaddress'''
-    baseaddr = get_system_baseaddr(proot)
-    addr = add_offsets(baseaddr, offset)
-    return addr
+def append_baseaddr(proot, offset, default_offset='',
+                    sysconffile='', force_append=False):
+    '''Append the Given Offset to the Memory Baseaddress
+       offset - can be value or config macro
+       default_offset - use default_offset if config value null'''
+    baseaddr = get_system_baseaddr(proot, sysconffile)
+    is_append_baseaddr = get_config_value(plnx_vars.UbootConfs['AppendBase'],
+                                          sysconffile if sysconffile else plnx_vars.SysConfFile.format(proot))
+    if offset.startswith('CONFIG_'):
+        offset = get_config_value(offset,
+                                  sysconffile if sysconffile else plnx_vars.SysConfFile.format(proot))
+        if not offset and default_offset:
+            offset = default_offset
+
+    if is_append_baseaddr == 'y' or force_append:
+        offset = add_offsets(baseaddr, offset)
+    return offset
 
 
 def get_yocto_path(proot, arch):
