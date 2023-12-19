@@ -119,6 +119,7 @@ DefaultBootAttributes = {
             'zynqmp': ['destination_cpu=a53-0']
         },
         'Offset': {
+            'config': 'CONFIG_SUBSYSTEM_UBOOT_QSPI_BOOTSCR_OFFSET',
             'microblaze': ['0x1F00000'], 'zynq': ['0x9C0000'], 'zynqmp': ['0x3E80000'],
             'versal': ['0x7F80000'], 'versal-net': ['0x7F80000']
         }
@@ -169,6 +170,16 @@ def AddDefaultBootAttributes(proot, xilinx_arch):
                 if DefAttrKey in ['Offset', 'Load']:
                     if BootParams[BootParam].get(DefAttrKey):
                         continue
+                    # If 'config' key is present in dictionary read that value
+                    # from systemconf file and use to generate bif file
+                    # if config not exists or empty use default offset
+                    if DefAttrKey == 'Offset':
+                        if DefAttr.get('config'):
+                            offset_user = plnx_utils.get_config_value(
+                                DefAttr.get('config'),
+                                plnx_vars.SysConfFile.format(proot))
+                            if offset_user and offset_user.lower() != 'auto':
+                                DefAttr[xilinx_arch] = [offset_user]
                     if DefAttrKey == 'Load':
                         # Add BaseAddress to load Offset
                         archload = DefAttr.get(xilinx_arch)
