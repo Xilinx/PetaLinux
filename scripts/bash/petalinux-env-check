@@ -293,12 +293,14 @@ function check_services {
 	plnx_info "Checking network and other services"
 	# In latest distro's netstat deprecated so using ss
 	netstat_util=`which netstat`
+	netstat_args="--numeric-hosts"
 	if [ -z "$netstat_util" ]; then
 		netstat_util=`which ss`
+		netstat_args=""
 	fi
 	# Check for tftp
 	if [ -n "$netstat_util" ]; then
-		if ! $netstat_util -l 2>/dev/null | grep tftp 2>/dev/null 1>/dev/null; then
+		if ! $netstat_util -l $netstat_args 2>/dev/null | grep tftp 2>/dev/null 1>/dev/null; then
 			plnx_warning "No tftp server found - please refer to \"UG1144 $PETALINUX_VER PetaLinux Tools Documentation Reference Guide\" for its impact and solution"
 		fi
 	fi
