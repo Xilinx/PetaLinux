@@ -144,12 +144,20 @@ BootFileNames = {
     'KERNEL': 'image.ub',
     'KIMAGE_AARCH64': 'Image',
     'KIMAGE_ARM': 'uImage',
+    'KIMAGE_QEMU_ARM': 'zImage',
     'KIMAGE_MICROBLAZE': 'linux.bin.ub',
+    'KIMAGE_QEMU_MICROBLAZE': 'image.elf',
     'BOOTSCRIPT': 'boot.scr',
     'RFS_FILE': 'rootfs.cpio.gz.u-boot',
+    'RFS_FILE_QEMU_AARCH64': 'rootfs.ext4',
     'TINY_RFS_FILE': 'ramdisk.cpio.gz.u-boot',
     'BOOTBIN': 'BOOT.BIN',
-    'OPENAMP': 'dtbos/openamp.dtbo'
+    'BOOTBH': 'BOOT_bh.bin',
+    'OPENAMP': 'dtbos/openamp.dtbo',
+    'QEMUIMG': 'qemu_boot.img',
+    'PMCCDO': 'pmc_cdo.bin',
+    'PMUROM': 'pmu_rom_qemu_sha3.elf',
+    'PMUCONF': 'pmu-conf.bin'
 }
 
 DFX_Templates = {

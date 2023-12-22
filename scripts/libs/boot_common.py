@@ -5,6 +5,7 @@
 #
 # Author:
 #       Raju Kumar Pothuraju <rajukumar.pothuraju@amd.com>
+#       Varalaxmi Bingi <varalaxmi.bingi@amd.com>
 #
 # SPDX-License-Identifier: MIT
 
@@ -130,14 +131,28 @@ def AddPmuFile(proot, xilinx_arch, bootmode, targetcpu=0, prebuilt=''):
         after_load += 'rst -processor -clear-registers\n'
         plnx_utils.add_dictkey(BootParams, 'PMUFW', 'BeforeLoad', before_load)
         plnx_utils.add_dictkey(BootParams, 'PMUFW', 'AfterLoad', after_load)
+    # QEMU settings for PMUFW
+    if bootmode == 'qemu':
+        before_load = ' -device loader,file='
+        if xilinx_arch in ['versal', 'versal-net']:
+            plnx_utils.add_dictkey(
+                BootParams, 'PLM', 'BeforeLoad', before_load)
+        else:
+            plnx_utils.add_dictkey(BootParams, 'PMUFW',
+                                   'BeforeLoad', before_load)
 
 
 def AddFsblFile(proot, xilinx_arch, bootmode, targetcpu=0, prebuilt=''):
     ''' Add the FSBL file'''
     images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if prebuilt \
         else plnx_vars.BuildImagesDir.format(proot)
-    key = 'FSBL_%s' % xilinx_arch.upper()
-    FsblFile = os.path.join(images_dir, plnx_vars.BootFileNames[key])
+    if xilinx_arch in ['zynq', 'zynqmp'] and bootmode == 'jtag':
+        key = 'FSBL_%s' % xilinx_arch.upper()
+        FsblFile = os.path.join(images_dir, plnx_vars.BootFileNames[key])
+    elif xilinx_arch in ['zynqmp'] and bootmode == 'qemu':
+        FsblFile = os.path.join(images_dir, plnx_vars.BootFileNames['PMUROM'])
+    elif xilinx_arch in ['versal', 'versal-net'] and bootmode == 'qemu':
+        FsblFile = os.path.join(images_dir, plnx_vars.BootFileNames['PMCCDO'])
     plnx_utils.add_dictkey(BootParams, 'FSBL', 'Path', FsblFile)
     # JTAG settings for FSBL
     if bootmode == 'jtag':
@@ -157,20 +172,40 @@ def AddFsblFile(proot, xilinx_arch, bootmode, targetcpu=0, prebuilt=''):
             after_load += 'after 3000\n'
             after_load += 'stop\n'
             after_load += 'psu_ps_pl_isolation_removal; psu_ps_pl_reset_config\n'
-        plnx_utils.add_dictkey(BootParams, 'FSBL', 'BeforeLoad', before_load)
-        plnx_utils.add_dictkey(BootParams, 'FSBL', 'AfterLoad', after_load)
+    # QEMU settings for FSBL
+    if bootmode == 'qemu':
+        before_load = ''
+        after_load = ''
+        if xilinx_arch == 'zynqmp':
+            before_load += ' -kernel '
+        elif xilinx_arch in ['versal', 'versal-net']:
+            before_load += ' -device loader,addr=0xf0000000,data=0xba020004,data-len=4 -device loader,addr=0xf0000004,data=0xb800fffc,data-len=4 -device loader,file='
+            after_load += ',addr=0xf2000000'
+    plnx_utils.add_dictkey(BootParams, 'FSBL', 'BeforeLoad', before_load)
+    plnx_utils.add_dictkey(BootParams, 'FSBL', 'AfterLoad', after_load)
 
 
-def AddTfaFile(proot, bootmode, prebuilt=''):
+def AddTfaFile(proot, xilinx_arch, bootmode, prebuilt=''):
     ''' Add TF-A File'''
     images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if prebuilt \
         else plnx_vars.BuildImagesDir.format(proot)
     TfaFile = os.path.join(images_dir, plnx_vars.BootFileNames['TFA'])
     plnx_utils.add_dictkey(BootParams, 'TFA', 'Path', TfaFile)
+    before_load = ''
+    after_load = ''
     # JTAG settings for TF-A
     if bootmode == 'jtag':
-        after_load = 'con\n'
+        after_load += 'con\n'
         plnx_utils.add_dictkey(BootParams, 'TFA', 'AfterLoad', after_load)
+    # QEMU settings for TF-A
+    elif bootmode == 'qemu':
+        if xilinx_arch == 'zynqmp':
+            before_load += '-device loader,file='
+            after_load += ',cpu-num=0'
+            plnx_utils.add_dictkey(
+                BootParams, 'TFA', 'BeforeLoad', before_load)
+            plnx_utils.add_dictkey(
+                BootParams, 'TFA', 'AfterLoad', after_load)
 
 
 def AddDtbFile(proot, dtb_arg, bootmode, xilinx_arch, prebuilt=''):
@@ -200,6 +235,19 @@ def AddDtbFile(proot, dtb_arg, bootmode, xilinx_arch, prebuilt=''):
             before_load += 'stop\n'
             plnx_utils.add_dictkey(
                 BootParams, 'DTB', 'BeforeLoad', before_load)
+    # QEMU settings for DTB
+    if bootmode == 'qemu':
+        if xilinx_arch in ['zynq', 'microblaze']:
+            before_load = ' -dtb '
+            plnx_utils.add_dictkey(
+                BootParams, 'DTB', 'BeforeLoad', before_load)
+        if xilinx_arch in ['zynqmp']:
+            before_load = ' -device loader,file='
+            after_load = ',addr=0x00100000,force-raw=on'
+            plnx_utils.add_dictkey(
+                BootParams, 'DTB', 'BeforeLoad', before_load)
+            plnx_utils.add_dictkey(
+                BootParams, 'DTB', 'AfterLoad', after_load)
 
 
 def AddUbootFile(proot, uboot_arg, xilinx_arch, targetcpu, bootmode, prebuilt=''):
@@ -225,6 +273,14 @@ def AddUbootFile(proot, uboot_arg, xilinx_arch, targetcpu, bootmode, prebuilt=''
             before_load += '}\n'
         plnx_utils.add_dictkey(BootParams, 'UBOOT', 'BeforeLoad', before_load)
         plnx_utils.add_dictkey(BootParams, 'UBOOT', 'AfterLoad', after_load)
+    # QEMU settings for UBOOT
+    if bootmode == 'qemu':
+        before_load = ''
+        if xilinx_arch in ['zynq', 'microblaze']:
+            before_load = ' -kernel '
+        elif xilinx_arch == 'zynqmp':
+            before_load = ' -device loader,file='
+        plnx_utils.add_dictkey(BootParams, 'UBOOT', 'BeforeLoad', before_load)
 
 
 def AddKernelFile(proot, kernel_arg, sys_arch, xilinx_arch, bootmode, prebuilt=''):
@@ -237,6 +293,8 @@ def AddKernelFile(proot, kernel_arg, sys_arch, xilinx_arch, bootmode, prebuilt='
         else plnx_vars.BuildImagesDir.format(proot)
     if not kernel_arg or kernel_arg == 'Default':
         key = 'KIMAGE_%s' % sys_arch.upper()
+        if xilinx_arch in ['microblaze', 'zynq'] and bootmode == 'qemu':
+            key = 'KIMAGE_%s_%s' % (bootmode.upper(), sys_arch.upper())
         KernelFile = os.path.join(images_dir, plnx_vars.BootFileNames[key])
         plnx_utils.add_dictkey(BootParams, 'KERNEL', 'Path', KernelFile)
     # JTAG settings for KERNEL
@@ -252,9 +310,22 @@ def AddKernelFile(proot, kernel_arg, sys_arch, xilinx_arch, bootmode, prebuilt='
                                    plnx_utils.append_baseaddr(proot,
                                                               plnx_vars.UbootConfs['JtagKernelOffset'],
                                                               kernel_offset, sysconf))
+    # QEMU settings for KERNEL
+    if bootmode == 'qemu':
+        before_load = ''
+        after_load = ''
+        if xilinx_arch in ['microblaze', 'zynq']:
+            before_load = ' -kernel '
+        if xilinx_arch in ['zynqmp', 'versal', 'versal-net']:
+            before_load = ' -device loader,file='
+            after_load = ',addr=0x00200000,force-raw=on'
+        plnx_utils.add_dictkey(BootParams, 'KERNEL',
+                               'BeforeLoad', before_load)
+        plnx_utils.add_dictkey(BootParams, 'KERNEL',
+                               'AfterLoad', after_load)
 
 
-def AddRootfsFile(proot, rootfs_file, sys_arch, bootmode, prebuilt=''):
+def AddRootfsFile(proot, rootfs_file, sys_arch, xilinx_arch, bootmode, prebuilt=''):
     '''Add Rootfs file '''
     sysconf = plnx_vars.SysConfFile.format(proot)
     # Use Prebuilt conf if exists
@@ -280,6 +351,19 @@ def AddRootfsFile(proot, rootfs_file, sys_arch, bootmode, prebuilt=''):
                                    plnx_utils.append_baseaddr(proot,
                                                               plnx_vars.UbootConfs['JtagRootfsOffset'],
                                                               rfs_offset, sysconf))
+    # QEMU settings for ROOTFS
+    if bootmode == 'qemu':
+        before_load = ''
+        after_load = ''
+        if xilinx_arch in ['microblaze', 'zynq']:
+            before_load = ' -initrd '
+        elif xilinx_arch in ['zynqmp', 'versal', 'versal-net']:
+            before_load = ' -device loader,file='
+            after_load = ',addr=0x04000000,force-raw=on'
+        plnx_utils.add_dictkey(BootParams, 'ROOTFS',
+                               'BeforeLoad', before_load)
+        plnx_utils.add_dictkey(BootParams, 'ROOTFS',
+                               'AfterLoad', after_load)
 
 
 def AddBootScriptFile(proot, xilinx_arch, bootscr_arg, bootmode, targetcpu, prebuilt=''):
@@ -315,6 +399,16 @@ def AddBootScriptFile(proot, xilinx_arch, bootscr_arg, bootmode, targetcpu, preb
             after_load += 'con'
             plnx_utils.add_dictkey(
                 BootParams, 'BOOTSCRIPT', 'AfterLoad', after_load)
+    # QEMU settings for BOOT.SCR
+    if bootmode == 'qemu':
+        before_load = ''
+        after_load = ''
+        before_load += ' -device loader,file='
+        after_load += ',addr=0x020000000,force-raw=on'
+        plnx_utils.add_dictkey(BootParams, 'BOOTSCRIPT',
+                               'BeforeLoad', before_load)
+        plnx_utils.add_dictkey(BootParams, 'BOOTSCRIPT',
+                               'AfterLoad', after_load)
 
 
 def ValidateFiles(bootmode):
