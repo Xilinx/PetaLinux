@@ -153,7 +153,8 @@ def JtagBootSetup(args, proot):
     if args.xilinx_arch == 'zynqmp':
         boot_common.AddPmuFile(proot, args.xilinx_arch, args.command,
                                args.targetcpu, args.prebuilt)
-        boot_common.AddTfaFile(proot, args.command, args.prebuilt)
+        boot_common.AddTfaFile(proot, args.xilinx_arch,
+                               args.command, args.prebuilt)
     if args.xilinx_arch in ['zynq', 'zynqmp']:
         boot_common.AddFsblFile(proot, args.xilinx_arch,
                                 args.command, args.targetcpu, args.prebuilt)
@@ -183,7 +184,7 @@ def JtagBootSetup(args, proot):
             'CONFIG_SUBSYSTEM_ROOTFS_', sysconf, 'choice')
         if rootfs_type == 'INITRD':
             boot_common.AddRootfsFile(
-                proot, args.rootfs, args.arch, args.command, args.prebuilt)
+                proot, args.rootfs, args.arch, args.xilinx_arch, args.command, args.prebuilt)
         boot_common.AddBootScriptFile(
             proot, args.xilinx_arch, args.boot_script,
             args.command, args.targetcpu, args.prebuilt)
