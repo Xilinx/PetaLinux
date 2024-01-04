@@ -20,8 +20,6 @@ import getpass
 import tempfile
 
 scripts_path = os.path.dirname(os.path.realpath(__file__))
-libs_path = scripts_path + '/libs'
-sys.path = sys.path + [libs_path]
 logger = logging.getLogger('PetaLinux')
 
 ProjectEssentials = 'pre-built project-spec components .petalinux user .gitignore README README.hw'
@@ -233,6 +231,10 @@ def QemuBootSetup(args, proot):
     '''QEMU BootFiles setup.
     Add Each BootFile to the Dictionary based on the platform'''
     user = getpass.getuser()
+    boot_path = os.path.join(scripts_path + '/../bash/' + 'petalinux-boot')
+    stdout = plnx_utils.runCmd('%s --qemu %s' % (boot_path, (' '.join(sys.argv[2:]))), os.getcwd(),
+                               failed_msg='Fail to launch qemu cmd', shell=True, checkcall=True)
+    sys.exit(255)
     pmufw = 'n'
     ExtraArgs = ''
     if user == 'root':
@@ -379,7 +381,7 @@ def QemuBootArgs(qemu_parser):
                              '\nBoot images/linux/Image for ZynqMP, versal and versal-net.'
                              '\nBoot images/linux/image.elf for MicroBlaze'
                              )
-    qemu_parser.add_argument('--dtb', metavar='DTB',
+    qemu_parser.add_argument('--dtb', metavar='DTB', type=boot_common.add_bootfile('DTB'),
                              help='force use of a particular device tree file.'
                              '\nif not specified, QEMU uses'
                              '\n<PROJECT>/images/linux/system.dtb')
@@ -408,7 +410,7 @@ def QemuBootArgs(qemu_parser):
                              help='Specify the cpio rootfile system needs to be used for boot.'
                              '\nSupports for: zynq,zynqMP and microblaze.')
     qemu_parser.add_argument(
-        '--qemu-no-gdb', help='Specify this option to disable gdb via qemu boot.')
+        '--qemu-no-gdb', action='store_true', help='Specify this option to disable gdb via qemu boot.')
     qemu_parser.add_argument('--targetcpu', metavar='TARGET_CPU', default=0,
                              type=int, help='Specify target CPUID (0 to N-1)')
     qemu_parser.add_argument('--targetcluster', metavar='TARGET_CLUSTER', default=0,
