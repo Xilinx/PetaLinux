@@ -50,7 +50,7 @@ def RenameFile(infile, outfile):
 def RemoveDir(dirpath):
     '''Remove Directory'''
     if os.path.exists(dirpath):
-        shutil.rmtree(dirpath)
+        shutil.rmtree(dirpath, ignore_errors=True)
 
 
 def RemoveFile(filepath):
