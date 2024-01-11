@@ -39,7 +39,6 @@ setenv XSCT_TOOLCHAIN "${PETALINUX}/components/xsct"
 #
 # Add toolchains to user's search path
 #
-setenv PATH "${XSCT_TOOLCHAIN}/bin:${PATH}"
 setenv PATH "${XSCT_TOOLCHAIN}/gnu/aarch32/lin/aarch64-none-elf/bin:${PATH}"
 setenv PATH "${XSCT_TOOLCHAIN}/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin:${PATH}"
 setenv PATH "${XSCT_TOOLCHAIN}/gnu/aarch64/lin/aarch64-none/bin:${PATH}"
