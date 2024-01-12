@@ -70,8 +70,7 @@ def CreateDownloadbit(args, proot, download_bit_out):
     proc_ipname = plnx_utils.get_config_value(
         plnx_vars.ProcConfs['Prefix'] +
         '_', plnx_vars.SysConfFile.format(proot),
-        'choice', plnx_vars.ProcConfs['Select']
-    ).lower()
+        'choice', plnx_vars.ProcConfs['Select'])
     proc_ipindex = plnx_utils.get_config_value(
         plnx_vars.ProcConfs['Prefix'], plnx_vars.SysConfFile.format(proot),
         'choice', '%s="%s"' % (plnx_vars.ProcConfs['IpName'],
