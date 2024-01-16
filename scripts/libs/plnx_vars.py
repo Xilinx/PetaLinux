@@ -299,7 +299,7 @@ EthConfs = {
     'Mac': '_MAC'
 }
 FlashConfs = {
-    'Prefix': 'CONFIG_SUBSYSTEM_FLASH_QSPI_BANKLESS_PART',
+    'Prefix': 'CONFIG_SUBSYSTEM_FLASH_',
     'Name': '_NAME', 'Size': '_SIZE'
 }
 MemoryConfs = {

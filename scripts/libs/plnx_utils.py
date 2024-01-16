@@ -330,11 +330,13 @@ def gen_sysconf_dtsi_file(proot):
                             flash_ipname), mode='a')
         for num in range(0, 19):
             part_offset = add_offsets(prev_part_offset, prev_part_size)
-            part_name = get_config_value('%s%s%s' % (
-                plnx_vars.FlashConfs['Prefix'], num, plnx_vars.FlashConfs['Name']),
+            part_name = get_config_value('%s%s%s%s' % (
+                plnx_vars.FlashConfs['Prefix'], '%s_PART' % flash_ipname.upper(),
+                num, plnx_vars.FlashConfs['Name']),
                 plnx_vars.SysConfFile.format(proot))
-            part_size = get_config_value('%s%s%s' % (
-                plnx_vars.FlashConfs['Prefix'], num, plnx_vars.FlashConfs['Size']),
+            part_size = get_config_value('%s%s%s%s' % (
+                plnx_vars.FlashConfs['Prefix'], '%s_PART' % flash_ipname.upper(),
+                num, plnx_vars.FlashConfs['Size']),
                 plnx_vars.SysConfFile.format(proot))
             prev_part_offset = part_offset
             prev_part_size = part_size
