@@ -98,8 +98,10 @@ def GenerateTcl(args, BootParams):
                 TclStr += 'puts stderr "INFO: Loading image: %s at %s."\n' % (
                     BootParams[BootParam].get('Path'),
                     BootParams[BootParam].get('LoadAddr'))
-                TclStr += 'dow -data "%s" %s\n' % (BootParams[BootParam].get('Path'),
-                                                   BootParams[BootParam].get('LoadAddr'))
+                TclStr += 'dow -data %s"%s" %s\n' % (
+                                    '-force ' if args.xilinx_arch in ['versal', 'versal-net'] else '',
+                                    BootParams[BootParam].get('Path'),
+                                    BootParams[BootParam].get('LoadAddr'))
             if BootParams[BootParam].get('AfterLoad'):
                 TclStr += BootParams[BootParam].get('AfterLoad')
             TclStr += '\n'
