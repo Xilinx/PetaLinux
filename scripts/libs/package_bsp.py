@@ -42,7 +42,7 @@ def AddProjectData(proj_key):
     return f
 
 
-def AddHwProjData(hw_key):
+def AddHwProjData(hw_key, append=False):
     ''' Adding HW Path to Project in Dictionary'''
     def f(arg):
         if arg:
@@ -53,7 +53,7 @@ def AddHwProjData(hw_key):
             if ProjectKeys:
                 lastprojkey = ProjectKeys[-1]
                 plnx_utils.add_dictkey(PackageBspDict, lastprojkey,
-                                       hw_key, arg)
+                                       hw_key, arg, append, sep=' ')
             else:
                 raise argparse.ArgumentTypeError(
                     '-p/--project option must be specified before --hwsource %s' % (arg))
@@ -171,7 +171,8 @@ def pkgbsp_args(bsp_parser):
     bsp_parser.add_argument('-p', '--project', metavar='PROJECT_DIR', type=AddProjectData('Project'),
                             help='Specify full path to a PetaLinux project to include in BSP'
                             '(Allow Multiple).', action='append')
-    bsp_parser.add_argument('--hwsource', action='append', type=AddHwProjData('HWSource'), default=[],
+    bsp_parser.add_argument('--hwsource', action='append', default=[],
+                            type=AddHwProjData('HWSource', append=True),
                             help='Include a hardware source for PetaLinux project'
                             )
     bsp_parser.add_argument('--exclude-from-file', metavar='EXCLUDE_FILE',

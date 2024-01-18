@@ -303,7 +303,7 @@ def check_tool(tools=[], failed_msg=''):
             sys.exit(255)
 
 
-def add_dictkey(Dict, key, sub_key, value, append=False):
+def add_dictkey(Dict, key, sub_key, value, append=False, sep=', '):
     '''Add Elements to the given Dictionary'''
     if sub_key:
         if not append:
@@ -314,7 +314,7 @@ def add_dictkey(Dict, key, sub_key, value, append=False):
                 Dict[key][sub_key] = value
         else:
             try:
-                Dict[key][sub_key] += ', ' + value
+                Dict[key][sub_key] += sep + value
             except KeyError:
                 Dict[key][sub_key] = ''
                 Dict[key][sub_key] += value
