@@ -205,7 +205,7 @@ def GenerateBif(args, proot):
         logger.info('Adding fsbl_config %s' % args.fsblconfig)
         bif_content += '\t[fsbl_config] %s\n' % args.fsblconfig
     bif_content += '}\n'
-    if AddedLinuxId:
+    if args.xilinx_arch in ['versal', 'versal-net']:
         bif_content += '}\n'
     logger.debug(bif_content)
     plnx_utils.RemoveFile(plnx_vars.BifFile.format(proot))
