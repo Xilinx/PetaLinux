@@ -48,7 +48,7 @@ def bb_updatevar(recipename, bbvar, value, append=False):
     if append:
         srcuris_file += ' ' + value
     else:
-        srcuris_file = ' ' + value
+        srcuris_file = value
     srcuris_file = re.sub(r"\s+", ' \\\n\t', srcuris_file)
     parsed_lines += '\n%s = "%s"\n' % (bbvar, srcuris_file)
     with open(recipename, 'w') as file_data:
