@@ -94,14 +94,10 @@ if ! echo $SHELL | grep -q "bash"; then
 	echo "/bin/bash is Petalinux recommended SHELL variable. Please set your SHELL variable to /bin/bash."
 fi
 
-# Add buildtools path
-NATIVE_SYSROOT_PATH="${PETALINUX}/sysroots/x86_64-petalinux-linux"
-if [ -d ${NATIVE_SYSROOT_PATH} ]; then
-	PATH="${NATIVE_SYSROOT_PATH}/usr/bin:${NATIVE_SYSROOT_PATH}/usr/sbin:${NATIVE_SYSROOT_PATH}/sbin:$PATH"
-fi
 
 export PATH
 
+source "${PETALINUX}"/.environment-setup-x86_64-petalinux-linux
 "${PETALINUX}"/scripts/bash/petalinux-env-check
 #
 # Not to generate the pycache files in tool
