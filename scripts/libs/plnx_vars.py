@@ -99,7 +99,9 @@ TemplateDir_C = os.path.join(TemplateDir, '{0:s}', 'template-{1:s}')
 
 '''PATH variables'''
 ospath = os.environ['PATH']
-os.environ['PATH'] = XsctBinPath + ":" + ospath
+extra_ospaths = os.environ.get('EXTERNAL_TOOLS_PATH', '') + ':'
+extra_ospaths += XsctBinPath + ':'
+os.environ['PATH'] = extra_ospaths + ospath
 
 
 YoctoEnvPrefix = 'environment-setup'
