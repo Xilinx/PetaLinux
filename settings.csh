@@ -65,6 +65,8 @@ printf '%*s\n' $length | tr ' ' '*'
 printf "${plnxbanner}\n"
 printf '%*s\n' $length | tr ' ' '*'
 
+echo "[WARNING] Deprecating cshell support in upcoming releases. It is recommended to use settings.sh"
+
 echo PetaLinux environment set to \'${PETALINUX}\'
 
 foreach s (/bin/sh sh)
