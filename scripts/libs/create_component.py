@@ -210,7 +210,7 @@ def Createproject(args, proot, cpath):
             create_tmpdir_ifnfs(proot, project, args.tmpdir)
             installed_proj.append(project)
 
-        if installed_proj:
+        if installed_proj and not args.name:
             logger.info('Project(s):')
             for p in installed_proj:
                 print('\t* %s' % (p))
