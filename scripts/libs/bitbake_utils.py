@@ -178,7 +178,13 @@ def get_yocto_source(proot):
                 plnx_utils.RemoveDir(plnx_vars.EsdkInstalledDir.format(proot))
                 break
             if userchoice in ['n', 'N', 'no', 'NO', 'No', 'nO']:
-                return False
+                if not os.path.exists(plnx_vars.EsdkInstalledDir.format(proot)):
+                    logger.warning('SDK install directory missing in project.'
+                                 ' Please input y to install the SDK into project')
+                    continue
+                else:
+                    logger.warning('Not installing the newer yocto SDK as requested by the user, instead using the older yocto SDK')
+                    return True
     plnx_utils.CreateDir(plnx_vars.EsdkInstalledDir.format(proot))
     if not os.path.exists(plnx_vars.EsdkBBLayerconf.format(proot)):
         logger.info(
