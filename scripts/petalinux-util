@@ -1,0 +1,194 @@
+#!/usr/bin/env python3
+
+# Copyright (C) 2021-2022, Xilinx, Inc.  All rights reserved.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.  All rights reserved.
+#
+# Authors:
+#       Swagath Gadde <swagath.gadde@amd.com>
+#       Raju Kumar Pothuraju <rajukumar.pothuraju@amd.com>
+#
+# SPDX-License-Identifier: MIT
+
+import os
+import sys
+import argparse
+
+scripts_path = os.path.dirname(os.path.realpath(__file__))
+libs_path = scripts_path + '/libs'
+sys.path = sys.path + [libs_path]
+import plnx_vars
+import plnx_utils
+import logger_setup
+
+logger, console_h = logger_setup.setup_logger('PetaLinux')
+
+
+def GdbUtil(args, unknown_args, proot):
+    '''Gdb util to debug applications'''
+    CrossCompilerDict = {'aarch64': 'aarch64-linux-gnu-gdb',
+                         'arm': 'arm-linux-gnueabihf-gdb'}
+    CrossCompiler = CrossCompilerDict.get(args.arch)
+    if not CrossCompiler:
+        logger.error('Unable to detect the cross compiler prefix')
+        sys.exit(255)
+    plnx_utils.check_tool(CrossCompiler, 'Unable to find gdb client binary')
+    gdbcmd = CrossCompiler
+    gdbcmd += ' %s' % ' '.join(unknown_args)
+    if '-iex' not in unknown_args:
+        gdbcmd += ' -iex "set auto-load safe-path %s:/tmp"' % proot
+    logger.info(gdbcmd)
+    plnx_utils.runCmd(gdbcmd, os.getcwd(),
+                      failed_msg='Fail to launch gdb cmd',
+                      shell=True, checkcall=True)
+
+
+def FindXsaBitstreamUtil(args, unknown_args, proot):
+    ''' Find Bitstream or pdi file name from xsa or sdt'''
+    filename = plnx_utils.GetFileFromXsa(proot, args.xsa_file)
+    logger.plain(filename)
+
+
+def XsdbConnectUtil(args, unknown_args, proot):
+    '''xsdb connect to debug the qemu using gdb'''
+    QemuHost = ''
+    QemuPort = ''
+    if unknown_args:
+        QemuHost = unknown_args[0].split(':')[0]
+        if len(unknown_args[0].split(':')) > 1:
+            QemuPort = unknown_args[0].split(':')[1]
+    if not QemuHost:
+        # Default to local host if the host is blank
+        QemuHost = 'localhost'
+    if not QemuPort:
+        logger.error(
+            'No QEMU port specified. Please ensure that the debugging port for QEMU is specified')
+        sys.exit(255)
+    import tempfile
+    filehandle = tempfile.NamedTemporaryFile()
+    XsdbFile = filehandle.name
+    GdbServerCmd = plnx_vars.XsdbConnectCmd.format(
+        QemuHost, QemuPort, ' '.join(unknown_args[1:]))
+
+    plnx_utils.add_str_to_file(XsdbFile, GdbServerCmd)
+    XsdbCmd = 'xsdb -interactive %s' % XsdbFile
+    logger.plain(GdbServerCmd)
+    plnx_utils.runCmd(XsdbCmd, os.getcwd(),
+                      failed_msg='Fail to launch xsdb', shell=True, checkcall=True)
+
+
+def DfuConnectUtil(args, unknown_args, proot):
+    '''Dfu util to load the images'''
+    if not unknown_args:
+        logger.error('You need to specify one of -D or -U')
+        sys.exit(255)
+    DfuUtilCmd = '%s %s' % (plnx_vars.DfuUtilBin, ' '.join(unknown_args))
+    logger.info(DfuUtilCmd)
+    plnx_utils.runCmd(DfuUtilCmd, os.getcwd(),
+                      failed_msg='Fail to launch dfu-util', shell=True, checkcall=True)
+
+
+def PreProcessArgs():
+    # Shell used to support --gdb, --find-xsa-bitstream, --xsdb-connect, --dfu-util
+    # To support those adding preprocessor for args
+    # which will read the args and find any deprecated args
+    # and rearrange them as per the python argparser
+    DeprecatedArgs = ['--gdb', '--find-xsa-bitstream',
+                      '--xsdb-connect', '--dfu-util']
+    parser_value = ''
+    for arg in DeprecatedArgs:
+        if arg in sys.argv:
+            parser_value = sys.argv[sys.argv.index(arg)].replace('-', '', 2)
+            logger.note('Argument: "%s" has been deprecated. '
+                        'It is recommended to start using new python command line Argument.'
+                        % (sys.argv[sys.argv.index(arg)]))
+            logger.note('Use: %s %s [OPTIONS]' % (os.path.basename(sys.argv[0]),
+                                                  parser_value))
+            del sys.argv[sys.argv.index(arg)]
+    if parser_value:
+        sys.argv.insert(1, parser_value)
+
+
+def main():
+    PreProcessArgs()
+    parser = argparse.ArgumentParser(
+        description='This command provides the misc utilities which are packed as part of Tool ',
+        formatter_class=argparse.RawTextHelpFormatter,
+        add_help=False,
+        epilog='Use %(prog)s <subcommand> --help to get help on a specific command')
+
+    # Global args
+    parser.add_argument('-p', '--project', metavar='PROJECT_DIR', type=os.path.realpath,
+                        help='Specify full path to a PetaLinux project.'
+                             '\nDefault is the working project.')
+    global_args, unparsed_args = parser.parse_known_args()
+
+    parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
+                        help='Show this help message and exit')
+
+    subparsers = parser.add_subparsers(dest="command",
+                                       title='subcommands', metavar='<subcommand>')
+    subparsers.required = True
+
+    # gdb parser args
+    gdb_parser = subparsers.add_parser(
+        'gdb', help='PetaLinux gdb Debug wrapper', add_help=False,
+        formatter_class=argparse.RawTextHelpFormatter)
+    gdb_parser.set_defaults(func=GdbUtil)
+
+    # find-xsa-bitstream parser args
+    findxsabitstream_parser = subparsers.add_parser(
+        'find-xsa-bitstream', help='Find the bistream from inside a XSA file',
+        formatter_class=argparse.RawTextHelpFormatter)
+    findxsabitstream_parser.add_argument('--xsa-file', metavar='<XSA>', type=os.path.realpath,
+                                         help='Optional argument to specify the XSA file to use.'
+                                         '\nDefaults to the system.xsa file in the subsystem directory.')
+    findxsabitstream_parser.set_defaults(func=FindXsaBitstreamUtil)
+
+    # xsdb-connect parser args
+    xsdbconnect_parser = subparsers.add_parser(
+        'xsdb-connect', help='Connect XSDB to a running instance of QEMU',
+        formatter_class=argparse.RawTextHelpFormatter)
+    xsdbconnect_parser.set_defaults(func=XsdbConnectUtil)
+
+    # dfu-util parser args
+    dfuutil_parser = subparsers.add_parser(
+        'dfu-util', help='Invoke dfu-util and parse arguments specified with it',
+        add_help=False, formatter_class=argparse.RawTextHelpFormatter)
+    dfuutil_parser.set_defaults(func=DfuConnectUtil)
+
+    # Display help if no args specified
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
+    args, unknown_args = parser.parse_known_args(
+        unparsed_args, namespace=global_args)
+
+    # Exit if PROOT is not PetaLinux project
+    proot = plnx_utils.exit_not_plnx_project(args.project)
+
+    # Exit if PetaLinux version mismatch
+    if not plnx_utils.petalinux_version_check(proot):
+        sys.exit(255)
+
+    args.arch = plnx_utils.get_system_arch(proot)
+    args.xilinx_arch = plnx_utils.get_xilinx_arch(proot)
+
+    if '-h' in sys.argv or '--help' in sys.argv:
+        if args.command in ('xsdb-connect', 'find-xsa-bitstream'):
+            eval('%s_parser.print_help(sys.stderr)' %
+                 args.command.replace('-', ''))
+            sys.exit(1)
+
+    ret = args.func(args, unknown_args, proot)
+    return ret
+
+
+if __name__ == "__main__":
+    try:
+        ret = main()
+    except Exception:
+        ret = 1
+        import traceback
+        traceback.print_exc()
+    sys.exit(ret)

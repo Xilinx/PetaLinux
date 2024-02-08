@@ -96,6 +96,7 @@ XsctBinPath = os.path.join(XsctPath, 'bin')
 TemplateDir = os.path.join(PetaLinux, 'templates')
 TemplateCommon = os.path.join(TemplateDir, '{0:s}', 'common')
 TemplateDir_C = os.path.join(TemplateDir, '{0:s}', 'template-{1:s}')
+DfuUtilBin = os.path.join(XsctPath, 'tps', 'lnx64', 'dfu-util-0.9', 'bin', 'dfu-util')
 
 '''PATH variables'''
 ospath = os.environ['PATH']
@@ -327,3 +328,4 @@ HdfDataMacro = '@#%HDF_DATA@#%'
 GetHWFilesCmd = 'set lu_data [hsi get_hw_files -filter {{TYPE == {0}}}];\
         puts "{1}${{lu_data}}"; exit;'
 XsctFileIn = 'xsct -sdx -nodisp {0}'
+XsdbConnectCmd = 'gdbremote connect {0}:{1} {2}'
