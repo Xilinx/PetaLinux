@@ -218,6 +218,23 @@ def get_filehashvalue(filename):
     return method.hexdigest()
 
 
+def get_free_port(port=9000):
+    '''Get the free port to use'''
+    import socket, random
+    from contextlib import closing
+    while True:
+        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+            if sock.connect_ex(('localhost', port)) == 0:
+                # Port is open, so not free
+                # Generate random int and try again
+                port = port + random.randint(0, 9)
+                continue
+            else:
+                # Port is not open, so free
+                # return port
+                return port
+
+
 def update_config_value(macro, value, filename):
     '''Update the value for macro in a given filename'''
     lines = []
