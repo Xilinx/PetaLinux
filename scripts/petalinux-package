@@ -39,7 +39,7 @@ def PreProcessArgs():
     parser_value = ''
     for arg in DeprecatedArgs:
         if arg in sys.argv:
-            parser_value = sys.argv[sys.argv.index(arg)].replace('-', '')
+            parser_value = sys.argv[sys.argv.index(arg)].replace('-', '', 2)
             logger.note('Argument: "%s" has been deprecated. '
                         'It is recommended to start using new python command line Argument.'
                         % (sys.argv[sys.argv.index(arg)]))
