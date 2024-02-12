@@ -106,7 +106,7 @@ def RunBootGen(biffile, args, proot):
     if args.bootgen_extra_args:
         extra_bootargs += ' %s' % args.bootgen_extra_args
     BootGenCmd = 'bootgen -arch %s -image %s -o %s %s' % (
-        bootgen_arch, plnx_vars.BifFile.format(proot),
+        bootgen_arch, biffile,
         args.output, extra_bootargs)
     stdout = plnx_utils.runCmd(BootGenCmd, os.getcwd(),
                                failed_msg='Fail to create BOOT image', shell=True)
