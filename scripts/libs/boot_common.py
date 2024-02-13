@@ -336,6 +336,7 @@ def AddRootfsFile(proot, rootfs_file, sys_arch, xilinx_arch, bootmode, prebuilt=
     images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if prebuilt \
         else plnx_vars.BuildImagesDir.format(proot)
     if not rootfs_file or rootfs_file == 'Default':
+        Rootfs = rootfs_file
         if initramfs_image.find('initramfs') != -1:
             Rootfs = os.path.join(
                 images_dir, plnx_vars.BootFileNames['TINY_RFS_FILE'])

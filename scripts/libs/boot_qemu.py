@@ -18,19 +18,18 @@ import os
 import sys
 import getpass
 import tempfile
+import re
 
-scripts_path = os.path.dirname(os.path.realpath(__file__))
 logger = logging.getLogger('PetaLinux')
 
-ProjectEssentials = 'pre-built project-spec components .petalinux user .gitignore README README.hw'
 
 # Global variables
 # machine path
 MachineDir = tempfile.mkdtemp()
 # default endian
 DEFAULT_ENDIAN = 'little'
-# default gdb args
-QemuGdbArgs = ' -gdb tcp::9000 '
+HOST_NET_DEV = "eth"
+SkipAddWic = False
 
 QemuHwDtb = {
     'no_multi_arch': 'zynqmp-qemu-arm.dtb',
@@ -84,6 +83,143 @@ QemuMemArgs = {
     'versal-net': '-m 8G '
 }
 
+def AutoMmc(Mmc, args, QemuCmd):
+    BootModeVersal = ''
+    SdIndex = ''
+    if args.xilinx_arch in ['versal', 'versal-net']:
+        if QemuCmd == 'qemu-system-aarch64':
+            for i in range(0, len(Mmc)):
+                if Mmc[i] == '0':
+                    BootModeVersal = 3
+                    SdIndex = 0
+                elif Mmc[i] == '1':
+                    BootModeVersal = 5
+                    SdIndex = 1
+                elif Mmc[i] == '6':
+                    BootModeVersal = 6
+                    SdIndex = 3
+        if args.xilinx_arch == 'versal-net':
+            SdIndex = 0
+        if args.xilinx_arch == 'versal-net' and BootModeVersal == 6:
+            SdIndex = 1
+    return BootModeVersal, SdIndex
+
+
+def AutoSerial(dtb_file_path, args, QemuCmd):
+    QemuSerialArgs = ''
+    dts_file = dtb_file_path.replace('.dtb', '.dts')
+    # Run the dtc command to convert DTB to DTS
+    DtbCmd = 'dtc -I dtb -O dts -o %s %s' % (dts_file, dtb_file_path)
+    stdout = plnx_utils.runCmd(DtbCmd, os.getcwd(),
+                               failed_msg='Fail to convert dtb cmd', shell=True)
+    with open(dts_file, 'r') as file:
+        content = file.read()
+        SerialRegexp = ['serial@[0-9a-zA-Z]+']
+        SerialAliases = re.search(
+            'stdout-path.*', content).group(0).split('=')[1].split(':')[0].replace('"', '')
+        if not SerialAliases:
+            SerialAliases = 'serial0'
+        aliases_match = re.search(r'aliases\s*{([^}]*)}', content)
+        aliases_node = aliases_match.group(1) if aliases_match else None
+        exp = SerialAliases.strip(' ') + '\s*=\s*([^;]+);'
+        SerialInstance = re.search(exp, aliases_node).group(
+            1).split('/')[2].strip(';').strip('"')
+        for lablekey in SerialRegexp:
+            serial_matches = re.findall(lablekey + r'\s*{', content)
+        SerialNum = serial_matches.index(SerialInstance + ' {')
+        SerialCnt = len(serial_matches)
+    for i in range(0, SerialCnt):
+        if i == SerialNum:
+            QemuSerialArgs += ' -serial mon:stdio'
+        else:
+            QemuSerialArgs += ' -serial /dev/null'
+    if args.xilinx_arch in ['versal', 'versal-net']:
+        if QemuCmd == 'qemu-system-aarch64':
+            QemuSerialArgs = ' -serial null -serial null' + QemuSerialArgs
+        else:
+            QemuSerialArgs = ' -serial mon:stdio'
+    QemuSerialArgs += ' -display none '
+    return QemuSerialArgs
+
+
+def AutoEth(GemCnt, TftpDir):
+    QemuEthArgs = ''
+    for Gem in GemCnt:
+        if Gem.isdigit():
+            j = int(Gem)
+            for i in range(0, j+1):
+                if i < j:
+                    QemuEthArgs += ' -net nic'
+                elif j == i:
+                    QemuEthArgs += ' -net nic,netdev=%s%d -netdev user,id=%s%d,' % (
+                        HOST_NET_DEV, i, HOST_NET_DEV, i)
+                    if TftpDir:
+                        QemuEthArgs += 'tftp=%s' % TftpDir
+    return QemuEthArgs
+
+
+def FindMmcAndGemStatus(dtb_file_path):
+    dts_file = dtb_file_path.replace('.dtb', '.dts')
+    # Run the dtc command to convert DTB to DTS
+    DtbCmd = 'dtc -I dtb -O dts -o %s %s' % (dts_file, dtb_file_path)
+    counter = []
+    stdout = plnx_utils.runCmd(DtbCmd, os.getcwd(),
+                               failed_msg='Fail to convert dtb cmd', shell=True)
+    with open(dts_file, 'r') as file:
+        content = file.read()
+        sdhci_regexp = ['sdhci[0-9]+']
+        gem_regexp = ['gem[0-9]+', 'ethernet.*[0-9]+']
+        mmc_counter = []
+        gem_counter = []
+        symbol_match = re.search(r'__symbols__\s*{([^}]*)}', content)
+        symbol_node = symbol_match.group(1) if symbol_match else None
+        if symbol_node:
+            sdhci_labels = []
+            gem_labels = []
+            for lablekey in sdhci_regexp:
+                sdhci_matches = re.findall(
+                    lablekey + r'\s*=\s*([^;]+);', symbol_node)
+                sdhci_labels += [match.strip() for match in sdhci_matches]
+            for lablekey in gem_regexp:
+                gem_matches = re.findall(
+                    lablekey + r'\s*=\s*([^;]+);', symbol_node)
+                gem_labels += [match.strip() for match in gem_matches]
+            mmc_counter = FindMmcEthNode(sdhci_labels, content)
+            counter.append(mmc_counter)
+            gem_counter = FindMmcEthNode(gem_labels, content)
+            counter.append(gem_counter)
+    return counter
+
+
+def FindMmcEthNode(labels, content):
+    generic_address = None
+    generic_status = None
+    counter = []
+    gem_num = 0
+    emmc_mode = 6
+
+    for label in labels:
+        generic_match = label.replace('"', '').split('/')[2]
+        if generic_match:
+            generic_node_match = re.search(
+                r'{}(\s*{{\s*[^}}]+}})'.format(re.escape(generic_match)), content)
+            gem_num += 1
+            if generic_node_match:
+                generic_node_content = generic_node_match.group(1)
+                non_removable_match = re.search(
+                    r'non-removable(\s*;)?', generic_node_content)
+                generic_status_match = re.search(
+                    r'status\s*=\s*"([^"]+)"', generic_node_content)
+                if generic_status_match:
+                    generic_status = generic_status_match.group(1)
+
+        if (generic_node_match and non_removable_match) and (generic_status == "okay" or not generic_status_match):
+            return emmc_mode
+        elif generic_node_match and (generic_status == "okay" or not generic_status_match):
+            counter.append(gem_num-1)
+
+    return counter
+
 
 def AddPmuConf(args, proot, arch, prebuilt):
     '''Add pmc-conf.bin file to bootparam dict'''
@@ -98,6 +234,7 @@ def AddPmuConf(args, proot, arch, prebuilt):
     before_load = ' -global xlnx,zynqmp-boot.cpu-num=0 -global xlnx,zynqmp-boot.use-pmufw=true  -global xlnx,zynqmp-boot.drive=pmu-cfg -blockdev node-name=pmu-cfg,filename='
     plnx_utils.add_dictkey(boot_common.BootParams, 'PMUCONF',
                            'BeforeLoad', before_load)
+    plnx_utils.MakePowerof2(ExtRootfs)
     after_load += ',driver=file'
     if prebuilt == 3 or args.kernel:
         after_load += ' -drive if=sd,format=raw,index=1,file='
@@ -137,22 +274,34 @@ def AddHwDtb(proot, multiarch, DtbArch, prebuilt):
                            'HWDTB', 'BeforeLoad', before_load)
 
 
-def AddQemuBootBin(proot, arch, prebuilt):
+def AddQemuBootBin(proot, arch, args, QemuCmd):
     '''Add qemu bootbin file to bootparam dict'''
-    images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if prebuilt \
+    global SkipAddWic
+    images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if args.prebuilt \
         else plnx_vars.BuildImagesDir.format(proot)
     bootfile = os.path.join(images_dir, plnx_vars.BootFileNames['QEMUIMG'])
     plnx_utils.add_dictkey(boot_common.BootParams,
                            'QemuBootBin', 'Path', bootfile)
-    if arch == 'versal':
-        before_load = ' -boot mode=5 -drive if=sd,index=1,file='
-    elif arch == 'versal-net':
-        before_load = ' -boot mode=6 -drive if=sd,index=1,file='
-    plnx_utils.add_dictkey(boot_common.BootParams, 'QemuBootBin',
-                           'BeforeLoad', before_load)
-    after_load = ',format=raw'
-    plnx_utils.add_dictkey(boot_common.BootParams,
-                           'QemuBootBin', 'AfterLoad', after_load)
+    MmcEthValue = FindMmcAndGemStatus(os.path.join(images_dir, plnx_vars.BootFileNames['DTB']))
+    Mmc = str(MmcEthValue[0]).strip('[]')
+    Eth = str(MmcEthValue[1]).strip('[]').strip(',')
+    BootMode, Index = AutoMmc(Mmc, args, QemuCmd)
+    if arch in ['versal', 'versal-net']:
+        if SkipAddWic == True:
+            before_load = ' -boot mode=%s -drive if=sd,index=%s,file=' % (
+                BootMode, Index)
+            plnx_utils.add_dictkey(boot_common.BootParams, 'QemuBootBin',
+                                   'BeforeLoad', before_load)
+            after_load = ',format=raw'
+            plnx_utils.add_dictkey(boot_common.BootParams,
+                                   'QemuBootBin', 'AfterLoad', after_load)
+    else:
+        before_load = '-device loader,file='
+        plnx_utils.add_dictkey(boot_common.BootParams, 'QemuBootBin',
+                               'BeforeLoad', before_load)
+        after_load = ',cpu-num=%s' % (args.targetcpu)
+        plnx_utils.add_dictkey(boot_common.BootParams,
+                               'QemuBootBin', 'AfterLoad', after_load)
 
 
 def QemuArchSetup(imgarch, imgendian, pmufw):
@@ -181,11 +330,16 @@ def QemuArchSetup(imgarch, imgendian, pmufw):
     return qemu, qemu_mach
 
 
-def RunGenQemuCmd(QemuCmd, QemuMach, args, BootParams, TftpDir, prebuilt):
+def RunGenQemuCmd(proot, QemuCmd, QemuMach, args, BootParams, TftpDir, rootfs_type):
     '''Run arch specific qemu command'''
     QemuGenCmd = ''
+    global SkipAddWic
+    images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if args.prebuilt \
+        else plnx_vars.BuildImagesDir.format(proot)
+    DtbFile = os.path.join(images_dir, plnx_vars.BootFileNames['DTB'])
     QemuGenCmd += '%s %s %s' % (QemuCmd, QemuMach,
-                                ArchQemuSerialArgs[args.xilinx_arch])
+                                AutoSerial(DtbFile, args, QemuCmd))
+
     for BootParam in BootParams:
         if BootParams[BootParam].get('BeforeLoad'):
             QemuGenCmd += BootParams[BootParam].get('BeforeLoad')
@@ -193,23 +347,46 @@ def RunGenQemuCmd(QemuCmd, QemuMach, args, BootParams, TftpDir, prebuilt):
             QemuGenCmd += BootParams[BootParam].get('Path')
         if BootParams[BootParam].get('AfterLoad'):
             QemuGenCmd += BootParams[BootParam].get('AfterLoad')
-    QemuGenCmd += "%s %stftp=%s %s" % (QemuGdbArgs, QemuEthArgs[args.xilinx_arch], TftpDir,
-                                       QemuMemArgs[args.xilinx_arch])
+    MmcEthValue = FindMmcAndGemStatus(DtbFile)
+    Mmc = str(MmcEthValue[0]).strip('[]')
+    Eth = str(MmcEthValue[1]).strip('[]').strip(',')
+    if not args.qemu_no_gdb:
+        QemuGenCmd += ' -gdb tcp:localhost:%s ' % plnx_utils.get_free_port()
+    QemuGenCmd += AutoEth(Eth, TftpDir)
     if args.xilinx_arch in ['zynqmp', 'versal', 'versal-net']:
-        QemuGenCmd += ' -machine-path %s' % MachineDir
+        QemuGenCmd += ' -machine-path %s ' % MachineDir
+    if rootfs_type == 'EXT4' and SkipAddWic == False:
+        WicImage = os.path.join(images_dir, 'petalinux-sdimage.wic')
+        plnx_utils.MakePowerof2(WicImage)
+        if not WicImage:
+            logger.error('File: %s Not found, This is required to boot the EXT4 Root file system type' % WicImage)
+        if args.arch == 'aarch64' and QemuCmd == 'qemu-system-aarch64':
+            QemuGenCmd +=" -boot mode=5 -drive if=sd,index=1,file=%s,format=raw" % WicImage
+        elif args.xilinx_arch == 'zynq':
+            QemuGenCmd +=" -boot mode=5 -drive if=sd,index=0,file=%s,format=raw" % WicImage
     if args.xilinx_arch == 'zynq':
-        ExtraArgs = '-device loader,addr=0xf8000008,data=0xDF0D,data-len=4 -device loader,addr=0xf8000140,data=0x00500801,data-len=4 -device loader,addr=0xf800012c,data=0x1ed044d,data-len=4 -device loader,addr=0xf8000108,data=0x0001e008,data-len=4 -device loader,addr=0xF8000910,data=0xF,data-len=0x4'
+        ExtraArgs = ' -device loader,addr=0xf8000008,data=0xDF0D,data-len=4 -device loader,addr=0xf8000140,data=0x00500801,data-len=4 -device loader,addr=0xf800012c,data=0x1ed044d,data-len=4 -device loader,addr=0xf8000108,data=0x0001e008,data-len=4 -device loader,addr=0xF8000910,data=0xF,data-len=0x4'
         QemuGenCmd += ExtraArgs
+    if args.qemu_args:
+        for qarg in args.qemu_args:
+            if isinstance(qarg, str) and re.search('-tftp=', qarg):
+                i = args.qemu_args.index(qarg)
+                args.qemu_args = args.qemu_args[:i]+['']+args.qemu_args[i+1:]
+        QemuGenCmd += ' %s' % '\n'.join(args.qemu_args)
+    QemuGenCmd += '%s ' % QemuMemArgs[args.xilinx_arch]
     logger.info(QemuGenCmd)
     stdout = plnx_utils.runCmd(QemuGenCmd, os.getcwd(),
                                failed_msg='Fail to launch qemu cmd', shell=True, checkcall=True)
 
 
-def RunMbQemuCmd(QemuCmd, QemuMach, args, BootParams):
+def RunMbQemuCmd(proot, QemuCmd, QemuMach, args, BootParams):
     '''Run multi arch microblaze qemu command'''
     QemuMbCmd = ''
+    images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if args.prebuilt \
+        else plnx_vars.BuildImagesDir.format(proot)
+    DtbFile = os.path.join(images_dir, plnx_vars.BootFileNames['DTB'])
     QemuMbCmd += '%s %s %s' % (QemuCmd, QemuMach,
-                               MbQemuSerialArgs[args.xilinx_arch])
+                               AutoSerial(DtbFile, args, QemuCmd))
     for BootParam in BootParams:
         if BootParams[BootParam].get('BeforeLoad'):
             QemuMbCmd += BootParams[BootParam].get('BeforeLoad')
@@ -231,12 +408,11 @@ def QemuBootSetup(args, proot):
     '''QEMU BootFiles setup.
     Add Each BootFile to the Dictionary based on the platform'''
     user = getpass.getuser()
-    boot_path = os.path.join(scripts_path + '/../bash/' + 'petalinux-boot')
-    stdout = plnx_utils.runCmd('%s --qemu %s' % (boot_path, (' '.join(sys.argv[2:]))), os.getcwd(),
-                               failed_msg='Fail to launch qemu cmd', shell=True, checkcall=True)
-    sys.exit(255)
     pmufw = 'n'
     ExtraArgs = ''
+    tftp_dir = ''
+    tftp_dir_disable = ''
+    global SkipAddWic
     if user == 'root':
         logger.warn('root user')
     args.arch = plnx_utils.get_system_arch(proot)
@@ -244,7 +420,15 @@ def QemuBootSetup(args, proot):
     if args.arch == ' ' or args.xilinx_arch == ' ':
         logger.error('Unable to get system architecture.')
 
-     # Check directories exists or not
+    sysconf = plnx_vars.SysConfFile.format(proot)
+    images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if args.prebuilt \
+        else plnx_vars.BuildImagesDir.format(proot)
+    # Use Prebuilt conf if exists
+    if args.prebuilt and os.path.exists(plnx_vars.PreBuildsSysConf.format(proot)):
+        sysconf = plnx_vars.PreBuildsSysConf.format(proot)
+    rootfs_type = plnx_utils.get_config_value(
+        'CONFIG_SUBSYSTEM_ROOTFS_', sysconf, 'choice')
+    # Check directories exists or not
     if args.prebuilt and not os.path.exists(
             plnx_vars.PreBuildsImagesDir.format(proot)):
         logger.error('Failed to Boot --prebuilt %s, %s Directory not found'
@@ -262,29 +446,36 @@ def QemuBootSetup(args, proot):
         imgarch = args.arch
         pmufw = 'n'
 
-    if not '-tftp' in args.qemu_args:
-        if args.tftp:
-            tftp_dir = args.tftp
-        else:
-            tftp_dir = plnx_utils.get_config_value('CONFIG_SUBSYSTEM_TFTPBOOT_DIR',
-                                                   plnx_vars.SysConfFile.format(proot))
-            tftp_dir_disable = plnx_utils.get_config_value('CONFIG_SUBSYSTEM_COPY_TO_TFTPBOOT',
-                                                           plnx_vars.SysConfFile.format(proot))
-        if tftp_dir and tftp_dir_disable == 'n':
-            ImagesDir = plnx_vars.BuildImagesDir.format(proot)
-            if os.path.isdir(ImagesDir):
-                numoffiles = os.listdir(ImagesDir)
-                if len(numoffiles) > 3:
-                    tftp_dir = ImagesDir
-                else:
-                    tftp_dir = plnx_vars.PreBuildsImagesDir.format(proot)
-            else:
-                tftp_dir = plnx_vars.PreBuildsImagesDir.format(proot)
-            logger.info('Set QEMU tftp to "%s"' % tftp_dir)
-        else:
+    for qarg in args.qemu_args:
+        if isinstance(qarg, str) and re.search('-tftp=', qarg):
+            tftp_dir = qarg.split('=')[1]
             if args.tftp:
                 logger.info(
                     'tftp command passed to petalinux-boot will be ignored as -tftp is mentioned in qemu-args')
+        else:
+            if args.tftp:
+                tftp_dir = args.tftp
+            else:
+                tftp_dir = plnx_utils.get_config_value('CONFIG_SUBSYSTEM_TFTPBOOT_DIR',
+                                                       plnx_vars.SysConfFile.format(proot))
+                tftp_dir_disable = plnx_utils.get_config_value('CONFIG_SUBSYSTEM_COPY_TO_TFTPBOOT',
+                                                               plnx_vars.SysConfFile.format(proot))
+            if tftp_dir and tftp_dir_disable == 'n':
+                ImagesDir = plnx_vars.BuildImagesDir.format(proot)
+                if os.path.isdir(ImagesDir):
+                    numoffiles = os.listdir(ImagesDir)
+                    if len(numoffiles) > 3:
+                        tftp_dir = ImagesDir
+                    else:
+                        tftp_dir = plnx_vars.PreBuildsImagesDir.format(proot)
+                else:
+                    tftp_dir = plnx_vars.PreBuildsImagesDir.format(proot)
+                logger.info('Set QEMU tftp to "%s"' % tftp_dir)
+    # check whether wic image generation required or not
+    if args.u_boot or args.prebuilt == '2':
+        SkipAddWic = True
+    if args.xilinx_arch in ['versal', 'versal-net']:
+        SkipAddWic = True
 
     if imgarch == 'microblaze' and pmufw == 'y':
         QemuMbCmd = ''
@@ -302,10 +493,13 @@ def QemuBootSetup(args, proot):
             # to add boot header
             AddBootHeader(proot, args.xilinx_arch, args.prebuilt)
         # running qemu-microblazeel
-        RunMbQemuCmd(QemuCmd, QemuMach, args, boot_common.BootParams)
+        RunMbQemuCmd(proot, QemuCmd, QemuMach, args, boot_common.BootParams)
     boot_common.BootParams = dict()
+    QemuCmd, QemuMach = QemuArchSetup(args.arch, args.endian, pmufw)
+    if QemuCmd == '' or QemuMach == '':
+        logger.error('Failed to detect QEMU ARCH for image')
     if args.xilinx_arch in ['versal', 'versal-net']:
-        AddQemuBootBin(proot, args.xilinx_arch, args.prebuilt)
+        AddQemuBootBin(proot, args.xilinx_arch, args, QemuCmd)
     if args.xilinx_arch == 'zynqmp':
         boot_common.AddTfaFile(proot, args.xilinx_arch,
                                args.command, args.prebuilt)
@@ -320,8 +514,6 @@ def QemuBootSetup(args, proot):
             boot_common.AddDtbFile(proot, args.dtb, args.command,
                                    args.xilinx_arch, args.prebuilt)
         if args.xilinx_arch == 'zynq':
-            images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if args.prebuilt \
-                else plnx_vars.BuildImagesDir.format(proot)
             ZynqDtbFile = os.path.join(
                 images_dir, plnx_vars.BootFileNames['DTB'])
             plnx_utils.add_dictkey(
@@ -345,23 +537,14 @@ def QemuBootSetup(args, proot):
             boot_common.AddBootScriptFile(
                 proot, args.xilinx_arch, args.boot_script,
                 args.command, args.targetcpu, args.prebuilt)
-        sysconf = plnx_vars.SysConfFile.format(proot)
-        # Use Prebuilt conf if exists
-        if args.prebuilt and os.path.exists(plnx_vars.PreBuildsSysConf.format(proot)):
-            sysconf = plnx_vars.PreBuildsSysConf.format(proot)
-        rootfs_type = plnx_utils.get_config_value(
-            'CONFIG_SUBSYSTEM_ROOTFS_', sysconf, 'choice')
         if rootfs_type == 'INITRD':
             boot_common.AddRootfsFile(
                 proot, args.rootfs, args.arch, args.xilinx_arch, args.command, args.prebuilt)
     # Validate Files
     boot_common.ValidateFiles(args.command)
-    QemuCmd, QemuMach = QemuArchSetup(args.arch, args.endian, pmufw)
-    if QemuCmd == '' or QemuMach == '':
-        logger.error('Failed to detect QEMU ARCH for image')
     # running arch qemu
-    RunGenQemuCmd(QemuCmd, QemuMach, args,
-                  boot_common.BootParams, tftp_dir, args.prebuilt)
+    RunGenQemuCmd(proot, QemuCmd, QemuMach, args,
+                  boot_common.BootParams, tftp_dir, rootfs_type)
 
 
 def QemuBootArgs(qemu_parser):
@@ -406,7 +589,8 @@ def QemuBootArgs(qemu_parser):
                              help='extra arguments to QEMU command')
     qemu_parser.add_argument(
         '--pmu-qemu-args', help='extra arguments for pmu instance of qemu <ZynqMP>')
-    qemu_parser.add_argument('--rootfs', metavar='ROOTFS_CPIO_FILE',
+    qemu_parser.add_argument('--rootfs', metavar='ROOTFS_CPIO_FILE', type=boot_common.add_bootfile('ROOTFS'),
+                             nargs='?', default='', const='Default',
                              help='Specify the cpio rootfile system needs to be used for boot.'
                              '\nSupports for: zynq,zynqMP and microblaze.')
     qemu_parser.add_argument(

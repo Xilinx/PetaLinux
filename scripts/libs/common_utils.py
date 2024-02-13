@@ -337,3 +337,28 @@ def add_dictkey(Dict, key, sub_key, value, append=False, sep=', '):
                 Dict[key][sub_key] += value
     else:
         Dict[key] = value
+
+def GetFileSize(FilePath):
+    if os.path.isfile(FilePath):
+        FileInfo = os.stat(FilePath)
+        return FileInfo.st_size
+
+def HighestPowerof2(FilePath):
+    FileSize=GetFileSize(FilePath)
+    if isinstance(FileSize, float):
+        Size_=int(FileSize) + 1
+    else:
+        Size_=FileSize
+
+    if not Size_ & (Size_ - 1) == 0 and Size_ > 0:
+        import math
+        p = int(math.log(Size_, 2)) + 1
+        return int(pow(2, p))
+    else:
+        return Size_
+
+def MakePowerof2(Image):
+    Power2Size = HighestPowerof2(Image)
+    QemuImgCmd = 'qemu-img resize -f raw %s %s' % (Image, Power2Size)
+    stdout = runCmd(QemuImgCmd, os.getcwd(),
+                               failed_msg='Fail to launch qemu img cmd', shell=True, checkcall=True)
