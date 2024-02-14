@@ -84,6 +84,24 @@ def AddWorkspaceRecipes(args, project):
             plnx_utils.RemoveDir(DevtoolAtticDir)
 
 
+def ResetVivadoProj(HwProj):
+    ''' Resetting HW project to pack bsp'''
+    logger.info('\tTrying to cleanup the copied hardware project.')
+    plnx_utils.check_tool('vivado', 'Please source Xilinx Tools settings first.')
+    import glob
+    HwXprFile = glob.glob(os.path.join(HwProj, '*.xpr'))
+    if HwXprFile:
+        import tempfile
+        filehandle = tempfile.NamedTemporaryFile()
+        VivadoTcl = filehandle.name
+        plnx_utils.add_str_to_file(VivadoTcl, 'reset_project')
+        VivadoCmd = 'vivado -mode batch -nojournal -nolog -s %s %s' % (VivadoTcl, HwXprFile[0])
+        plnx_utils.runCmd(VivadoCmd, out_dir=os.getcwd(), shell=True)
+
+    else:
+        logger.warning('Unable to find a valid hardware project file')
+
+
 def PackageBsp(args, proot):
     ''' Package the BSP for given projects'''
     if not args.project:
@@ -155,6 +173,8 @@ def PackageBsp(args, proot):
                     ExcludeFile, HwDir, TmpHwProjDir)
                 plnx_utils.runCmd(
                     rsync_cmd, out_dir=os.getcwd(), shell=True)
+                if args.clean:
+                    ResetVivadoProj(os.path.join(TmpHwProjDir, os.path.basename(HwDir)))
 
     # Create a tar file
     logger.info('Creating BSP')
@@ -175,6 +195,8 @@ def pkgbsp_args(bsp_parser):
                             type=AddHwProjData('HWSource', append=True),
                             help='Include a hardware source for PetaLinux project'
                             )
+    bsp_parser.add_argument('--clean', action='store_true', help='Force clean hardware project'
+                            'Vivado Installation is required for this option.')
     bsp_parser.add_argument('--exclude-from-file', metavar='EXCLUDE_FILE',
                             help='Excludes the files specified in EXCLUDE_FILE'
                             )
