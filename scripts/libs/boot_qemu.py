@@ -564,7 +564,7 @@ def QemuBootArgs(qemu_parser):
                              '\nBoot images/linux/Image for ZynqMP, versal and versal-net.'
                              '\nBoot images/linux/image.elf for MicroBlaze'
                              )
-    qemu_parser.add_argument('--dtb', metavar='DTB',
+    qemu_parser.add_argument('--dtb', metavar='DTB', type=boot_common.add_bootfile('DTB'),
                              help='force use of a particular device tree file.'
                              '\nif not specified, QEMU uses'
                              '\n<PROJECT>/images/linux/system.dtb')
@@ -594,7 +594,7 @@ def QemuBootArgs(qemu_parser):
                              help='Specify the cpio rootfile system needs to be used for boot.'
                              '\nSupports for: zynq,zynqMP and microblaze.')
     qemu_parser.add_argument(
-        '--qemu-no-gdb', help='Specify this option to disable gdb via qemu boot.')
+        '--qemu-no-gdb', action='store_true', help='Specify this option to disable gdb via qemu boot.')
     qemu_parser.add_argument('--targetcpu', metavar='TARGET_CPU', default=0,
                              type=int, help='Specify target CPUID (0 to N-1)')
     qemu_parser.add_argument('--targetcluster', metavar='TARGET_CLUSTER', default=0,
