@@ -222,9 +222,7 @@ def GetFileFromXsa(proot, hw_file='', bootfile_ext=''):
             bootfile = glob.glob(os.path.join(
                 plnx_vars.HWDescDir.format(proot),
                 '*_boot.%s' % bootfile_ext))
-        else:
-            bootfile = bootfile[0]
-        return bootfile
+        return bootfile[0]
 
     import tempfile
     filehandle = tempfile.NamedTemporaryFile()
