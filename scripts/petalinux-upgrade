@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+
+# Copyright (C) 2021-2022, Xilinx, Inc.  All rights reserved.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.  All rights reserved.
+#
+# Author:
+#       Raju Kumar Pothuraju <rajukumar.pothuraju@amd.com>
+#
+# SPDX-License-Identifier: MIT
+
+
+import argparse
+import logging
+import os
+import re
+import stat
+import sys
+
+scripts_path = os.path.dirname(os.path.realpath(__file__))
+libs_path = scripts_path + '/libs'
+sys.path = sys.path + [libs_path]
+import logger_setup
+import plnx_utils
+import plnx_vars
+
+logger, console_h = logger_setup.setup_logger('PetaLinux')
+
+DefaultPlatForm = ('aarch64', 'aarch64_dt', 'arm', 'microblaze')
+
+
+def GetVersion(Filename):
+    ''' Get eSDK version'''
+    with open(Filename, 'rb') as f:
+        lines = f.readlines()
+    NewVersion = ''
+    for line in lines:
+        if re.search(b'^titlestr', line):
+            NewVersion = line.decode("utf-8").split()[-1].strip('"')
+            return NewVersion
+    if not NewVersion:
+        logger.error('Falied to Get Version for eSDK')
+        sys.exit(255)
+
+
+def FetchEsdk(url, esdk, wget_args):
+    ''' Fetch eSDK from local or remote'''
+    EsdkFile = url
+    if '://' in url:
+        import tempfile
+        Dirhandle = tempfile.TemporaryDirectory()
+        WgetOutDir = Dirhandle.name
+        plnx_utils.runCmd('wget %s -O %s %s' % (wget_args,
+                                                os.path.join(WgetOutDir, esdk), url),
+                          os.getcwd(), failed_msg='Failed to get %s eSDK file' % esdk,
+                          shell=True)
+        EsdkFile = os.path.join(WgetOutDir, esdk)
+    NewVersion = GetVersion(EsdkFile)
+    if plnx_vars.Petainux_Major_Ver != NewVersion.split('.')[0]:
+        logger.error('PetaLinux will not support major upgrade versions')
+        sys.exit(255)
+    logger.info('Start updating %s eSDK' % esdk)
+    esdk_metadata_dir = os.path.join(plnx_vars.YoctoSrcPath, '.statistics')
+    esdk_metadata_file = os.path.join(esdk_metadata_dir, esdk)
+    OldHash = plnx_utils.get_config_value(
+        'BASE_SDK', esdk_metadata_file)
+    NewHash = plnx_utils.get_filehashvalue(EsdkFile)
+
+    if OldHash == NewHash:
+        logger.info('%s eSDK is upto date' % esdk)
+        return
+    plnx_utils.CopyFile(EsdkFile, plnx_vars.YoctoSrcPath)
+
+    plnx_utils.CreateDir(esdk_metadata_dir)
+    plnx_utils.CreateFile(esdk_metadata_file)
+    plnx_utils.update_config_value(
+        'BASE_SDK', NewHash, esdk_metadata_file)
+    os.chmod(os.path.join(plnx_vars.YoctoSrcPath, esdk),
+             stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+
+    plnx_utils.add_str_to_file(plnx_vars.VersionFile,
+                               'PETALINUX_NEW_VER = "%s"\n' % NewVersion, mode='a+')
+    logger.info('Updating %s eSDK succeeded' % esdk)
+
+
+def UpgradeEsdk(args):
+    ''' Upgrade setup for eSDK'''
+    if not os.access(plnx_vars.YoctoSrcPath, os.W_OK):
+        logger.error('User doesnot have write access to: %s' %
+                     plnx_vars.YoctoSrcPath)
+        sys.exit(255)
+    if not args.url:
+        logger.error('No --file/--url specified.')
+        sys.exit(255)
+    logger.info('Upgrading esdks from %s...' % args.url)
+    # Add default list if not provided
+    if not args.platform:
+        args.platform = [DefaultPlatForm]
+    # Merge nested lists
+    args.platform = sum(args.platform, [])
+    # Remove duplicates from list
+    args.platform = list(set(args.platform))
+    for esdk in args.platform:
+        FetchEsdk(os.path.join(args.url, esdk), esdk, args.wget_args)
+
+
+def ValidatePath(path):
+    ''' Validate the use specified path or url'''
+    if '://' in path:
+        wgetcmd = 'wget --delete-after --timeout=10 --tries=5 --retry-connrefused %s' % path
+        plnx_utils.runCmd(wgetcmd, os.getcwd(),
+                          failed_msg='Specified URL: %s is not reachable or does not exist' % path,
+                          shell=True)
+    else:
+        path = os.path.realpath(path)
+        if not os.path.exists(path):
+            raise argparse.ArgumentTypeError(
+                'Specified path does not exist: %s' % path)
+    path = path if path.endswith('/') else path + '/'
+    return path
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Upgrade the system software without changing the host tool components',
+        formatter_class=argparse.RawTextHelpFormatter,
+        add_help=False,
+        usage='Use %(prog)s <subcommand> --help to get help on a specific command')
+
+    parser.add_argument('-f', '--file', metavar='<DIR>', type=ValidatePath, dest='url',
+                        help='Specify the directory which contains upgradable esdk files.')
+    parser.add_argument('-w', '--wget-args', default='',
+                        help='Specify additional wget arguments to use with -u/--url option')
+    parser.add_argument('-D', '--debug', action='store_true',
+                        help=argparse.SUPPRESS)
+    parser.add_argument('-u', '--url', type=ValidatePath, dest='url',
+                        help='Specify the URL which contains upgradable esdk content.')
+    parser.add_argument('-p', '--platform', choices=DefaultPlatForm, default=[],
+                        nargs='+', action='append',
+                        help='Specifies the architecture name to upgrade'
+                        '\naarch64         	: sources for zynqMP and versal'
+                        '\naarch64_dt      	: system device-tree(SDT) sources for zynqMP and versal'
+                        '\narm             	: sources for zynq'
+                        '\nmicroblaze      	: sources for microblaze')
+    parser.add_argument('-h', '--help', action='help',
+                        help='Show help message and exit')
+    parser.set_defaults(func=UpgradeEsdk)
+
+    args = parser.parse_args()
+
+    # Display help if no args specified
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
+    args = parser.parse_args()
+
+    # Setup logger to file
+    plnx_utils.RenameFile(plnx_vars.UpgradeLog, plnx_vars.UpgradeLog + '.old')
+    logger_setup.setup_logger_file(plnx_vars.UpgradeLog)
+
+    # Print debug prints if debug selected
+    if args.debug:
+        console_h.setLevel(logging.DEBUG)
+
+    ret = args.func(args)
+    return ret
+
+
+if __name__ == "__main__":
+    try:
+        ret = main()
+    except Exception:
+        ret = 1
+        import traceback
+        traceback.print_exc()
+    sys.exit(ret)

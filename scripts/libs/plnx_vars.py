@@ -84,8 +84,8 @@ HsmOutFile = os.path.join(SysConfDir, 'flash_parts.txt')
 
 '''Tool Configurations'''
 PetaLinux = os.environ.get('PETALINUX', '')
-PetaLinux_Ver_Str = 'PETALINUX_VER'
-PetaLinux_Ver = os.environ.get(PetaLinux_Ver_Str, '')
+Petainux_Major_Ver = os.environ.get('PETALINUX_MAJOR_VER', '')
+PetaLinux_Ver = os.environ.get('PETALINUX_VER', '')
 BuildToolsEnvPath = os.path.join(PetaLinux,
                                  '.environment-setup-x86_64-petalinux-linux')
 YoctoSrcPath = os.path.join(PetaLinux, 'components', 'yocto')
@@ -97,6 +97,8 @@ TemplateDir = os.path.join(PetaLinux, 'templates')
 TemplateCommon = os.path.join(TemplateDir, '{0:s}', 'common')
 TemplateDir_C = os.path.join(TemplateDir, '{0:s}', 'template-{1:s}')
 DfuUtilBin = os.path.join(XsctPath, 'tps', 'lnx64', 'dfu-util-0.9', 'bin', 'dfu-util')
+UpgradeLog = os.path.join(PetaLinux, 'update.log')
+VersionFile = os.path.join(PetaLinux, '.version-history')
 
 '''PATH variables'''
 ospath = os.environ['PATH']
