@@ -85,7 +85,8 @@ HsmOutFile = os.path.join(SysConfDir, 'flash_parts.txt')
 '''Tool Configurations'''
 PetaLinux = os.environ.get('PETALINUX', '')
 Petainux_Major_Ver = os.environ.get('PETALINUX_MAJOR_VER', '')
-PetaLinux_Ver = os.environ.get('PETALINUX_VER', '')
+PetaLinux_Ver_Str = 'PETALINUX_VER'
+PetaLinux_Ver = os.environ.get(PetaLinux_Ver_Str, '')
 BuildToolsEnvPath = os.path.join(PetaLinux,
                                  '.environment-setup-x86_64-petalinux-linux')
 YoctoSrcPath = os.path.join(PetaLinux, 'components', 'yocto')
