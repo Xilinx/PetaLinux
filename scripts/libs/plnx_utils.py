@@ -409,3 +409,9 @@ def setup_plnwrapper(args, proot, config_target, gen_confargs):
 
     if is_hwflow_sdt(proot) == 'sdt':
         gen_sysconf_dtsi_file(proot)
+
+
+def PlnxTraceback():
+    if plnx_vars.EnablePlnxTraceback:
+        import traceback
+        traceback.print_exc()
