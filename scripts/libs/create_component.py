@@ -106,8 +106,11 @@ def SetupAppsModules(args, template_path, cpath, proot):
     else:
         map_str = '@modname@ @mod_name@'
     for _str in map_str.split():
+        r_name = recipe_name
+        if _str == '@mod_name@':
+            r_name = recipe_name.replace('-', '_').replace('+', '_')
         plnx_utils.replace_str_fromdir(
-            cpath, _str, recipe_name, include_dir_names=True)
+            cpath, _str, r_name, include_dir_names=True)
 
     srcuri2add = []
     if args.network_srcuris:
