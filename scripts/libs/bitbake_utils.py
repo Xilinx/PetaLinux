@@ -173,7 +173,7 @@ def get_yocto_source(proot):
             return True
         while True:
             userchoice = input(
-                'Please input "y" to proceed the installing SDK into project, "n" to exit:')
+                'Please input "y" to proceed the installing SDK into project, "n" to use existing yocto SDK:')
             if userchoice in ['y', 'Y', 'yes', 'Yes', 'YEs', 'YES']:
                 plnx_utils.RemoveDir(plnx_vars.EsdkInstalledDir.format(proot))
                 break
