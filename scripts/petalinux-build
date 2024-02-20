@@ -221,7 +221,7 @@ def BuildComponent(args, proot):
     tmpdir_path = tmpdir_path.replace(
         '${PROOT}', proot).replace('$PROOT', proot)
     # when user specify -s/--sdk or -e/--esdk then the below code will execute
-    if build_task == 'do_populate_sdk' or build_task == 'do_populate_sdk_ext':
+    if {'do_populate_sdk', 'do_populate_sdk_ext'} & set(build_task.split()):
         logger.info('Copying SDK Installer...')
         SDKOutFile = plnx_vars.SdkOutFile.format(proot)
         if build_task == 'do_populate_sdk_ext':
@@ -230,10 +230,10 @@ def BuildComponent(args, proot):
         sdk_dir = os.path.join(deploy_path, 'sdk')
         # if sdk directory is exists in build/tmp/deploy/sdk then below code will execute
         if os.path.isdir(sdk_dir):
-            if build_task == 'do_populate_sdk':
+            if 'do_populate_sdk' in build_task.split():
                 sdk_src = glob.glob(os.path.join(
                     sdk_dir, 'petalinux-glibc-x86_64-petalinux-image-minimal-*.sh'))
-            if build_task == 'do_populate_sdk_ext':
+            if 'do_populate_sdk_ext' in build_task.split():
                 sdk_src = glob.glob(os.path.join(
                     sdk_dir, 'petalinux-glibc-x86_64-petalinux-image-minimal-*ext*.sh'))
             # if .sh files are exists then it will create sdk.sh/esdk.sh file and copy .sh files into images/linux
