@@ -215,7 +215,7 @@ def main():
 if __name__ == "__main__":
     try:
         ret = main()
-    except Exception:
+    except Exception as e:
         ret = 1
-        plnx_utils.PlnxTraceback()
+        plnx_utils.PlnxTraceback(e)
     sys.exit(ret)

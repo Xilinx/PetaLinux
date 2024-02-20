@@ -411,7 +411,9 @@ def setup_plnwrapper(args, proot, config_target, gen_confargs):
         gen_sysconf_dtsi_file(proot)
 
 
-def PlnxTraceback():
+def PlnxTraceback(e):
     if plnx_vars.EnablePlnxTraceback:
         import traceback
         traceback.print_exc()
+    else:
+        logger.error(e)
