@@ -223,9 +223,9 @@ def BuildComponent(args, proot):
     # when user specify -s/--sdk or -e/--esdk then the below code will execute
     if build_task == 'do_populate_sdk' or build_task == 'do_populate_sdk_ext':
         logger.info('Copying SDK Installer...')
-        SDKOutFile = plnx_vars.SdkFile.format(proot)
+        SDKOutFile = plnx_vars.SdkOutFile.format(proot)
         if build_task == 'do_populate_sdk_ext':
-            SDKOutFile = plnx_vars.ESdkFile.format(proot)
+            SDKOutFile = plnx_vars.ESdkOutFile.format(proot)
         deploy_path = os.path.join(tmpdir_path, 'deploy')
         sdk_dir = os.path.join(deploy_path, 'sdk')
         # if sdk directory is exists in build/tmp/deploy/sdk then below code will execute
