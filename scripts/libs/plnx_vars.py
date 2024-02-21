@@ -69,6 +69,7 @@ OeInitEnv = os.path.join(EsdkInstalledDir, 'layers',
 EsdkConfDir = os.path.join(EsdkInstalledDir, 'conf')
 EsdkBBLayerconf = os.path.join(EsdkConfDir, 'bblayers.conf')
 EnablePlnxTraceback = False
+AutoCleanupFiles = []
 
 '''Project Out Files'''
 BootBINFile = os.path.join(BuildImagesDir, 'BOOT.BIN')

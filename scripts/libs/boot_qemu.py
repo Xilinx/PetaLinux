@@ -26,6 +26,8 @@ logger = logging.getLogger('PetaLinux')
 # Global variables
 # machine path
 MachineDir = tempfile.mkdtemp()
+plnx_vars.AutoCleanupFiles.append(MachineDir)
+
 # default endian
 DEFAULT_ENDIAN = 'little'
 HOST_NET_DEV = "eth"

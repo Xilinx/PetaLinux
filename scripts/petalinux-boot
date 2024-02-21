@@ -118,4 +118,6 @@ if __name__ == "__main__":
     except Exception as e:
         ret = 1
         plnx_utils.PlnxTraceback(e)
+    finally:
+        plnx_utils.PlnxCleanup()
     sys.exit(ret)

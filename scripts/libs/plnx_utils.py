@@ -417,3 +417,12 @@ def PlnxTraceback(e):
         traceback.print_exc()
     else:
         logger.error(e)
+
+
+def PlnxCleanup():
+    for Path in plnx_vars.AutoCleanupFiles:
+        logger.debug('Removing %s' % Path)
+        if os.path.isfile(Path):
+            RemoveFile(Path)
+        else:
+            RemoveDir(Path)
