@@ -32,6 +32,7 @@ plnx_vars.AutoCleanupFiles.append(MachineDir)
 DEFAULT_ENDIAN = 'little'
 HOST_NET_DEV = "eth"
 SkipAddWic = False
+ExtraArgs = ''
 
 QemuHwDtb = {
     'no_multi_arch': 'zynqmp-qemu-arm.dtb',
@@ -222,27 +223,55 @@ def FindMmcEthNode(labels, content):
 
     return counter
 
-
-def AddPmuConf(args, proot, arch, prebuilt):
+def AddPmuConf(args, proot, arch, prebuilt, rootfs_type):
     '''Add pmc-conf.bin file to bootparam dict'''
     images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if prebuilt \
         else plnx_vars.BuildImagesDir.format(proot)
     before_load = ''
     after_load = ''
+    ExtRootfs = ''
+    global SkipAddWic
+    global ExtraArgs
     PmuConf = os.path.join(images_dir, plnx_vars.BootFileNames['PMUCONF'])
     key = 'RFS_FILE_%s_%s' % (args.command.upper(), arch.upper())
-    ExtRootfs = os.path.join(images_dir, plnx_vars.BootFileNames[key])
-    plnx_utils.add_dictkey(boot_common.BootParams, 'PMUCONF', 'Path', PmuConf)
-    before_load = ' -global xlnx,zynqmp-boot.cpu-num=0 -global xlnx,zynqmp-boot.use-pmufw=true  -global xlnx,zynqmp-boot.drive=pmu-cfg -blockdev node-name=pmu-cfg,filename='
-    plnx_utils.add_dictkey(boot_common.BootParams, 'PMUCONF',
-                           'BeforeLoad', before_load)
-    plnx_utils.MakePowerof2(ExtRootfs)
-    after_load += ',driver=file'
-    if prebuilt == 3 or args.kernel:
-        after_load += ' -drive if=sd,format=raw,index=1,file='
-        after_load += ExtRootfs
-    plnx_utils.add_dictkey(boot_common.BootParams,
-                           'PMUCONF', 'AfterLoad', after_load)
+    YoctoMachine = plnx_utils.get_config_value(plnx_vars.YoctoMachineConf, plnx_vars.SysConfFile.format(proot))
+    # using wic for SOM in pivot rootfs enabled cases
+    if YoctoMachine in ['xilinx-k26-som', 'xilinx-k26-kv', 'xilinx-k24-som', 'xilinx-k24-kd']:
+        WicImage = os.path.join(images_dir, 'petalinux-sdimage.wic')
+        for qargs in args.qemu_args[0].split():
+            if  re.search('if=sd', qargs):
+                SkipAddWic = True
+                for WicArgs in qargs.split(','):
+                    if 'file=' in WicArgs:
+                        SdImage = WicArgs.strip('file=')
+                        plnx_utils.MakePowerof2(SdImage)
+        if SkipAddWic == False:
+            ExtRootfs = WicImage
+    else:
+        ExtRootfs = os.path.join(images_dir, plnx_vars.BootFileNames[key])
+    if os.path.exists(PmuConf):
+        plnx_utils.add_dictkey(boot_common.BootParams, 'PMUCONF', 'Path', PmuConf)
+        before_load = ' -global xlnx,zynqmp-boot.cpu-num=0 -global xlnx,zynqmp-boot.use-pmufw=true  -global xlnx,zynqmp-boot.drive=pmu-cfg -blockdev node-name=pmu-cfg,filename='
+        plnx_utils.add_dictkey(boot_common.BootParams, 'PMUCONF',
+                               'BeforeLoad', before_load)
+        after_load += ',driver=file'
+        plnx_utils.add_dictkey(boot_common.BootParams,
+                               'PMUCONF', 'AfterLoad', after_load)
+    else:
+        # If pmu-conf does not exists
+        ExtraArgs += ' -global xlnx,zynqmp-boot.cpu-num=0 -global xlnx,zynqmp-boot.use-pmufw=true'
+    if ExtRootfs and (prebuilt == 3 or args.kernel):
+        before_load = ''
+        if rootfs_type == 'INITRD' or rootfs_type == 'INITRAMFS':
+            # Add ramdisk image if switch_root enabled
+            initramfs_image = plnx_utils.get_config_value('CONFIG_SUBSYSTEM_INITRAMFS_IMAGE_NAME',
+                                                          plnx_vars.SysConfFile.format(proot))
+            if initramfs_image.find('initramfs') != -1:
+                plnx_utils.MakePowerof2(ExtRootfs)
+                plnx_utils.add_dictkey(boot_common.BootParams, 'EXTROOTFS', 'Path', ExtRootfs)
+                before_load += ' -drive if=sd,format=raw,index=1,file='
+                plnx_utils.add_dictkey(boot_common.BootParams,
+                                       'EXTROOTFS', 'BeforeLoad', before_load)
 
 
 def AddBootHeader(proot, arch, prebuilt):
@@ -336,6 +365,7 @@ def RunGenQemuCmd(proot, QemuCmd, QemuMach, args, BootParams, TftpDir, rootfs_ty
     '''Run arch specific qemu command'''
     QemuGenCmd = ''
     global SkipAddWic
+    global ExtraArgs
     images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if args.prebuilt \
         else plnx_vars.BuildImagesDir.format(proot)
     DtbFile = os.path.join(images_dir, plnx_vars.BootFileNames['DTB'])
@@ -359,23 +389,30 @@ def RunGenQemuCmd(proot, QemuCmd, QemuMach, args, BootParams, TftpDir, rootfs_ty
         QemuGenCmd += ' -machine-path %s ' % MachineDir
     if rootfs_type == 'EXT4' and SkipAddWic == False:
         WicImage = os.path.join(images_dir, 'petalinux-sdimage.wic')
-        plnx_utils.MakePowerof2(WicImage)
-        if not WicImage:
+        if not os.path.exists(WicImage):
             logger.error('File: %s Not found, This is required to boot the EXT4 Root file system type' % WicImage)
-        if args.arch == 'aarch64' and QemuCmd == 'qemu-system-aarch64':
-            QemuGenCmd +=" -boot mode=5 -drive if=sd,index=1,file=%s,format=raw" % WicImage
-        elif args.xilinx_arch == 'zynq':
-            QemuGenCmd +=" -boot mode=5 -drive if=sd,index=0,file=%s,format=raw" % WicImage
+        for qarg in args.qemu_args:
+            for qargs in qarg.split():
+                if  not re.search('if=sd', qargs):
+                    plnx_utils.MakePowerof2(WicImage)
+                    if args.arch == 'aarch64' and QemuCmd == 'qemu-system-aarch64':
+                        QemuGenCmd +=" -boot mode=5 -drive if=sd,index=1,file=%s,format=raw" % WicImage
+                    elif args.xilinx_arch == 'zynq':
+                        QemuGenCmd +=" -boot mode=5 -drive if=sd,index=0,file=%s,format=raw" % WicImage
     if args.xilinx_arch == 'zynq':
         ExtraArgs = ' -device loader,addr=0xf8000008,data=0xDF0D,data-len=4 -device loader,addr=0xf8000140,data=0x00500801,data-len=4 -device loader,addr=0xf800012c,data=0x1ed044d,data-len=4 -device loader,addr=0xf8000108,data=0x0001e008,data-len=4 -device loader,addr=0xF8000910,data=0xF,data-len=0x4'
-        QemuGenCmd += ExtraArgs
+    QemuGenCmd += ExtraArgs
     if args.qemu_args:
         for qarg in args.qemu_args:
             if isinstance(qarg, str) and re.search('-tftp=', qarg):
                 i = args.qemu_args.index(qarg)
                 args.qemu_args = args.qemu_args[:i]+['']+args.qemu_args[i+1:]
         QemuGenCmd += ' %s' % '\n'.join(args.qemu_args)
-    QemuGenCmd += '%s ' % QemuMemArgs[args.xilinx_arch]
+	# if -m not passed in qemu extra args
+        if not '-m' in args.qemu_args[0].split():
+            QemuGenCmd += '%s ' % QemuMemArgs[args.xilinx_arch]
+    else:
+        QemuGenCmd += '%s ' % QemuMemArgs[args.xilinx_arch]
     logger.info(QemuGenCmd)
     stdout = plnx_utils.runCmd(QemuGenCmd, os.getcwd(),
                                failed_msg='Fail to launch qemu cmd', shell=True, checkcall=True)
@@ -454,25 +491,19 @@ def QemuBootSetup(args, proot):
             if args.tftp:
                 logger.info(
                     'tftp command passed to petalinux-boot will be ignored as -tftp is mentioned in qemu-args')
-        else:
-            if args.tftp:
-                tftp_dir = args.tftp
-            else:
-                tftp_dir = plnx_utils.get_config_value('CONFIG_SUBSYSTEM_TFTPBOOT_DIR',
+    if args.tftp:
+        tftp_dir = args.tftp
+    else:
+        tftp_dir = plnx_utils.get_config_value('CONFIG_SUBSYSTEM_TFTPBOOT_DIR',
+                                               plnx_vars.SysConfFile.format(proot))
+        tftp_dir_disable = plnx_utils.get_config_value('CONFIG_SUBSYSTEM_COPY_TO_TFTPBOOT',
                                                        plnx_vars.SysConfFile.format(proot))
-                tftp_dir_disable = plnx_utils.get_config_value('CONFIG_SUBSYSTEM_COPY_TO_TFTPBOOT',
-                                                               plnx_vars.SysConfFile.format(proot))
-            if tftp_dir and tftp_dir_disable == 'n':
-                ImagesDir = plnx_vars.BuildImagesDir.format(proot)
-                if os.path.isdir(ImagesDir):
-                    numoffiles = os.listdir(ImagesDir)
-                    if len(numoffiles) > 3:
-                        tftp_dir = ImagesDir
-                    else:
-                        tftp_dir = plnx_vars.PreBuildsImagesDir.format(proot)
-                else:
-                    tftp_dir = plnx_vars.PreBuildsImagesDir.format(proot)
-                logger.info('Set QEMU tftp to "%s"' % tftp_dir)
+    if not tftp_dir and tftp_dir_disable == 'y':
+        if args.prebuilt > 1:
+            tftp_dir = plnx_vars.PreBuildsImagesDir.format(proot)
+        else:
+            tftp_dir = plnx_vars.BuildImagesDir.format(proot)
+    logger.info('Set QEMU tftp to "%s"' % tftp_dir)
     # check whether wic image generation required or not
     if args.u_boot or args.prebuilt == '2':
         SkipAddWic = True
@@ -482,7 +513,7 @@ def QemuBootSetup(args, proot):
     if imgarch == 'microblaze' and pmufw == 'y':
         QemuMbCmd = ''
         boot_common.BootParams = dict()
-        QemuCmd, QemuMach = QemuArchSetup(imgarch, args.endian, pmufw)
+        QemuCmd, QemuMach = QemuArchSetup(imgarch, DEFAULT_ENDIAN, pmufw)
         if QemuCmd == '' or QemuMach == '':
             logger.error('Failed to detect QEMU ARCH for image')
         boot_common.AddPmuFile(proot, args.xilinx_arch, args.command,
@@ -497,7 +528,7 @@ def QemuBootSetup(args, proot):
         # running qemu-microblazeel
         RunMbQemuCmd(proot, QemuCmd, QemuMach, args, boot_common.BootParams)
     boot_common.BootParams = dict()
-    QemuCmd, QemuMach = QemuArchSetup(args.arch, args.endian, pmufw)
+    QemuCmd, QemuMach = QemuArchSetup(args.arch, DEFAULT_ENDIAN, pmufw)
     if QemuCmd == '' or QemuMach == '':
         logger.error('Failed to detect QEMU ARCH for image')
     if args.xilinx_arch in ['versal', 'versal-net']:
@@ -505,7 +536,7 @@ def QemuBootSetup(args, proot):
     if args.xilinx_arch == 'zynqmp':
         boot_common.AddTfaFile(proot, args.xilinx_arch,
                                args.command, args.prebuilt)
-        AddPmuConf(args, proot, args.arch, args.prebuilt)
+        AddPmuConf(args, proot, args.arch, args.prebuilt, rootfs_type)
     if args.xilinx_arch in ['zynqmp', 'versal', 'versal-net']:
         AddHwDtb(proot, 'y', HwDtbMap[args.xilinx_arch], args.prebuilt)
     if args.prebuilt == 2 or args.u_boot:
@@ -570,22 +601,6 @@ def QemuBootArgs(qemu_parser):
                              help='force use of a particular device tree file.'
                              '\nif not specified, QEMU uses'
                              '\n<PROJECT>/images/linux/system.dtb')
-    qemu_parser.add_argument('--dhcpd', choices=['enable', 'disable'],
-                             help='enable or disable dhcpd. This option applies'
-                             '\nfor ROOT MODE ONLY.'
-                             '\ndefault is to enable dhcpd.')
-    qemu_parser.add_argument('--iptables-allowed', help='whether to allow to implement iptables commands.'
-                             '\nThis option applies for ROOT MODE ONLY'
-                             '\nDefault is not allowed.')
-    qemu_parser.add_argument('--net-intf', metavar='NET_INTERFACE',
-                             help='network interface on the host to bridge with'
-                             '\nthe QEMU subnet. This option applies for ROOT'
-                             '\nMODE ONLY. Default is eth0.')
-    qemu_parser.add_argument('--subnet', metavar='SUBNET',
-                             help='subnet_gateway_ip/num_bits_of_subnet_mask'
-                             '\nsubnet gateway IP and the number of valid bits'
-                             '\nof network mask. This option applies for ROOT'
-                             '\nMODE ONLY. Default is 192.168.10.1/24')
     qemu_parser.add_argument('--tftp', help='Path to tftp folder')
     qemu_parser.add_argument('--qemu-args', metavar='QEMU_ARGUMENTS', action='append', default=[],
                              help='extra arguments to QEMU command')
@@ -594,15 +609,11 @@ def QemuBootArgs(qemu_parser):
     qemu_parser.add_argument('--rootfs', metavar='ROOTFS_CPIO_FILE', type=boot_common.add_bootfile('ROOTFS'),
                              nargs='?', default='', const='Default',
                              help='Specify the cpio rootfile system needs to be used for boot.'
-                             '\nSupports for: zynq,zynqMP and microblaze.')
+                             '\nSupports for: zynq, zynqMP, versal, versal-net and microblaze.')
     qemu_parser.add_argument(
         '--qemu-no-gdb', action='store_true', help='Specify this option to disable gdb via qemu boot.')
     qemu_parser.add_argument('--targetcpu', metavar='TARGET_CPU', default=0,
                              type=int, help='Specify target CPUID (0 to N-1)')
-    qemu_parser.add_argument('--targetcluster', metavar='TARGET_CLUSTER', default=0,
-                             type=int, help='Specify target cluster (0 to N-1)')
-    qemu_parser.add_argument('--endian', metavar='ENDIAN', default='little',
-                             help='Specify the image endian')
     qemu_parser.add_argument('--boot-script', type=boot_common.add_bootfile('BOOTSCRIPT'),
                              nargs='?', default='', const='Default',
                              help='Specify the boot.scr path')
