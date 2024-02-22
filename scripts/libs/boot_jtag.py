@@ -45,7 +45,7 @@ def JtagConnect(args):
     else:
         ConStr += 'connect -url %s\n' % args.hw_server_url \
             if args.hw_server_url else 'connect\n'
-        if args.xilinx_arch not in ['versal', 'versal-net']:
+        if args.xilinx_arch not in ('versal', 'versal-net'):
             ConStr += 'for {set i 0} {$i < 20} {incr i} {\n'
             ConStr += '\tif { [ta] != "" } break;\n'
             ConStr += '\tafter 50\n'
@@ -73,7 +73,7 @@ def GenerateTcl(args, BootParams):
             if BootParams[BootParam].get('BeforeLoad'):
                 TclStr += BootParams[BootParam].get('BeforeLoad')
             if BootParam == 'FPGA':
-                if args.xilinx_arch in ['versal', 'versal-net']:
+                if args.xilinx_arch in ('versal', 'versal-net'):
                     TclStr += 'puts stderr "INFO: Downloading BIN file: %s to the target."\n' % (
                         BootParams[BootParam].get('Path'))
                     fpga_cmd = 'device program'
@@ -99,7 +99,7 @@ def GenerateTcl(args, BootParams):
                     BootParams[BootParam].get('Path'),
                     BootParams[BootParam].get('LoadAddr'))
                 TclStr += 'dow -data %s"%s" %s\n' % (
-                                    '-force ' if args.xilinx_arch in ['versal', 'versal-net'] else '',
+                                    '-force ' if args.xilinx_arch in ('versal', 'versal-net') else '',
                                     BootParams[BootParam].get('Path'),
                                     BootParams[BootParam].get('LoadAddr'))
             if BootParams[BootParam].get('AfterLoad'):
@@ -157,20 +157,20 @@ def JtagBootSetup(args, proot):
                                args.targetcpu, args.prebuilt)
         boot_common.AddTfaFile(proot, args.xilinx_arch,
                                args.command, args.prebuilt)
-    if args.xilinx_arch in ['zynq', 'zynqmp']:
+    if args.xilinx_arch in ('zynq', 'zynqmp'):
         boot_common.AddFsblFile(proot, args.xilinx_arch,
                                 args.command, args.targetcpu, args.prebuilt)
 
     if not args.prebuilt == 1:
         AddDTB = False
-        if args.xilinx_arch not in ['microblaze', 'versal', 'versal-net']:
+        if args.xilinx_arch not in ('microblaze', 'versal', 'versal-net'):
             AddDTB = True
         elif args.xilinx_arch == 'microblaze' and (args.prebuilt == 3 or args.kernel):
             AddDTB = True
         if AddDTB:
             boot_common.AddDtbFile(proot, args.dtb, args.command,
                                    args.xilinx_arch, args.prebuilt)
-        if args.xilinx_arch not in ['versal', 'versal-net']:
+        if args.xilinx_arch not in ('versal', 'versal-net'):
             boot_common.AddUbootFile(
                 proot, args.u_boot, args.xilinx_arch, args.targetcpu,
                 args.command, args.prebuilt)

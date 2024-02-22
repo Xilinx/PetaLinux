@@ -91,15 +91,15 @@ def GetFlashInterface(flash_intf_arg, flash_type, flash_width, bitfile):
                         'Unknown SPI width detected: %s.' % spi_width)
                     logger.warning('Using default one: %s' % auto_flash_intf)
     elif flash_type == 'parallel':
-        if flash_width in ['8', '16']:
+        if flash_width in ('8', '16'):
             auto_flash_intf = 'BPIx%s' % flash_width
         else:
             logger.warning(
                 'Auto detect: Unsupported parallel system flash width: %s.' % flash_width)
     if flash_intf_arg:
-        if flash_intf_arg not in ['SERIALx1', 'SPIx1', 'SPIx2',
+        if flash_intf_arg not in ('SERIALx1', 'SPIx1', 'SPIx2',
                                   'SPIx4', 'SPIx8', 'BPIx8', 'BPIx16',
-                                  'SMAPx8', 'SMAPx16', 'SMAPx32']:
+                                  'SMAPx8', 'SMAPx16', 'SMAPx32'):
             logger.error(
                 'Unsupported user specified flash interface: %s' % flash_intf_arg)
             sys.exit(255)
@@ -159,7 +159,7 @@ def CreateMBBootBin(args, proot):
     data_args = ''
     # Check the Offset value for given keys
     for file_ in BootParams.keys():
-        if file_ in ['FSBL', 'DTB']:
+        if file_ in ('FSBL', 'DTB'):
             continue
         file_path = BootParams[file_].get('Path')
         if not os.path.isabs(file_path):
@@ -169,7 +169,7 @@ def CreateMBBootBin(args, proot):
         if not BootParams[file_].get('Offset'):
             bootfile_offset = ''
             bootfile_size = ''
-            if file_ in ['FPGA', 'UBOOT', 'KERNEL', 'JFFS2']:
+            if file_ in ('FPGA', 'UBOOT', 'KERNEL', 'JFFS2'):
                 file_prop = eval('%s_prop' % file_.lower())
                 if file_prop:
                     try:

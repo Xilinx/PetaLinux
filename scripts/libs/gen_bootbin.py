@@ -24,7 +24,7 @@ def AddBifSubsystemId(Attribute, Value, xilinx_arch, notfile=False):
     For versal{-net} image file should be { attrs, file }
     For others image file should be [attrs] file'''
     string = ''
-    if xilinx_arch in ['versal', 'versal-net']:
+    if xilinx_arch in ('versal', 'versal-net'):
         string += ''
         if not notfile:
             Value = 'file=%s' % Value
@@ -72,7 +72,7 @@ def GenQemuBootImage(args, proot):
             QemuRootfs = os.path.join(plnx_vars.BuildImagesDir.format(proot),
                                       plnx_vars.BootFileNames['RFS_FILE'])
 
-    if QemuRootfs and QemuRootfs not in ['no', 'none']:
+    if QemuRootfs and QemuRootfs not in ('no', 'none'):
         if not os.path.isabs(QemuRootfs):
             QemuRootfs = os.path.join(proot, QemuRootfs)
 
@@ -101,7 +101,7 @@ def RunBootGen(biffile, args, proot):
                 )
     extra_bootargs = ''
     bootgen_arch = args.xilinx_arch.replace('-', '')
-    if args.xilinx_arch in ['versal', 'versal-net']:
+    if args.xilinx_arch in ('versal', 'versal-net'):
         extra_bootargs = '-w -dump bh'
     if args.bootgen_extra_args:
         extra_bootargs += ' %s' % args.bootgen_extra_args
@@ -111,7 +111,7 @@ def RunBootGen(biffile, args, proot):
     stdout = plnx_utils.runCmd(BootGenCmd, os.getcwd(),
                                failed_msg='Fail to create BOOT image', shell=True)
     logger.info(''.join(stdout))
-    if args.xilinx_arch in ['versal', 'versal-net'] and \
+    if args.xilinx_arch in ('versal', 'versal-net') and \
             args.format == 'BIN':
         GenQemuBootImage(args, proot)
     logger.info('Binary is ready.')
@@ -141,7 +141,7 @@ def GenerateBif(args, proot):
             if BootParams[File].get('Cpu'):
                 DestCpu = 'destination_cpu=%s' % BootParams[File].get(
                     'Cpu')
-                if args.xilinx_arch in ['versal', 'versal-net']:
+                if args.xilinx_arch in ('versal', 'versal-net'):
                     DestCpu = 'core=%s' % BootParams[File].get('Cpu')
                 Tmp_Attr_ = ''
                 if File_Attr_.find('destination_cpu=') != -1 or \
@@ -167,12 +167,12 @@ def GenerateBif(args, proot):
                     File_Attr_ += ', load=%s' % load
                 else:
                     File_Attr_ += 'load=%s' % load
-            if args.xilinx_arch in ['versal', 'versal-net'] and \
+            if args.xilinx_arch in ('versal', 'versal-net') and \
                     BootParams[File].get('AddBootId'):
                 if not AddedSubBootId:
                     AddedSubBootId = True
                     bif_content += 'image {\n'
-            elif args.xilinx_arch in ['versal', 'versal-net']:
+            elif args.xilinx_arch in ('versal', 'versal-net'):
                 if not AddedLinuxId:
                     AddedLinuxId = True
                     if AddedSubBootId:
@@ -205,7 +205,7 @@ def GenerateBif(args, proot):
         logger.info('Adding fsbl_config %s' % args.fsblconfig)
         bif_content += '\t[fsbl_config] %s\n' % args.fsblconfig
     bif_content += '}\n'
-    if args.xilinx_arch in ['versal', 'versal-net']:
+    if args.xilinx_arch in ('versal', 'versal-net'):
         bif_content += '}\n'
     logger.debug(bif_content)
     plnx_utils.RemoveFile(plnx_vars.BifFile.format(proot))

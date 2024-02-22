@@ -30,7 +30,7 @@ def _config(args, proot):
     gen_confargs = ''
     config_target = 'silentconfig'
     if not args.silentconfig:
-        if args.component in ['project', 'rootfs']:
+        if args.component in ('project', 'rootfs'):
             gen_confargs = '--menuconfig %s' % args.component
         config_target = 'config'
     if args.debug:

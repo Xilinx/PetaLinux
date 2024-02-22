@@ -92,8 +92,8 @@ def PreProcessArgs():
     # To support those adding preprocessor for args
     # which will read the args and find any deprecated args
     # and rearrange them as per the python argparser
-    DeprecatedArgs = ['--gdb', '--find-xsa-bitstream',
-                      '--xsdb-connect', '--dfu-util']
+    DeprecatedArgs = ('--gdb', '--find-xsa-bitstream',
+                      '--xsdb-connect', '--dfu-util')
     parser_value = ''
     for arg in DeprecatedArgs:
         if arg in sys.argv:

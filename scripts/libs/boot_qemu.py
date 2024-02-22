@@ -65,7 +65,7 @@ QemuMemArgs = {
 def AutoMmc(Mmc, args, QemuCmd):
     BootModeVersal = ''
     SdIndex = ''
-    if args.xilinx_arch in ['versal', 'versal-net']:
+    if args.xilinx_arch in ('versal', 'versal-net'):
         if QemuCmd == 'qemu-system-aarch64':
             for i in range(0, len(Mmc)):
                 if Mmc[i] == '0':
@@ -112,7 +112,7 @@ def AutoSerial(dtb_file_path, args, QemuCmd):
             QemuSerialArgs += ' -serial mon:stdio'
         else:
             QemuSerialArgs += ' -serial /dev/null'
-    if args.xilinx_arch in ['versal', 'versal-net']:
+    if args.xilinx_arch in ('versal', 'versal-net'):
         if QemuCmd == 'qemu-system-aarch64':
             QemuSerialArgs = ' -serial null -serial null' + QemuSerialArgs
         else:
@@ -212,7 +212,7 @@ def AddPmuConf(args, proot, arch, prebuilt, rootfs_type):
     key = 'RFS_FILE_%s_%s' % (args.command.upper(), arch.upper())
     YoctoMachine = plnx_utils.get_config_value(plnx_vars.YoctoMachineConf, plnx_vars.SysConfFile.format(proot))
     # using wic for SOM in pivot rootfs enabled cases
-    if YoctoMachine in ['xilinx-k26-som', 'xilinx-k26-kv', 'xilinx-k24-som', 'xilinx-k24-kd']:
+    if YoctoMachine in ('xilinx-k26-som', 'xilinx-k26-kv', 'xilinx-k24-som', 'xilinx-k24-kd'):
         WicImage = os.path.join(images_dir, 'petalinux-sdimage.wic')
         for qargs in args.qemu_args[0].split():
             if  re.search('if=sd', qargs):
@@ -254,7 +254,7 @@ def AddBootHeader(proot, arch, prebuilt):
     '''Add Bootbh.bin file to bootparam dict'''
     images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if prebuilt \
         else plnx_vars.BuildImagesDir.format(proot)
-    if arch in ['versal', 'versal-net']:
+    if arch in ('versal', 'versal-net'):
         BootBh = os.path.join(images_dir, plnx_vars.BootFileNames['BOOTBH'])
         plnx_utils.add_dictkey(boot_common.BootParams,
                                'BOOTBH', 'Path', BootBh)
@@ -361,7 +361,7 @@ def RunGenQemuCmd(proot, QemuCmd, QemuMach, args, BootParams, TftpDir, rootfs_ty
     if not args.qemu_no_gdb:
         QemuGenCmd += ' -gdb tcp:localhost:%s ' % plnx_utils.get_free_port()
     QemuGenCmd += AutoEth(Eth, TftpDir)
-    if args.xilinx_arch in ['zynqmp', 'versal', 'versal-net']:
+    if args.xilinx_arch in ('zynqmp', 'versal', 'versal-net'):
         QemuGenCmd += ' -machine-path %s ' % MachineDir
     if rootfs_type == 'EXT4' and SkipAddWic == False:
         WicImage = os.path.join(images_dir, 'petalinux-sdimage.wic')
@@ -412,7 +412,7 @@ def RunMbQemuCmd(proot, QemuCmd, QemuMach, args, BootParams):
     QemuMbCmd += ' -machine-path %s' % MachineDir
     if args.xilinx_arch == 'zynqmp':
         QemuMbCmd += ' -device loader,addr=0xfd1a0074,data=0x1011003,data-len=4 -device loader,addr=0xfd1a007C,data=0x1010f03,data-len=4 &'
-    elif args.xilinx_arch in ['versal', 'versal-net']:
+    elif args.xilinx_arch in ('versal', 'versal-net'):
         QemuMbCmd += ' -device loader,addr=0xF1110624,data=0x0,data-len=4 -device loader,addr=0xF1110620,data=0x1,data-len=4 &'
     logger.info(QemuMbCmd)
     stdout = plnx_utils.runCmd(QemuMbCmd, os.getcwd(),
@@ -483,7 +483,7 @@ def QemuBootSetup(args, proot):
     # check whether wic image generation required or not
     if args.u_boot or args.prebuilt == '2':
         SkipAddWic = True
-    if args.xilinx_arch in ['versal', 'versal-net']:
+    if args.xilinx_arch in ('versal', 'versal-net'):
         SkipAddWic = True
 
     if imgarch == 'microblaze' and pmufw == 'y':
@@ -498,7 +498,7 @@ def QemuBootSetup(args, proot):
         # to add pmu rom elf and pmc cdo
         boot_common.AddFsblFile(proot, args.xilinx_arch,
                                 args.command, args.targetcpu, args.prebuilt)
-        if args.xilinx_arch in ['versal', 'versal-net']:
+        if args.xilinx_arch in ('versal', 'versal-net'):
             # to add boot header
             AddBootHeader(proot, args.xilinx_arch, args.prebuilt)
         # running qemu-microblazeel
@@ -507,16 +507,16 @@ def QemuBootSetup(args, proot):
     QemuCmd, QemuMach = QemuArchSetup(args.arch, DEFAULT_ENDIAN, pmufw)
     if QemuCmd == '' or QemuMach == '':
         logger.error('Failed to detect QEMU ARCH for image')
-    if args.xilinx_arch in ['versal', 'versal-net']:
+    if args.xilinx_arch in ('versal', 'versal-net'):
         AddQemuBootBin(proot, args.xilinx_arch, args, QemuCmd)
     if args.xilinx_arch == 'zynqmp':
         boot_common.AddTfaFile(proot, args.xilinx_arch,
                                args.command, args.prebuilt)
         AddPmuConf(args, proot, args.arch, args.prebuilt, rootfs_type)
-    if args.xilinx_arch in ['zynqmp', 'versal', 'versal-net']:
+    if args.xilinx_arch in ('zynqmp', 'versal', 'versal-net'):
         AddHwDtb(proot, 'y', HwDtbMap[args.xilinx_arch], args.prebuilt)
     if args.prebuilt == 2 or args.u_boot:
-        if args.xilinx_arch in ['microblaze', 'zynq', 'zynqmp']:
+        if args.xilinx_arch in ('microblaze', 'zynq', 'zynqmp'):
             boot_common.AddUbootFile(
                 proot, args.u_boot, args.xilinx_arch, args.targetcpu,
                 args.command, args.prebuilt)
@@ -536,7 +536,7 @@ def QemuBootSetup(args, proot):
     if args.prebuilt == 3 or args.kernel:
         boot_common.AddKernelFile(proot, args.kernel, args.arch, args.xilinx_arch,
                                   args.command, args.prebuilt)
-        if args.xilinx_arch in ['microblaze', 'zynq', 'zynqmp']:
+        if args.xilinx_arch in ('microblaze', 'zynq', 'zynqmp'):
             boot_common.AddDtbFile(proot, args.dtb, args.command,
                                    args.xilinx_arch, args.prebuilt)
         if args.xilinx_arch == 'zynqmp':

@@ -101,7 +101,7 @@ def petalinux_version_check(proot):
             return True
         userchoice = input(
             'Please input "y/Y" to continue. Otherwise it will exit![n]')
-        if userchoice in ['y', 'Y', 'yes', 'Yes', 'YEs', 'YES']:
+        if userchoice in ('y', 'Y', 'yes', 'Yes', 'YEs', 'YES'):
             update_config_value(plnx_vars.PetaLinux_Ver_Str,
                                 plnx_vars.PetaLinux_Ver, plnx_vars.MetaDataFile.format(proot))
             return True
@@ -205,7 +205,7 @@ def GetFileFromXsa(proot, hw_file='', bootfile_ext=''):
     hw_file = get_xsaordts_path(proot, hw_file)
     xilinx_arch = get_xilinx_arch(proot)
     if not bootfile_ext:
-        if xilinx_arch in ['versal', 'versal-net']:
+        if xilinx_arch in ('versal', 'versal-net'):
             bootfile_ext = 'pdi'
         else:
             bootfile_ext = 'bit'
@@ -216,7 +216,7 @@ def GetFileFromXsa(proot, hw_file='', bootfile_ext=''):
         bootfile = glob.glob(os.path.join(
             plnx_vars.HWDescDir.format(proot),
             '*.%s' % bootfile_ext))
-        if len(bootfile) > 1 and xilinx_arch in ['versal', 'versal-net']:
+        if len(bootfile) > 1 and xilinx_arch in ('versal', 'versal-net'):
             # To handle the segmented boot flow where design has two pdis
             # boot pdi with _boot.pdi and pl pdi as _pld.pdi.
             bootfile = glob.glob(os.path.join(

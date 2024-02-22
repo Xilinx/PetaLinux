@@ -57,7 +57,7 @@ def bb_updatevar(recipename, bbvar, value, append=False):
 
 def validate_pn(pn):
     '''Validate the package name at creation time'''
-    reserved_names = ['forcevariable', 'append', 'prepend', 'remove']
+    reserved_names = ('forcevariable', 'append', 'prepend', 'remove')
     if not re.match('^[0-9a-z-.+]+$', pn):
         return 'Recipe name "%s" is invalid: only characters 0-9, a-z, -, + and . are allowed' % pn
     elif pn in reserved_names:
@@ -174,10 +174,10 @@ def get_yocto_source(proot):
         while True:
             userchoice = input(
                 'Please input "y" to proceed the installing SDK into project, "n" to use existing yocto SDK:')
-            if userchoice in ['y', 'Y', 'yes', 'Yes', 'YEs', 'YES']:
+            if userchoice in ('y', 'Y', 'yes', 'Yes', 'YEs', 'YES'):
                 plnx_utils.RemoveDir(plnx_vars.EsdkInstalledDir.format(proot))
                 break
-            if userchoice in ['n', 'N', 'no', 'NO', 'No', 'nO']:
+            if userchoice in ('n', 'N', 'no', 'NO', 'No', 'nO'):
                 if not os.path.exists(plnx_vars.EsdkInstalledDir.format(proot)):
                     logger.warning('SDK install directory missing in project.'
                                  ' Please input y to install the SDK into project')

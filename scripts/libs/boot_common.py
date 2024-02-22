@@ -29,7 +29,7 @@ def add_bootfile(dict_key, sub_key='Path'):
         if arg:
             arg = plnx_utils.argreadlink(arg)
         if arg and dict_key:
-            if arg in ['no', 'none']:
+            if arg in ('no', 'none'):
                 arg = None
             plnx_utils.add_dictkey(BootParams, dict_key, sub_key, arg)
         return arg
@@ -70,12 +70,12 @@ def AddFpgaBootFile(fpga_arg, proot, xilinx_arch, bootmode, targetcpu=0, prebuil
         'CONFIG_SUBSYSTEM_FPGA_MANAGER', sysconf)
     bootfile = ''
     # Skip adding Bit/BIN file if fpgamanager enabled
-    if if_fpga_manager == 'y' and xilinx_arch not in ['versal', 'versal-net']:
+    if if_fpga_manager == 'y' and xilinx_arch not in ('versal', 'versal-net'):
         logger.info(
             'FPGA manager enabled, skipping bitstream to load in jtag...')
         bootfile = None
     elif not fpga_arg:
-        if xilinx_arch not in ['versal', 'versal-net']:
+        if xilinx_arch not in ('versal', 'versal-net'):
             if prebuilt:
                 bootfile = os.path.join(plnx_vars.ImpPreBuildsDir.format(proot),
                                         'download.bit')
@@ -96,7 +96,7 @@ def AddFpgaBootFile(fpga_arg, proot, xilinx_arch, bootmode, targetcpu=0, prebuil
         bootfile = os.path.realpath(bootfile)
         plnx_utils.add_dictkey(BootParams, 'FPGA', 'Path', bootfile)
         # Jtag settings for FPGA
-        if bootmode == 'jtag' and xilinx_arch in ['versal', 'versal-net']:
+        if bootmode == 'jtag' and xilinx_arch in ('versal', 'versal-net'):
             before_load = 'targets -set -nocase -filter {name =~ "*PMC*"}\n'
             plnx_utils.add_dictkey(
                 BootParams, 'FPGA', 'BeforeLoad', before_load)
@@ -112,7 +112,7 @@ def AddPmuFile(proot, xilinx_arch, bootmode, targetcpu=0, prebuilt=''):
     ''' Add the Default PMU or PLM FW files'''
     images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if prebuilt \
         else plnx_vars.BuildImagesDir.format(proot)
-    if xilinx_arch in ['versal', 'versal-net']:
+    if xilinx_arch in ('versal', 'versal-net'):
         ElfFile = os.path.join(images_dir, plnx_vars.BootFileNames['PLM'])
         plnx_utils.add_dictkey(BootParams, 'PLM', 'Path', ElfFile)
     else:
@@ -134,7 +134,7 @@ def AddPmuFile(proot, xilinx_arch, bootmode, targetcpu=0, prebuilt=''):
     # QEMU settings for PMUFW
     if bootmode == 'qemu':
         before_load = ' -device loader,file='
-        if xilinx_arch in ['versal', 'versal-net']:
+        if xilinx_arch in ('versal', 'versal-net'):
             plnx_utils.add_dictkey(
                 BootParams, 'PLM', 'BeforeLoad', before_load)
         else:
@@ -146,12 +146,12 @@ def AddFsblFile(proot, xilinx_arch, bootmode, targetcpu=0, prebuilt=''):
     ''' Add the FSBL file'''
     images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if prebuilt \
         else plnx_vars.BuildImagesDir.format(proot)
-    if xilinx_arch in ['zynq', 'zynqmp'] and bootmode == 'jtag':
+    if xilinx_arch in ('zynq', 'zynqmp') and bootmode == 'jtag':
         key = 'FSBL_%s' % xilinx_arch.upper()
         FsblFile = os.path.join(images_dir, plnx_vars.BootFileNames[key])
-    elif xilinx_arch in ['zynqmp'] and bootmode == 'qemu':
+    elif xilinx_arch == 'zynqmp' and bootmode == 'qemu':
         FsblFile = os.path.join(images_dir, plnx_vars.BootFileNames['PMUROM'])
-    elif xilinx_arch in ['versal', 'versal-net'] and bootmode == 'qemu':
+    elif xilinx_arch in ('versal', 'versal-net') and bootmode == 'qemu':
         FsblFile = os.path.join(images_dir, plnx_vars.BootFileNames['PMCCDO'])
     plnx_utils.add_dictkey(BootParams, 'FSBL', 'Path', FsblFile)
     # JTAG settings for FSBL
@@ -178,7 +178,7 @@ def AddFsblFile(proot, xilinx_arch, bootmode, targetcpu=0, prebuilt=''):
         after_load = ''
         if xilinx_arch == 'zynqmp':
             before_load += ' -kernel '
-        elif xilinx_arch in ['versal', 'versal-net']:
+        elif xilinx_arch in ('versal', 'versal-net'):
             before_load += ' -device loader,addr=0xf0000000,data=0xba020004,data-len=4 -device loader,addr=0xf0000004,data=0xb800fffc,data-len=4 -device loader,file='
             after_load += ',addr=0xf2000000'
     plnx_utils.add_dictkey(BootParams, 'FSBL', 'BeforeLoad', before_load)
@@ -219,7 +219,7 @@ def AddDtbFile(proot, dtb_arg, bootmode, xilinx_arch, prebuilt=''):
     if not dtb_arg or dtb_arg == 'Default':
         DtbFile = os.path.join(images_dir, plnx_vars.BootFileNames['DTB'])
         plnx_utils.add_dictkey(BootParams, 'DTB', 'Path', DtbFile)
-    dtb_offset = '0x1000' if xilinx_arch in ['versal', 'versal-net'] \
+    dtb_offset = '0x1000' if xilinx_arch in ('versal', 'versal-net') \
         else '0x100000'
     if xilinx_arch == 'microblaze':
         dtb_offset = '0x1E00000'
@@ -237,11 +237,11 @@ def AddDtbFile(proot, dtb_arg, bootmode, xilinx_arch, prebuilt=''):
                 BootParams, 'DTB', 'BeforeLoad', before_load)
     # QEMU settings for DTB
     if bootmode == 'qemu':
-        if xilinx_arch in ['zynq', 'microblaze']:
+        if xilinx_arch in ('zynq', 'microblaze'):
             before_load = ' -dtb '
             plnx_utils.add_dictkey(
                 BootParams, 'DTB', 'BeforeLoad', before_load)
-        if xilinx_arch in ['zynqmp']:
+        if xilinx_arch == 'zynqmp':
             before_load = ' -device loader,file='
             after_load = ',addr=%s,force-raw=on' % (BootParams['DTB'].get('LoadAddr'))
             plnx_utils.add_dictkey(
@@ -261,7 +261,7 @@ def AddUbootFile(proot, uboot_arg, xilinx_arch, targetcpu, bootmode, prebuilt=''
     if bootmode == 'jtag':
         after_load = ''
         before_load = ''
-        if xilinx_arch in ['microblaze', 'zynq']:
+        if xilinx_arch in ('microblaze', 'zynq'):
             after_load += 'con\n'
             if BootParams.get('KERNEL') or prebuilt == 3:
                 after_load += 'after 1000; stop\n'
@@ -276,7 +276,7 @@ def AddUbootFile(proot, uboot_arg, xilinx_arch, targetcpu, bootmode, prebuilt=''
     # QEMU settings for UBOOT
     if bootmode == 'qemu':
         before_load = ''
-        if xilinx_arch in ['zynq', 'microblaze']:
+        if xilinx_arch in ('zynq', 'microblaze'):
             before_load = ' -kernel '
         elif xilinx_arch == 'zynqmp':
             before_load = ' -device loader,file='
@@ -293,7 +293,7 @@ def AddKernelFile(proot, kernel_arg, sys_arch, xilinx_arch, bootmode, prebuilt='
         else plnx_vars.BuildImagesDir.format(proot)
     if not kernel_arg or kernel_arg == 'Default':
         key = 'KIMAGE_%s' % sys_arch.upper()
-        if xilinx_arch in ['microblaze', 'zynq'] and bootmode == 'qemu':
+        if xilinx_arch in ('microblaze', 'zynq') and bootmode == 'qemu':
             key = 'KIMAGE_%s_%s' % (bootmode.upper(), sys_arch.upper())
         KernelFile = os.path.join(images_dir, plnx_vars.BootFileNames[key])
         plnx_utils.add_dictkey(BootParams, 'KERNEL', 'Path', KernelFile)
@@ -305,7 +305,7 @@ def AddKernelFile(proot, kernel_arg, sys_arch, xilinx_arch, bootmode, prebuilt='
                                                           kernel_offset, sysconf))
     # JTAG settings for KERNEL
     if bootmode == 'jtag':
-        if xilinx_arch in ['versal', 'versal-net']:
+        if xilinx_arch in ('versal', 'versal-net'):
             before_load = 'targets -set -nocase -filter {name =~ "*%s*"}\n' % (
                 'Versal' if xilinx_arch == 'versal' else 'Versal xcvn3716')
             plnx_utils.add_dictkey(BootParams, 'KERNEL',
@@ -314,9 +314,9 @@ def AddKernelFile(proot, kernel_arg, sys_arch, xilinx_arch, bootmode, prebuilt='
     if bootmode == 'qemu':
         before_load = ''
         after_load = ''
-        if xilinx_arch in ['microblaze', 'zynq']:
+        if xilinx_arch in ('microblaze', 'zynq'):
             before_load = ' -kernel '
-        if xilinx_arch in ['zynqmp', 'versal', 'versal-net']:
+        if xilinx_arch in ('zynqmp', 'versal', 'versal-net'):
             before_load = ' -device loader,file='
             after_load = ',addr=%s,force-raw=on' % (BootParams['KERNEL'].get('LoadAddr'))
         plnx_utils.add_dictkey(BootParams, 'KERNEL',
@@ -355,9 +355,9 @@ def AddRootfsFile(proot, rootfs_file, sys_arch, xilinx_arch, bootmode, prebuilt=
     if bootmode == 'qemu':
         before_load = ''
         after_load = ''
-        if xilinx_arch in ['microblaze', 'zynq']:
+        if xilinx_arch in ('microblaze', 'zynq'):
             before_load = ' -initrd '
-        elif xilinx_arch in ['zynqmp', 'versal', 'versal-net']:
+        elif xilinx_arch in ('zynqmp', 'versal', 'versal-net'):
             before_load = ' -device loader,file='
             after_load = ',addr=%s,force-raw=on' % (BootParams['ROOTFS'].get('LoadAddr'))
         plnx_utils.add_dictkey(BootParams, 'ROOTFS',
@@ -393,7 +393,7 @@ def AddBootScriptFile(proot, xilinx_arch, bootscr_arg, bootmode, targetcpu, preb
     if bootmode == 'jtag':
         if xilinx_arch != 'zynqmp':
             after_load = ''
-            if xilinx_arch in ['versal', 'versal-net']:
+            if xilinx_arch in ('versal', 'versal-net'):
                 after_load += 'targets -set -nocase -filter {name =~ "*%s*#%s"}\n' % (
                     'A72' if xilinx_arch == 'versal' else 'A78', targetcpu)
             after_load += 'con'

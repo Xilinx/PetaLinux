@@ -132,7 +132,7 @@ def AddFpgaBootFile(fpga_arg, proot, xilinx_arch):
     if_fpga_manager = plnx_utils.get_config_value(
         'CONFIG_SUBSYSTEM_FPGA_MANAGER',
         plnx_vars.SysConfFile.format(proot))
-    if not fpga_arg and xilinx_arch in ['microblaze', 'versal', 'versal-net']:
+    if not fpga_arg and xilinx_arch in ('microblaze', 'versal', 'versal-net'):
         fpga_arg = 'Default'
     if fpga_arg == 'Default':
         bootfile_name = plnx_utils.GetFileFromXsa(proot)
@@ -167,7 +167,7 @@ def AddDefaultBootAttributes(proot, xilinx_arch):
                 append = True
                 # Dont add default Offset and Load
                 # if user specified
-                if DefAttrKey in ['Offset', 'Load']:
+                if DefAttrKey in ('Offset', 'Load'):
                     if BootParams[BootParam].get(DefAttrKey):
                         continue
                     # If 'config' key is present in dictionary read that value

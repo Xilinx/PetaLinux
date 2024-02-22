@@ -35,7 +35,7 @@ def PreProcessArgs():
     # To support those adding preprocessor for args
     # which will read the args and find any deprecated args
     # and rearrange them as per the python argparser
-    DeprecatedArgs = ['--boot', '--bsp', '--prebuilt', '--sysroot', '--wic']
+    DeprecatedArgs = ('--boot', '--bsp', '--prebuilt', '--sysroot', '--wic')
     parser_value = ''
     for arg in DeprecatedArgs:
         if arg in sys.argv:

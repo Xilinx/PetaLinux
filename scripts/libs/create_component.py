@@ -290,7 +290,7 @@ to be enabled in petalinux-config' % (args.template))
     logger.info('New %s successfully created in %s' % (args.command, cpath))
 
     # Enable the component
-    if args.command in ['apps', 'modules'] and args.enable:
+    if args.command in ('apps', 'modules') and args.enable:
         logger.info('Enabling created component')
         plnx_utils.add_str_to_file(
             plnx_vars.RfsConfig.format(proot),

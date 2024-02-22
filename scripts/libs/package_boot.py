@@ -53,14 +53,14 @@ def add_bootfile(dict_key, sub_key='Path'):
     ''' Add bootfile param into Dict '''
     ''' Append random key if data files and bif attaributes '''
     def f(arg):
-        if arg in ['no', 'none']:
+        if arg in ('no', 'none'):
             BootParamDisable.append(dict_key)
             arg = None
         elif arg:
             arg = plnx_utils.argreadlink(arg)
         if arg and dict_key:
             tmp_key = dict_key
-            if dict_key in ['ADDFILE', 'ADDCDO', 'BIFATTR']:
+            if dict_key in ('ADDFILE', 'ADDCDO', 'BIFATTR'):
                 rmdstr = ''.join(random.choices(
                     string.ascii_uppercase + string.digits, k=5)
                 )
@@ -73,23 +73,23 @@ def add_bootfile(dict_key, sub_key='Path'):
 def ValidateArgArch(args, arch):
     ''' Validate the Arguments specified v/s Arch and gives error '''
     if arch == 'aarch64':
-        for arg in ['mmi', 'flash_size', 'flash_intf']:
+        for arg in ('mmi', 'flash_size', 'flash_intf'):
             if getattr(args, arg):
                 return arg
         if args.format == 'DOWNLOAD.BIT':
             return 'format DOWNLOAD.BIT'
         return ''
     elif arch == 'arm':
-        for arg in ['tfa', 'mmi', 'flash_size', 'flash_intf', 'pmufw']:
+        for arg in ('tfa', 'mmi', 'flash_size', 'flash_intf', 'pmufw'):
             if getattr(args, arg):
                 return arg
         if args.format == 'DOWNLOAD.BIT':
             return 'format DOWNLOAD.BIT'
         return ''
     elif arch == 'microblaze':
-        for arg in ['tfa', 'file_attribute', 'bif_attribute',
+        for arg in ('tfa', 'file_attribute', 'bif_attribute',
                     'bif_attribute_value', 'fsblconfig', 'bif',
-                    'pmufw', 'bootgen_extra_args']:
+                    'pmufw', 'bootgen_extra_args'):
             if getattr(args, arg):
                 return arg
         return ''
@@ -131,7 +131,7 @@ def CopyImageToTftp(args, proot):
     output_file = os.path.basename(args.output)
     if images_dir != output_dir:
         plnx_utils.CopyFile(args.output, images_dir)
-        if args.xilinx_arch in ['versal', 'versal-net']:
+        if args.xilinx_arch in ('versal', 'versal-net'):
             bh_file = '%s_bh.bin' % output_file.split('.')[0]
             plnx_utils.CopyFile(os.path.join(output_dir, bh_file),
                                 images_dir)
@@ -160,7 +160,7 @@ def CopyImageToTftp(args, proot):
         logger.warning('Skip file copy to TFTPBOOT folder!!!')
         return 0
 
-    if os.environ.get('TFTPDIR_DISABLE') in ['True', 'TRUE']:
+    if os.environ.get('TFTPDIR_DISABLE') in ('True', 'TRUE'):
         logger.warning(
             'TFTPDIR_DISABLE env set to TRUE, skip images copy to TFTPBOOT folder!!!')
         return 0
@@ -203,9 +203,9 @@ def PackageBootImage(args, proot):
     # Create outputdir directory
     plnx_utils.CreateDir(os.path.dirname(args.output))
     # Run Respective funtion per arch and format type
-    if args.format in ['BIN', 'MCS']:
+    if args.format in ('BIN', 'MCS'):
         FailedMsg = 'Please source Xilinx Tools settings first.'
-        if args.arch in ['arm', 'aarch64']:
+        if args.arch in ('arm', 'aarch64'):
             plnx_utils.check_tool('bootgen', FailedMsg)
             CreateBootBin(args, proot)
         else:
@@ -322,7 +322,7 @@ def pkgboot_args(boot_parser):
                              )
     boot_parser.add_argument('--format', default='',
                              nargs='?', const='BIN', type=plnx_utils.ToUpper,
-                             choices=['BIN', 'DOWNLOAD.BIT', 'MCS'], help='Avaiable formats:'
+                             choices=('BIN', 'DOWNLOAD.BIT', 'MCS'), help='Avaiable formats:'
                              '\n* BIN (default): generate BIN file to be put to Flash or SD to boot from it.'
                              '\n* MCS: generate MCS file Flash boot'
                              '\n* DOWNLOAD.BIT: Merges the fs-boot into the FPGA'
@@ -355,7 +355,7 @@ def pkgboot_args(boot_parser):
                              '\nIf it is parallel flash, it will auto detect flash'
                              '\nwidth. If it is SPI flash, the default will be SPIx1.'
                              )
-    boot_parser.add_argument('--boot-device', default='', choices=['sd', 'flash'],
+    boot_parser.add_argument('--boot-device', default='', choices=('sd', 'flash'),
                              help='valid only for generating BIN file.'
                              )
     boot_parser.add_argument('--cpu', metavar='<TARGETCPU>', action='append',

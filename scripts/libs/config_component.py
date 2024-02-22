@@ -115,7 +115,7 @@ def validate_hw_file(args, proot):
 def config_yocto_component(proot, component, config_target, logfile):
     '''Config yocto components'''
     arch = plnx_utils.get_system_arch(proot)
-    if component not in ['project', 'rootfs']:
+    if component not in ('project', 'rootfs'):
         logger.info('Configuring: %s' % (component))
         if component in plnx_vars.GUI_Components.keys():
             component = plnx_vars.GUI_Components[component]
