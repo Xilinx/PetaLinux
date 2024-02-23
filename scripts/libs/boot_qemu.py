@@ -214,13 +214,17 @@ def AddPmuConf(args, proot, arch, prebuilt, rootfs_type):
     # using wic for SOM in pivot rootfs enabled cases
     if YoctoMachine in ('xilinx-k26-som', 'xilinx-k26-kv', 'xilinx-k24-som', 'xilinx-k24-kd'):
         WicImage = os.path.join(images_dir, 'petalinux-sdimage.wic')
-        for qargs in args.qemu_args[0].split():
-            if  re.search('if=sd', qargs):
-                SkipAddWic = True
-                for WicArgs in qargs.split(','):
-                    if 'file=' in WicArgs:
-                        SdImage = WicArgs.strip('file=')
-                        plnx_utils.MakePowerof2(SdImage)
+        # Looping through given qemu-args
+        for qargs in args.qemu_args:
+            # Splitting Qemu args with space
+            for qarg in qargs.split():
+                if  re.search('if=sd', qarg):
+                    SkipAddWic = True
+                    # Splitting the sd args with ,
+                    for SdArgs in qarg.split(','):
+                        if 'file=' in SdArgs:
+                            SdImage = SdArgs.strip('file=')
+                            plnx_utils.MakePowerof2(SdImage)
         if SkipAddWic == False:
             ExtRootfs = WicImage
     else:
