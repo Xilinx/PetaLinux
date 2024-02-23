@@ -56,31 +56,7 @@ MbHwDtbMap = {
     'versal-net': 'pmx'
 }
 
-MbQemuSerialArgs = {
-    'zynqmp': ' -serial mon:stdio -serial /dev/null -display none ',
-    'versal': ' -serial mon:stdio -display none ',
-    'versal-net': ' -serial mon:stdio -display none '
-}
-
-ArchQemuSerialArgs = {
-    'microblaze': ' -serial mon:stdio -display none ',
-    'zynq': ' -serial /dev/null -serial mon:stdio -display none ',
-    'zynqmp': ' -serial mon:stdio -serial /dev/null -display none ',
-    'versal': ' -serial null -serial null  -serial mon:stdio -serial /dev/null -display none ',
-    'versal-net': ' -serial null -serial null  -serial mon:stdio -serial /dev/null -display none '
-}
-
-QemuEthArgs = {
-    'microblaze': ' -net nic,netdev=eth0 -netdev user,id=eth0,',
-    'zynq': ' -net nic,netdev=eth0 -netdev user,id=eth0,',
-    'zynqmp': ' -net nic -net nic -net nic -net nic,netdev=eth3 -netdev user,id=eth3,',
-    'versal': ' -net nic,netdev=eth0 -netdev user,id=eth0,tftp=/tftpboot -net nic,netdev=eth1 -netdev user,id=eth1,',
-    'versal-net': ' -net nic -net nic,netdev=eth1 -netdev user,id=eth1,'
-}
-
 QemuMemArgs = {
-    'microblaze': '',
-    'zynq': '',
     'zynqmp': ' -m 4G ',
     'versal': ' -m 8G ',
     'versal-net': '-m 8G '
@@ -410,9 +386,9 @@ def RunGenQemuCmd(proot, QemuCmd, QemuMach, args, BootParams, TftpDir, rootfs_ty
         QemuGenCmd += ' %s' % '\n'.join(args.qemu_args)
 	# if -m not passed in qemu extra args
         if not '-m' in args.qemu_args[0].split():
-            QemuGenCmd += '%s ' % QemuMemArgs[args.xilinx_arch]
+            QemuGenCmd += '%s ' % QemuMemArgs.get(args.xilinx_arch, '')
     else:
-        QemuGenCmd += '%s ' % QemuMemArgs[args.xilinx_arch]
+        QemuGenCmd += '%s ' % QemuMemArgs.get(args.xilinx_arch, '')
     logger.info(QemuGenCmd)
     stdout = plnx_utils.runCmd(QemuGenCmd, os.getcwd(),
                                failed_msg='Fail to launch qemu cmd', shell=True, checkcall=True)
