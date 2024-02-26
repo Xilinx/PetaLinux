@@ -223,8 +223,11 @@ def AddPmuConf(args, proot, arch, prebuilt, rootfs_type):
                     # Splitting the sd args with ,
                     for SdArgs in qarg.split(','):
                         if 'file=' in SdArgs:
-                            SdImage = SdArgs.strip('file=')
-                            plnx_utils.MakePowerof2(SdImage)
+                            SdImage = SdArgs.replace('file=', '')
+                            if os.path.exists(SdImage):
+                                plnx_utils.MakePowerof2(SdImage)
+                            else:
+                                logger.error('Provided SdImage:%s does not exists' % SdImage)
         if SkipAddWic == False:
             ExtRootfs = WicImage
     else:
