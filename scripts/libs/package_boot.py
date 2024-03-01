@@ -178,7 +178,8 @@ def PackageBootImage(args, proot):
         logger.error('Invalid arg "--%s" for system arch %s.' % (
             arg, args.arch))
         sys.exit(255)
-    package_common.AddFpgaBootFile(args.fpga, proot, args.xilinx_arch)
+    if not args.bif:
+        package_common.AddFpgaBootFile(args.fpga, proot, args.xilinx_arch)
 
     # Set Default Format name
     if not args.format:
