@@ -94,9 +94,10 @@ def UpgradeEsdk(args):
     logger.info('Upgrading esdks from %s...' % args.url)
     # Add default list if not provided
     if not args.platform:
-        args.platform = [DefaultPlatForm]
+        args.platform = list(DefaultPlatForm)
     # Merge nested lists
-    args.platform = sum(args.platform, [])
+    if any(isinstance(i, list) for i in args.platform):
+        args.platform = sum(args.platform, [])
     # Remove duplicates from list
     args.platform = list(set(args.platform))
     for esdk in args.platform:
