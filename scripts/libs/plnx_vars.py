@@ -92,6 +92,7 @@ PetaLinux_Ver_Str = 'PETALINUX_VER'
 PetaLinux_Ver = os.environ.get(PetaLinux_Ver_Str, '')
 BuildToolsEnvPath = os.path.join(PetaLinux,
                                  '.environment-setup-x86_64-petalinux-linux')
+PetaLinuxSysroot = os.path.join(PetaLinux, 'sysroots')
 YoctoSrcPath = os.path.join(PetaLinux, 'components', 'yocto')
 SDTPrestepFile = os.path.join(
     YoctoSrcPath, 'decoupling', 'decouple-prestep.sh')

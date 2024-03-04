@@ -25,7 +25,7 @@ import plnx_vars
 
 logger, console_h = logger_setup.setup_logger('PetaLinux')
 
-DefaultPlatForm = ('aarch64', 'aarch64_dt', 'arm', 'microblaze')
+DefaultPlatForm = ('aarch64', 'aarch64_dt', 'arm', 'microblaze', 'buildtools')
 
 
 def GetVersion(Filename):
@@ -59,23 +59,39 @@ def FetchEsdk(url, esdk, wget_args):
         logger.error('PetaLinux will not support major upgrade versions')
         sys.exit(255)
     logger.info('Start updating %s eSDK' % esdk)
-    esdk_metadata_dir = os.path.join(plnx_vars.YoctoSrcPath, '.statistics')
-    esdk_metadata_file = os.path.join(esdk_metadata_dir, esdk)
-    OldHash = plnx_utils.get_config_value(
-        'BASE_SDK', esdk_metadata_file)
-    NewHash = plnx_utils.get_filehashvalue(EsdkFile)
+    if esdk in ('buildtools'):
+        os.chmod(EsdkFile,
+                 stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+        plnxupgrade_path = os.path.dirname(os.path.realpath(
+                                            plnx_vars.PetaLinuxSysroot))
+        hosttools_cmd = '%s -p -y -d %s' % (EsdkFile, plnxupgrade_path)
+        plnx_utils.runCmd(hosttools_cmd, os.getcwd(),
+                failed_msg='Failed to install %s eSDK file' % esdk,
+                shell=True)
+        plnx_utils.RemoveFile(os.path.join(plnxupgrade_path,
+                                            'version-x86_64-petalinux-linux'))
+        envscript = 'environment-setup-x86_64-petalinux-linux'
+        # No csh conversion
+        plnx_utils.RenameFile(os.path.join(plnxupgrade_path, envscript),
+                                os.path.join(plnxupgrade_path, '.%s' % envscript))
+    else:
+        esdk_metadata_dir = os.path.join(plnx_vars.YoctoSrcPath, '.statistics')
+        esdk_metadata_file = os.path.join(esdk_metadata_dir, esdk)
+        OldHash = plnx_utils.get_config_value(
+            'BASE_SDK', esdk_metadata_file)
+        NewHash = plnx_utils.get_filehashvalue(EsdkFile)
 
-    if OldHash == NewHash:
-        logger.info('%s eSDK is upto date' % esdk)
-        return
-    plnx_utils.CopyFile(EsdkFile, plnx_vars.YoctoSrcPath)
+        if OldHash == NewHash:
+            logger.info('%s eSDK is upto date' % esdk)
+            return
+        plnx_utils.CopyFile(EsdkFile, plnx_vars.YoctoSrcPath)
 
-    plnx_utils.CreateDir(esdk_metadata_dir)
-    plnx_utils.CreateFile(esdk_metadata_file)
-    plnx_utils.update_config_value(
-        'BASE_SDK', NewHash, esdk_metadata_file)
-    os.chmod(os.path.join(plnx_vars.YoctoSrcPath, esdk),
-             stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+        plnx_utils.CreateDir(esdk_metadata_dir)
+        plnx_utils.CreateFile(esdk_metadata_file)
+        plnx_utils.update_config_value(
+            'BASE_SDK', NewHash, esdk_metadata_file)
+        os.chmod(os.path.join(plnx_vars.YoctoSrcPath, esdk),
+                 stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
 
     plnx_utils.add_str_to_file(plnx_vars.VersionFile,
                                'PETALINUX_NEW_VER = "%s"\n' % NewVersion, mode='a+')
@@ -98,6 +114,8 @@ def UpgradeEsdk(args):
     # Merge nested lists
     if any(isinstance(i, list) for i in args.platform):
         args.platform = sum(args.platform, [])
+    # Add buildtools as default
+    args.platform.append('buildtools')
     # Remove duplicates from list
     args.platform = list(set(args.platform))
     for esdk in args.platform:
@@ -141,7 +159,8 @@ def main():
                         '\naarch64         	: sources for zynqMP and versal'
                         '\naarch64_dt      	: system device-tree(SDT) sources for zynqMP and versal'
                         '\narm             	: sources for zynq'
-                        '\nmicroblaze      	: sources for microblaze')
+                        '\nmicroblaze      	: sources for microblaze'
+                        '\nbuildtools       : Native(x86) SDK tools')
     parser.add_argument('-h', '--help', action='help',
                         help='Show help message and exit')
     parser.set_defaults(func=UpgradeEsdk)
