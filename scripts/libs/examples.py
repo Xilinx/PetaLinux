@@ -437,3 +437,22 @@ Examples:
       $ petalinux-boot qemu --prebuilt 2/--prebuilt 3 --qemu-no-gdb
       $ petalinux-boot qemu --u-boot/--kernel --qemu-no-gdb
 '''
+
+PUpgrade = '''
+Examples:
+    To get only desired platforms:
+  $ petalinux-upgrade -u/-f <path/url>
+       This will upgrade esdks for all(zynq,zynqMP,versal,microblaze).
+
+  $ petalinux-upgrade -u/-f <path/url> --platform "arm"
+        This will upgrade esdk for zynq only.
+
+  $ petalinux-upgrade -u/-f <path/url> --platform arm aarch64
+       This will upgrade esdks for zynq,zynqMP and versal.
+
+  $ petalinux-upgrade -u/-f <path/url> --platform "microblaze"
+       This will upgrade esdks for microblaze
+
+  $ petalinux-upgrade -u/-f <path/url> --platform "aarch64_dt"
+       This will upgrade system device-tree(SDT) esdks for zynqMP and versal.
+'''

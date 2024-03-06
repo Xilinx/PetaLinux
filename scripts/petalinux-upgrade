@@ -22,6 +22,7 @@ sys.path = sys.path + [libs_path]
 import logger_setup
 import plnx_utils
 import plnx_vars
+import examples
 
 logger, console_h = logger_setup.setup_logger('PetaLinux')
 
@@ -143,7 +144,8 @@ def main():
         description='Upgrade the system software without changing the host tool components',
         formatter_class=argparse.RawTextHelpFormatter,
         add_help=False,
-        usage='Use %(prog)s <subcommand> --help to get help on a specific command')
+        usage='Use %(prog)s <subcommand> --help to get help on a specific command',
+        epilog=examples.PUpgrade)
 
     parser.add_argument('-f', '--file', metavar='<DIR>', type=ValidatePath, dest='url',
                         help='Specify the directory which contains upgradable esdk files.')
