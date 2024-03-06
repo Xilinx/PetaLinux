@@ -312,3 +312,128 @@ Examples:
     $ dd if=petalinux-sdimage.wic of=/dev/sd<X> conv=fsync
     You need sudo access to do this.
 '''
+
+PBootJtag = '''
+Examples:
+    Images for loading on target can be selected from:
+    1. prebuilt directory:<PROJECT>/pre-built/linux/images
+    2. images directory:<PROJECT>/images/linux
+
+    Some possible Use-Cases:
+    UC1 : Download bitstream and additonally FSBL for Zynq, FSBL and PMUFW for ZynqMP boards:
+      $ petalinux-boot jtag --prebuilt 1  # images are taken from <PROJECT>/pre-built/linux/images directory
+
+    UC2 : Boot u-boot on target board:
+      $ petalinux-boot jtag --prebuilt 2 # images are taken from <PROJECT>/pre-built/linux/images directory
+      $ petalinux-boot jtag --u-boot --fpga # images are taken from <PROJECT>/images/linux directory
+
+      For microblaze,the above command will download the bitstream to target board, and
+      then boot the u-boot on target board.
+      For Zynq, it will download the bitstream and FSBL to target board,
+      and then boot the u-boot on target board.
+      For Zynq UltraScale+, it will download the bitstream, PMUFW and FSBL,
+      and then boot the u-boot on target board.
+
+    UC3 : Boot prebuilt kernel on target board:
+      $ petalinux-boot jtag --prebuilt 3 # images are taken from <PROJECT>/pre-built/linux/images directory
+      $ petalinux-boot jtag --kernel --fpga # images are taken from <PROJECT>/images/linux directory
+
+      For microblaze, it will download the bitstream to target board, and
+      then boot the kernel image on target board.
+      For Zynq, it will download the bitstream and FSBL to target board,
+      and then boot the u-boot and then the kernel on target
+      board.
+      For Zynq UltraScale+, it will download the bitstream, PMUFW and FSBL,
+      and then boot the kernel with help of linux-boot.elf to set kernel
+      start and dtb addresses.
+
+    UC4 : Generate xsdb tcl using petalinux-boot command:
+      $ petalinux-boot jtag --kernel --fpga --tcl mytcl # images are taken from <PROJECT>/images/linux directory
+
+      This is similar to UC3, but instead of loading images on target a tcl(mytcl) is generated.
+      This script can be modified further by users and used directly with xsdb to load images. Ex: xsdb mytcl
+
+    UC5 : Generate debug messages while loading images:
+      $ petalinux-boot jtag --kernel --fpga -v # images are taken from <PROJECT>/images/linux directory
+
+      This is similar to UC3 but with more debug information while invoking xsdb
+
+    UC6: To download a image with a bitstream with --fpga --bitstream <BITSTREAM> option:
+      $ petalinux-boot jtag --u-boot --fpga --bitstream <BITSTREAM> # images are taken from <PROJECT>/images/linux directory
+      $ petalinux-boot jtag --kernel --fpga --bitstream <BITSTREAM> # images are taken from <PROJECT>/images/linux directory
+      $ petalinux-boot jtag --prebuilt <BOOT_LEVEL> --fpga --bitstream <BITSTREAM> # specify bitstream path
+      $ petalinux-boot jtag --prebuilt <BOOT_LEVEL> --fpga --bitstream no # skip loading bitstream
+
+    Boot customised u-boot image with jtag:
+      $ petalinux-boot jtag --u-boot/--uboot <specify custom u-boot.elf path>
+
+    Boot customised kernel image with jtag:
+      For zynqMP , versal and versal-net use Image
+      $ petalinux-boot jtag --kernel <specify custom Image path>
+
+    Boot customised kernel image with jtag:
+      For zynq use uImage
+      $ petalinux-boot jtag --kernel <specify custom uImage path>
+
+      For microblaze use linux.bin.ub
+      $ petalinux-boot jtag --kernel <specify custom linux.bin.ub path>
+
+    Boot customised dtb image with kernel:
+      $ petalinux-boot jtag --kernel <specify custom kernel path> --dtb <specify custom dtb path>
+
+    Boot customised dtb image with uboot:
+      $ petalinux-boot jtag --u-boot/--uboot  <specify custom u-boot path> --dtb <specify custom dtb path>
+      It will support for microblaze,zynq and zynqMP.
+
+    Boot customised rootfs image with kernel:
+      $ petalinux-boot jtag --kernel --rootfs <specify custom cpio rootfs path>
+'''
+
+PBootQemu = '''
+Examples:
+    Boot prebuilt u-boot with QEMU:
+      $ petalinux-boot qemu --prebuilt 2
+
+    Boot prebuilt kernel with QEMU:
+      $ petalinux-boot qemu --prebuilt 3
+
+    Download newly built u-boot with QEMU:
+      $ petalinux-boot qemu --u-boot
+      It will boot <PROJECT>/images/linux/u-boot.elf with QEMU.
+
+    Download newly built kernel to target board:
+      $ petalinux-boot qemu --kernel
+      For MicroBlaze, it will boot <PROJECT>/images/linux/image.elf with QEMU.
+      For Zynq, it will boot <PROJECT>/images/linux/zImage with QEMU.
+      For Zynq UltraScale+ ,versal and versal-net it will boot <PROJECT>/images/linux/Image with QEMU.
+
+    Boot customised u-boot image with QEMU:
+      $ petalinux-boot qemu --u-boot/--uboot <specify custom u-boot.elf path>
+      It will support for microblaze,zynq and zynqMP.
+
+    Boot customised kernel image with QEMU:
+      For zynqMP,versal and versal-net use Image
+      $ petalinux-boot qemu --kernel <specify custom Image path>
+
+    Boot customised kernel image with QEMU:
+      For zynq use zImage
+      $ petalinux-boot qemu --kernel <specify custom zimage path>
+
+      For microblaze use Image.elf
+      $ petalinux-boot qemu --kernel <specify custom Image.elf  path>
+
+    Boot customised dtb image with kernel:
+      $ petalinux-boot qemu --kernel <specify custom kernel path> --dtb <specify custom dtb path>
+      It will support for microblaze,zynq and zynqMP.
+
+    Boot customised dtb image with uboot:
+      $ petalinux-boot qemu --u-boot/--uboot  <specify custom u-boot path> --dtb <specify custom dtb path>
+      It will support for microblaze,zynq and zynqMP.
+
+    Boot customised rootfs image with kernel:
+      $ petalinux-boot qemu --kernel --rootfs <specify custom cpio rootfs path>
+
+    Specify qemu-no-gdb option to disable gdb via qemu boot
+      $ petalinux-boot qemu --prebuilt 2/--prebuilt 3 --qemu-no-gdb
+      $ petalinux-boot qemu --u-boot/--kernel --qemu-no-gdb
+'''

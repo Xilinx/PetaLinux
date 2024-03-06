@@ -74,11 +74,13 @@ def main():
 
     # --jtag parser args
     jtag_parser = subparsers.add_parser('jtag', help='Load images via JTAG',
+                                        epilog=examples.PBootJtag,
                                         formatter_class=argparse.RawTextHelpFormatter)
     boot_jtag.JtagBootArgs(jtag_parser)
 
     # --qemu parser args
     qemu_parser = subparsers.add_parser('qemu', help='Load images via QEMU',
+                                       epilog=examples.PBootQemu,
                                        formatter_class=argparse.RawTextHelpFormatter)
     boot_qemu.QemuBootArgs(qemu_parser)
 
