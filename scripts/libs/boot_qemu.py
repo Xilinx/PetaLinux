@@ -62,6 +62,25 @@ QemuMemArgs = {
     'versal-net': '-m 8G '
 }
 
+QemuAarchBootFiles = {
+    'microblaze': ['UBOOT', 'KERNEL',
+                   'DTB', 'ROOTFS'],
+    'zynq': ['ZynqDTB', 'DTB',
+             'UBOOT', 'KERNEL', 'ROOTFS'],
+    'zynqmp': ['DTB', 'UBOOT', 'KERNEL', 'ROOTFS',
+               'TFA', 'EXTROOTFS', 'PMUCONF', 'HWDTB', 'BOOTSCRIPT'],
+    'versal': ['QemuBootBin', 'UBOOT', 'KERNEL', 'ROOTFS',
+               'TFA', 'DTB', 'EXTROOTFS', 'HWDTB', 'BOOTSCRIPT'],
+    'versal-net': ['QemuBootBin', 'UBOOT', 'KERNEL', 'ROOTFS',
+                   'TFA', 'DTB', 'EXTROOTFS', 'HWDTB', 'BOOTSCRIPT']
+}
+
+QemuMbBootFiles = {
+    'zynqmp': ['FSBL', 'PMUFW', 'HWDTB'],
+    'versal': ['FSBL', 'BOOTBH', 'PLM', 'HWDTB'],
+    'versal-net': ['FSBL', 'BOOTBH', 'PLM', 'HWDTB']
+}
+
 def AutoMmc(Mmc, args, QemuCmd):
     BootModeVersal = ''
     SdIndex = ''
@@ -354,14 +373,11 @@ def RunGenQemuCmd(proot, QemuCmd, QemuMach, args, BootParams, TftpDir, rootfs_ty
     DtbFile = os.path.join(images_dir, plnx_vars.BootFileNames['DTB'])
     QemuGenCmd += '%s %s %s' % (QemuCmd, QemuMach,
                                 AutoSerial(DtbFile, args, QemuCmd))
-
-    for BootParam in BootParams:
-        if BootParams[BootParam].get('BeforeLoad'):
-            QemuGenCmd += BootParams[BootParam].get('BeforeLoad')
-        if BootParams[BootParam].get('Path'):
-            QemuGenCmd += BootParams[BootParam].get('Path')
-        if BootParams[BootParam].get('AfterLoad'):
-            QemuGenCmd += BootParams[BootParam].get('AfterLoad')
+    for BootParam in QemuAarchBootFiles[args.xilinx_arch]:
+        if BootParam in BootParams.keys():
+            QemuGenCmd += BootParams[BootParam].get('BeforeLoad', '')
+            QemuGenCmd += BootParams[BootParam].get('Path', '')
+            QemuGenCmd += BootParams[BootParam].get('AfterLoad', '')
     MmcEthValue = FindMmcAndGemStatus(DtbFile)
     Mmc = str(MmcEthValue[0]).strip('[]')
     Eth = str(MmcEthValue[1]).strip('[]').strip(',')
@@ -409,13 +425,11 @@ def RunMbQemuCmd(proot, QemuCmd, QemuMach, args, BootParams):
     DtbFile = os.path.join(images_dir, plnx_vars.BootFileNames['DTB'])
     QemuMbCmd += '%s %s %s' % (QemuCmd, QemuMach,
                                AutoSerial(DtbFile, args, QemuCmd))
-    for BootParam in BootParams:
-        if BootParams[BootParam].get('BeforeLoad'):
-            QemuMbCmd += BootParams[BootParam].get('BeforeLoad')
-        if BootParams[BootParam].get('Path'):
-            QemuMbCmd += BootParams[BootParam].get('Path')
-        if BootParams[BootParam].get('AfterLoad'):
-            QemuMbCmd += BootParams[BootParam].get('AfterLoad')
+    for BootParam in QemuMbBootFiles[args.xilinx_arch]:
+        if BootParam in BootParams.keys():
+            QemuMbCmd += BootParams[BootParam].get('BeforeLoad', '')
+            QemuMbCmd += BootParams[BootParam].get('Path', '')
+            QemuMbCmd += BootParams[BootParam].get('AfterLoad', '')
     QemuMbCmd += ' -machine-path %s' % MachineDir
     if args.xilinx_arch == 'zynqmp':
         QemuMbCmd += ' -device loader,addr=0xfd1a0074,data=0x1011003,data-len=4 -device loader,addr=0xfd1a007C,data=0x1010f03,data-len=4 &'
@@ -495,7 +509,6 @@ def QemuBootSetup(args, proot):
 
     if imgarch == 'microblaze' and pmufw == 'y':
         QemuMbCmd = ''
-        boot_common.BootParams = dict()
         QemuCmd, QemuMach = QemuArchSetup(imgarch, DEFAULT_ENDIAN, pmufw)
         if QemuCmd == '' or QemuMach == '':
             logger.error('Failed to detect QEMU ARCH for image')
@@ -510,7 +523,6 @@ def QemuBootSetup(args, proot):
             AddBootHeader(proot, args.xilinx_arch, args.prebuilt)
         # running qemu-microblazeel
         RunMbQemuCmd(proot, QemuCmd, QemuMach, args, boot_common.BootParams)
-    boot_common.BootParams = dict()
     QemuCmd, QemuMach = QemuArchSetup(args.arch, DEFAULT_ENDIAN, pmufw)
     if QemuCmd == '' or QemuMach == '':
         logger.error('Failed to detect QEMU ARCH for image')

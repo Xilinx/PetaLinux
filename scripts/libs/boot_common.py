@@ -200,7 +200,7 @@ def AddTfaFile(proot, xilinx_arch, bootmode, prebuilt=''):
     # QEMU settings for TF-A
     elif bootmode == 'qemu':
         if xilinx_arch == 'zynqmp':
-            before_load += '-device loader,file='
+            before_load += ' -device loader,file='
             after_load += ',cpu-num=0'
             plnx_utils.add_dictkey(
                 BootParams, 'TFA', 'BeforeLoad', before_load)
