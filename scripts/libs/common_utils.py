@@ -103,10 +103,15 @@ def CheckFileExists(filepath, failed_msg=''):
         sys.exit(255)
 
 
-def IsElfFile(filepath):
+def GetFileType(filepath):
     cmd = 'file %s' % filepath
     stdout = runCmd(cmd, os.getcwd(), shell=True)
-    if bool(re.search('ELF', stdout[0])):
+    return stdout[0]
+
+
+def IsElfFile(filepath):
+    stdout = GetFileType(filepath)
+    if bool(re.search('ELF', stdout)):
         return True
     return False
 

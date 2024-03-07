@@ -10,6 +10,7 @@
 
 import logging
 import os
+import re
 import subprocess
 import sys
 import bitbake_utils
@@ -204,7 +205,12 @@ def Createproject(args, proot, cpath):
                 tar_extraargs = '-C "%s"' % (cpath)
             elif args.name:
                 tar_extraargs = '--strip-components=1'
-            tar_cmd = 'tar -xJf "%s" "%s" %s' % (
+            # Use the tar args based on the compressed type
+            stdout = plnx_utils.GetFileType(args.source)
+            tar_args = '-xzf'
+            if bool(re.search('xz compressed', stdout.lower())):
+                tar_args = '-xJf'
+            tar_cmd = 'tar %s "%s" "%s" %s' % (tar_args,
                 args.source, project, tar_extraargs)
             msgonfail = 'Failed to extract %s from BSP %s!' % (
                 project, args.source)
