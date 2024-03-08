@@ -237,7 +237,7 @@ def AddPmuConf(args, proot, arch, prebuilt, rootfs_type):
         for qargs in args.qemu_args:
             # Splitting Qemu args with space
             for qarg in qargs.split():
-                if  re.search('if=sd', qarg):
+                if  re.search('if=sd', qarg) or re.search('if=none', qarg):
                     SkipAddWic = True
                     # Splitting the sd args with ,
                     for SdArgs in qarg.split(','):
@@ -387,17 +387,19 @@ def RunGenQemuCmd(proot, QemuCmd, QemuMach, args, BootParams, TftpDir, rootfs_ty
     if args.xilinx_arch in ('zynqmp', 'versal', 'versal-net'):
         QemuGenCmd += ' -machine-path %s ' % MachineDir
     if rootfs_type == 'EXT4' and SkipAddWic == False:
+        sd_provided = False
         WicImage = os.path.join(images_dir, 'petalinux-sdimage.wic')
         if not os.path.exists(WicImage):
             logger.error('File: %s Not found, This is required to boot the EXT4 Root file system type' % WicImage)
         for qarg in args.qemu_args:
-            for qargs in qarg.split():
-                if  not re.search('if=sd', qargs):
-                    plnx_utils.MakePowerof2(WicImage)
-                    if args.arch == 'aarch64' and QemuCmd == 'qemu-system-aarch64':
-                        QemuGenCmd +=" -boot mode=5 -drive if=sd,index=1,file=%s,format=raw" % WicImage
-                    elif args.xilinx_arch == 'zynq':
-                        QemuGenCmd +=" -boot mode=5 -drive if=sd,index=0,file=%s,format=raw" % WicImage
+            if re.search('if=sd', qarg):
+                sd_provided = True
+        if sd_provided == False:
+            plnx_utils.MakePowerof2(WicImage)
+            if args.arch == 'aarch64' and QemuCmd == 'qemu-system-aarch64':
+                QemuGenCmd +=" -boot mode=5 -drive if=sd,index=1,file=%s,format=raw" % WicImage
+            elif args.xilinx_arch == 'zynq':
+                QemuGenCmd +=" -boot mode=5 -drive if=sd,index=0,file=%s,format=raw" % WicImage
     if args.xilinx_arch == 'zynq':
         ExtraArgs = ' -device loader,addr=0xf8000008,data=0xDF0D,data-len=4 -device loader,addr=0xf8000140,data=0x00500801,data-len=4 -device loader,addr=0xf800012c,data=0x1ed044d,data-len=4 -device loader,addr=0xf8000108,data=0x0001e008,data-len=4 -device loader,addr=0xF8000910,data=0xF,data-len=0x4'
     QemuGenCmd += ExtraArgs
