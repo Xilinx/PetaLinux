@@ -85,9 +85,16 @@ def AddFpgaBootFile(fpga_arg, proot, xilinx_arch, bootmode, targetcpu=0, prebuil
             else:
                 bootfile = os.path.join(plnx_vars.BuildImagesDir.format(proot),
                                         'system.bit')
-            logger.info('Use Bitstream: %s' % bootfile)
-            logger.info('Please use --fpga <BITSTREAM> to specify a bitstream '
-                        'if you want to use other bitstream.')
+            # FPGA is optional for non versal{-net} devices so give warning and proceed
+            if not os.path.exists(bootfile):
+                bootfile = None
+                logger.warning('Will not program bitstream on the target. '
+                        'If you want to program bitstream,')
+                logger.warning('Use --fpga <BITSTREAM> option to specify a bitstream.')
+            else:
+                logger.info('Use Bitstream: %s' % bootfile)
+                logger.info('Please use --fpga <BITSTREAM> to specify a bitstream '
+                            'if you want to use other bitstream.')
         else:
             bootfile = os.path.join(plnx_vars.PreBuildsImagesDir.format(proot) if prebuilt
                                     else plnx_vars.BuildImagesDir.format(proot),
