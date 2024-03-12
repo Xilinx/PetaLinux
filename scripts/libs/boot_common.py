@@ -250,7 +250,7 @@ def AddDtbFile(proot, dtb_arg, bootmode, xilinx_arch, prebuilt=''):
                 BootParams, 'DTB', 'BeforeLoad', before_load)
         if xilinx_arch == 'zynqmp':
             before_load = ' -device loader,file='
-            after_load = ',addr=%s,force-raw=on' % (BootParams['DTB'].get('LoadAddr'))
+            after_load = ',addr=%s,force-raw=on ' % (BootParams['DTB'].get('LoadAddr'))
             plnx_utils.add_dictkey(
                 BootParams, 'DTB', 'BeforeLoad', before_load)
             plnx_utils.add_dictkey(
@@ -325,7 +325,7 @@ def AddKernelFile(proot, kernel_arg, sys_arch, xilinx_arch, bootmode, prebuilt='
             before_load = ' -kernel '
         if xilinx_arch in ('zynqmp', 'versal', 'versal-net'):
             before_load = ' -device loader,file='
-            after_load = ',addr=%s,force-raw=on' % (BootParams['KERNEL'].get('LoadAddr'))
+            after_load = ',addr=%s,force-raw=on ' % (BootParams['KERNEL'].get('LoadAddr'))
         plnx_utils.add_dictkey(BootParams, 'KERNEL',
                                'BeforeLoad', before_load)
         plnx_utils.add_dictkey(BootParams, 'KERNEL',
@@ -366,7 +366,7 @@ def AddRootfsFile(proot, rootfs_file, sys_arch, xilinx_arch, bootmode, prebuilt=
             before_load = ' -initrd '
         elif xilinx_arch in ('zynqmp', 'versal', 'versal-net'):
             before_load = ' -device loader,file='
-            after_load = ',addr=%s,force-raw=on' % (BootParams['ROOTFS'].get('LoadAddr'))
+            after_load = ',addr=%s,force-raw=on ' % (BootParams['ROOTFS'].get('LoadAddr'))
         plnx_utils.add_dictkey(BootParams, 'ROOTFS',
                                'BeforeLoad', before_load)
         plnx_utils.add_dictkey(BootParams, 'ROOTFS',
@@ -411,7 +411,7 @@ def AddBootScriptFile(proot, xilinx_arch, bootscr_arg, bootmode, targetcpu, preb
         before_load = ''
         after_load = ''
         before_load += ' -device loader,file='
-        after_load += ',addr=%s,force-raw=on' % (BootParams['BOOTSCRIPT'].get('LoadAddr'))
+        after_load += ',addr=%s,force-raw=on ' % (BootParams['BOOTSCRIPT'].get('LoadAddr'))
         plnx_utils.add_dictkey(BootParams, 'BOOTSCRIPT',
                                'BeforeLoad', before_load)
         plnx_utils.add_dictkey(BootParams, 'BOOTSCRIPT',

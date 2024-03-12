@@ -325,14 +325,14 @@ def AddQemuBootBin(proot, arch, args, QemuCmd):
                 BootMode, Index)
             plnx_utils.add_dictkey(boot_common.BootParams, 'QemuBootBin',
                                    'BeforeLoad', before_load)
-            after_load = ',format=raw'
+            after_load = ',format=raw '
             plnx_utils.add_dictkey(boot_common.BootParams,
                                    'QemuBootBin', 'AfterLoad', after_load)
     else:
-        before_load = '-device loader,file='
+        before_load = ' -device loader,file='
         plnx_utils.add_dictkey(boot_common.BootParams, 'QemuBootBin',
                                'BeforeLoad', before_load)
-        after_load = ',cpu-num=%s' % (args.targetcpu)
+        after_load = ',cpu-num=%s ' % (args.targetcpu)
         plnx_utils.add_dictkey(boot_common.BootParams,
                                'QemuBootBin', 'AfterLoad', after_load)
 
@@ -537,6 +537,11 @@ def QemuBootSetup(args, proot):
     if args.xilinx_arch in ('zynqmp', 'versal', 'versal-net'):
         AddHwDtb(proot, 'y', HwDtbMap[args.xilinx_arch], args.prebuilt)
     if args.prebuilt == 2 or args.u_boot:
+        if args.xilinx_arch in ('versal', 'versal-net'):
+            if args.u_boot:
+                plnx_utils.add_dictkey(boot_common.BootParams, 'UBOOT', 'Path', '')
+            if args.dtb:
+                plnx_utils.add_dictkey(boot_common.BootParams, 'DTB', 'Path', '')
         if args.xilinx_arch in ('microblaze', 'zynq', 'zynqmp'):
             boot_common.AddUbootFile(
                 proot, args.u_boot, args.xilinx_arch, args.targetcpu,
@@ -595,6 +600,7 @@ def QemuBootArgs(qemu_parser):
                              '\nBoot images/linux/image.elf for MicroBlaze'
                              )
     qemu_parser.add_argument('--dtb', metavar='DTB', type=boot_common.add_bootfile('DTB'),
+                             nargs='?', default='', const='Default',
                              help='force use of a particular device tree file.'
                              '\nif not specified, QEMU uses'
                              '\n<PROJECT>/images/linux/system.dtb')
