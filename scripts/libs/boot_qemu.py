@@ -4,7 +4,7 @@
 # Copyright (C) 2022-2023, Advanced Micro Devices, Inc.  All rights reserved.
 #
 # Author:
-#       Varalaxmi Bingi <varalaxmi.bingi@amd.com>
+#       Varalaxmi Bingi <varalaxmi.bingi>
 #
 # SPDX-License-Identifier: MIT
 
