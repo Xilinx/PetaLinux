@@ -187,7 +187,7 @@ def BuildComponent(args, proot):
         build_task = MapBuildComp['task'].get('esdk')
     # BitBake debug logs
     if args.debug:
-        build_task += ' -DDD -v'
+        build_comp += ' -DDD -v'
 
     # build_task contain some value then only it will append to bitbake command
     if build_task:
