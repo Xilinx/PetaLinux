@@ -38,11 +38,13 @@ def bb_updatevar(recipename, bbvar, value, append=False):
             line_s = line.replace('\\', '').strip()
             if line_s.startswith(bbvar):
                 srcuris_file += ' ' + line_s.split('"')[1]
-                start = True
+                if not line_s.endswith('"'):
+                    start = True
                 continue
-            elif start and line_s.endswith('"'):
+            elif start:
+                if line_s.endswith('"'):
+                    start = False
                 srcuris_file += ' ' + line_s.split('"')[0]
-                start = False
                 continue
             parsed_lines += line
     if append:
