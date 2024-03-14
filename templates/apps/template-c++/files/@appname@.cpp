@@ -4,7 +4,7 @@
 * Replace this with your application code
 
 * Copyright (C) 2013-2022  Xilinx, Inc.  All rights reserved.
-* Copyright (c) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+* Copyright (c) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 *
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
