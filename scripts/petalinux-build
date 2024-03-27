@@ -38,7 +38,11 @@ MapBuildComp = {
         'arm-trusted-firmware': 'virtual/arm-trusted-firmware',
         'device-tree': 'virtual/dtb',
         'bootloader': 'virtual/fsbl',
-        'bootloader_microblaze': 'virtual/fsboot'
+        'bootloader_microblaze': 'virtual/fsboot',
+		'pmufw_sdt': 'pmufw',
+		'plm_sdt': 'plmfw',
+		'psmfw_sdt': 'psmfw',
+		'bootloader_sdt': 'fsbl'
     },
     'task': {
         'distclean': 'cleansstate',
@@ -157,6 +161,8 @@ def BuildComponent(args, proot):
     gen_confargs = ''
     build_task = ''
     xilinx_arch = plnx_utils.get_xilinx_arch(proot)
+    hw_flow = plnx_utils.is_hwflow_sdt(proot)
+
     # Print debug logs while executing the project
     if args.debug:
         gen_confargs += ' --debug'
@@ -167,6 +173,11 @@ def BuildComponent(args, proot):
     # Get component from dictonary to build
     build_comp = MapBuildComp['component'].get(
         '%s_%s' % (args.component, xilinx_arch))
+
+	# Build component for sdt bsps using dictonary
+    build_comp = MapBuildComp['component'].get(
+        '%s_%s' % (args.component, hw_flow), build_comp)
+
     if not build_comp:
         build_comp = MapBuildComp['component'].get(
             args.component, args.component)
