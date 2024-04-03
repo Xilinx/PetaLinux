@@ -143,7 +143,7 @@ def JtagBootSetup(args, proot):
         logger.error('Failed to Boot --prebuilt %s, %s Directory not found'
                      % (args.prebuilt, plnx_vars.PreBuildsImagesDir.format(proot)))
         sys.exit(255)
-    if (args.u_boot or args.kernel) and not os.path.exists(
+    if (args.u_boot or args.kernel) and not args.prebuilt and not os.path.exists(
             plnx_vars.BuildImagesDir.format(proot)):
         logger.error('Failed to Boot, %s Directory not found'
                      % (plnx_vars.BuildImagesDir.format(proot)))
