@@ -55,6 +55,9 @@ def FetchEsdk(url, esdk, wget_args):
                           os.getcwd(), failed_msg='Failed to get %s eSDK file' % esdk,
                           shell=True)
         EsdkFile = os.path.join(WgetOutDir, esdk)
+    if not os.path.exists(EsdkFile):
+        logger.warning('Failed to get %s eSDK file' % esdk)
+        return
     NewVersion = GetVersion(EsdkFile)
     if plnx_vars.Petainux_Major_Ver != NewVersion.split('.')[0]:
         logger.error('PetaLinux will not support major upgrade versions')
