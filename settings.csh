@@ -59,10 +59,12 @@ setenv PATH `echo ${PATH} | tr ":" "\n" | grep -v '^\./*$' | tr "\n" ":"`
 # Strip any trailing or multi-colons - they are interpreted as '.'
 setenv PATH `echo ${PATH} | sed -e 's/:*$//g' -e 's/::*/:/g'`
 
-set plnxbanner=" The PetaLinux source code and images provided/generated are for demonstration purposes only."
-set length=`expr "$plnxbanner" : '.*'`
+set plnxbanner="The PetaLinux source code and images provided/generated are for demonstration purposes only."
+set plnxbanner_url="Please refer to https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/2741928025/Moving+from+PetaLinux+to+Production+Deployment for more details."
+set length=`expr "$plnxbanner_url" : '.*'`
 printf '%*s\n' $length | tr ' ' '*'
 printf "${plnxbanner}\n"
+printf "${plnxbanner_url}\n"
 printf '%*s\n' $length | tr ' ' '*'
 
 echo "[WARNING] Deprecating cshell support in upcoming releases. It is recommended to use settings.sh"

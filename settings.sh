@@ -74,10 +74,13 @@ PATH=`echo ${PATH} | tr ":" "\n" | grep -v '^\./*$' | tr "\n" ":"`
 # Strip any trailing or multi-colons - they are interpreted as '.'
 PATH=$(echo ${PATH} | sed -e 's/:*$//g' -e 's/::*/:/g')
 
-plnxbanner=" The PetaLinux source code and images provided/generated are for demonstration purposes only."
-printf "%${#plnxbanner}s\n" | tr " " "*"
+plnxbanner="The PetaLinux source code and images provided/generated are for demonstration purposes only."
+plnxbanner_url="Please refer to https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/2741928025/Moving+from+PetaLinux+to+Production+Deployment
+ for more details"
+printf "%${#plnxbanner_url}s\n" | tr " " "*"
 printf "${plnxbanner}\n"
-printf "%${#plnxbanner}s\n" | tr " " "*"
+printf "${plnxbanner_url}\n"
+printf "%${#plnxbanner_url}s\n" | tr " " "*"
 
 echo PetaLinux environment set to \'${PETALINUX}\'
 
