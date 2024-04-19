@@ -59,7 +59,7 @@ MbHwDtbMap = {
 QemuMemArgs = {
     'zynqmp': ' -m 4G ',
     'versal': ' -m 8G ',
-    'versal-net': '-m 8G '
+    'versal-net': ' -m 8G '
 }
 
 QemuAarchBootFiles = {
