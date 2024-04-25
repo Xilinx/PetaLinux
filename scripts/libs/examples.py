@@ -29,11 +29,9 @@ Examples:
     For zynqMP project,
     $ petalinux-create project -n <PROJECT> --template zynqMP
 
-    For versal project,
+    For versal/versal-net project,
     $ petalinux-create project -n <PROJECT> --template versal
 
-    For versal-net project,
-    $ petalinux-create project -n <PROJECT> --template versal-net
 '''
 
 PcreateApps = '''

@@ -82,7 +82,7 @@ def main():
                                 help='Specify a PetaLinux BSP as a project source')
     project_parser.add_argument('--template', default='',
                                 help='Specify the template name to use.',
-                                choices=['versal-net', 'versal', 'zynqMP', 'zynq', 'microblaze'])
+                                choices=['versal', 'zynqMP', 'zynq', 'microblaze'])
     project_parser.add_argument('--tmpdir',
                                 help='Specify the local drive path as TMPDIR location when creating project.'
                                 '\nDefault TMPDIR cannot be under NFS. By default.'
