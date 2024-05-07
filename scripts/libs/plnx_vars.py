@@ -111,6 +111,10 @@ extra_ospaths = os.environ.get('EXTERNAL_TOOLS_PATH', '') + ':'
 extra_ospaths += XsctBinPath + ':'
 os.environ['PATH'] = extra_ospaths + ospath
 
+'''BB_ENV variables'''
+bb_extraenv = os.environ.get('BB_ENV_PASSTHROUGH_ADDITIONS', '')
+plnx_bbenv = 'PETALINUX PETALINUX_VER PETALINUX_MAJOR_VER'
+os.environ['BB_ENV_PASSTHROUGH_ADDITIONS'] = bb_extraenv + ' ' + plnx_bbenv
 
 YoctoEnvPrefix = 'environment-setup'
 YoctoEnvFile = {
