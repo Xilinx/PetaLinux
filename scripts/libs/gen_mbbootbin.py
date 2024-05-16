@@ -184,7 +184,7 @@ def CreateMBBootBin(args, proot):
                 file_size = os.path.getsize(file_path)
                 if bootfile_size and file_size > int(bootfile_size, base=16):
                     logger.error('Size of BootFile "%s" is %s larger than the %s partition size %s.' % (
-                        file_path, bootfile_size, file_.lower(), int(file_path, base=16)))
+                        file_path, hex(file_size), file_.lower(), bootfile_size))
                     sys.exit(255)
         if not BootParams[file_].get('Offset'):
             logger.error('Offset of file "%s" is empty. '
