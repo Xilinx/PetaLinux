@@ -31,7 +31,7 @@ endif
 
 setenv PETALINUX `readlink -f "${XIL_SCRIPT_LOC}"`
 
-setenv PETALINUX_VER 2024.1
+setenv PETALINUX_VER 2024.2
 setenv PETALINUX_MAJOR_VER `echo $PETALINUX_VER | cut -d"." -f 1`
 
 setenv XSCT_TOOLCHAIN "${PETALINUX}/components/xsct"
