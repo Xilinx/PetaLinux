@@ -434,9 +434,12 @@ def RunMbQemuCmd(proot, QemuCmd, QemuMach, args, BootParams):
             QemuMbCmd += BootParams[BootParam].get('AfterLoad', '')
     QemuMbCmd += ' -machine-path %s' % MachineDir
     if args.xilinx_arch == 'zynqmp':
-        QemuMbCmd += ' -device loader,addr=0xfd1a0074,data=0x1011003,data-len=4 -device loader,addr=0xfd1a007C,data=0x1010f03,data-len=4 &'
+        QemuMbCmd += ' -device loader,addr=0xfd1a0074,data=0x1011003,data-len=4 -device loader,addr=0xfd1a007C,data=0x1010f03,data-len=4'
     elif args.xilinx_arch in ('versal', 'versal-net'):
-        QemuMbCmd += ' -device loader,addr=0xF1110624,data=0x0,data-len=4 -device loader,addr=0xF1110620,data=0x1,data-len=4 &'
+        QemuMbCmd += ' -device loader,addr=0xF1110624,data=0x0,data-len=4 -device loader,addr=0xF1110620,data=0x1,data-len=4'
+    if args.pmu_qemu_args:
+        QemuMbCmd += ' %s' % ' '.join(args.pmu_qemu_args)
+    QemuMbCmd += ' &'
     logger.info(QemuMbCmd)
     stdout = plnx_utils.runCmd(QemuMbCmd, os.getcwd(),
                                failed_msg='Fail to launch qemu cmd', shell=True, checkcall=True)
@@ -607,8 +610,8 @@ def QemuBootArgs(qemu_parser):
     qemu_parser.add_argument('--tftp', help='Path to tftp folder')
     qemu_parser.add_argument('--qemu-args', metavar='QEMU_ARGUMENTS', action='append', default=[],
                              help='extra arguments to QEMU command')
-    qemu_parser.add_argument(
-        '--pmu-qemu-args', help='extra arguments for pmu instance of qemu <ZynqMP>')
+    qemu_parser.add_argument('--pmu-qemu-args', action='append', default=[],
+                             help='extra arguments for pmu instance of qemu')
     qemu_parser.add_argument('--rootfs', metavar='ROOTFS_CPIO_FILE', type=boot_common.add_bootfile('ROOTFS'),
                              nargs='?', default='', const='Default',
                              help='Specify the cpio rootfile system needs to be used for boot.'
