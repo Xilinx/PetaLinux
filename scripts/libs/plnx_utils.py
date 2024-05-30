@@ -401,7 +401,7 @@ def setup_plnwrapper(args, proot, config_target, gen_confargs):
         bitbake_utils.run_bitbakecmd(
             workspace_cmd, proot, logfile=args.logfile, shell=True)
         remove_str_from_file(plnx_vars.LocalConf.format(proot),
-                             '^include conf\/petalinuxbsp.conf')
+                             r'^include conf\/petalinuxbsp.conf')
         add_str_to_file(plnx_vars.LocalConf.format(proot),
                         'include conf/petalinuxbsp.conf\n',
                         ignore_if_exists=True, mode='a+')

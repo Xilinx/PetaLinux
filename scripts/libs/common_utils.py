@@ -296,7 +296,7 @@ def get_config_value(macro, filename, Type='bool', end_macro='=y'):
 
 def check_gcc_version():
     ''' Check GCC version of the Host machine v/s required version'''
-    gcc_cmd = 'gcc --version | sed -ne "s/.* \([0-9]\+\.[0-9]\+\)\.[0-9]\+.*/\\1/p"'
+    gcc_cmd = r'gcc --version | sed -ne "s/.* \([0-9]\+\.[0-9]\+\)\.[0-9]\+.*/\\1/p"'
     cur_version = runCmd(gcc_cmd, os.getcwd(), shell=True)
     required_version = 7
     if float(cur_version[0].strip()) <= required_version:

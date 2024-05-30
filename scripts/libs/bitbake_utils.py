@@ -130,13 +130,13 @@ def setup_bitbake_env(proot, logfile):
             'SSTATE_MIRRORS(.*)=(.*)"$')
         plnx_utils.remove_str_from_file(
             plnx_vars.LocalConf.format(proot),
-            'include conf\/plnxbuild.conf')
+            r'include conf\/plnxbuild.conf')
         plnx_utils.remove_str_from_file(
             plnx_vars.LocalConf.format(proot),
-            'require conf\/locked-sigs.inc')
+            r'require conf\/locked-sigs.inc')
         plnx_utils.remove_str_from_file(
             plnx_vars.LocalConf.format(proot),
-            'require conf\/unlocked-sigs.inc')
+            r'require conf\/unlocked-sigs.inc')
     plnx_utils.replace_str_fromdir(
         plnx_vars.ConfDir.format(proot),
         'SDKBASEMETAPATH = "${TOPDIR}"',
@@ -204,7 +204,7 @@ def get_yocto_source(proot):
         plnx_utils.add_str_to_file(
             plnx_vars.LockedSigsFile.format(proot), locked_string, mode='a+')
         plnx_utils.remove_str_from_file(
-            plnx_vars.EsdkBBLayerconf.format(proot), '\${SDKBASEMETAPATH}/workspace')
+            plnx_vars.EsdkBBLayerconf.format(proot), r'\${SDKBASEMETAPATH}/workspace')
         plnx_utils.RemoveFile(plnx_vars.DevtoolFile.format(proot))
 
     plnx_utils.update_config_value(

@@ -128,7 +128,7 @@ def GetSourcesLicences(proot):
     plnx_utils.runCmd(tar_cmd, out_dir=os.getcwd(), shell=True)
     # Removing include conf/archiver.conf file from local.conf
     plnx_utils.remove_str_from_file(plnx_vars.LocalConf.format(proot),
-                                    '^include conf\/archiver.conf')
+                                    r'^include conf\/archiver.conf')
 
 
 def CopyToTftpDir(proot):
