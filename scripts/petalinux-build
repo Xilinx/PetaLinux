@@ -146,7 +146,7 @@ def CopyToTftpDir(proot):
             plnx_utils.CreateDir(tftp_dir)
         if os.path.isdir(tftp_dir) and os.access(tftp_dir, os.W_OK):
             # copy all images in tftp_dir path
-            plnx_vars.CopyDir(plnx_vars.BuildImagesDir.format(proot), tftp_dir)
+            plnx_utils.CopyDir(plnx_vars.BuildImagesDir.format(proot), tftp_dir)
             logger.info(
                 'Successfully copied built images to tftp dir: %s' % tftp_dir)
         else:
