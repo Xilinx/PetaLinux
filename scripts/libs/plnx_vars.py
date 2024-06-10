@@ -227,9 +227,9 @@ LocalConfStr = '''
 include conf/archiver.conf
 '''
 
-BspFilesExcludeStr = r'''
+BspFilesExcludeStr = '''
 RCS\nSCCS\nCVS\nCVS.adm\nRCSLOG\ncvslog.*\ntags\nTAGS\n.make.state\n.nse_depinfo
-*~\n.#*\n,*\n_\$*\n*\$\n*.old\n*.bak\n*.BAK\n*.orig\n*.rej\n.del-*\n*.olb\n*.o
+*~\n.#*\n,*\n_$*\n*$\n*.old\n*.bak\n*.BAK\n*.orig\n*.rej\n.del-*\n*.olb\n*.o
 *.obj\n*.exe\n*.Z\n*.elc\n*.ln\n.svn/\n.git/\n.bzr/\n:C\nyocto/
 project-spec/configs/*.conf\nproject-spec/configs/configs/
 project-spec/configs/rootfsconfigs/
