@@ -151,9 +151,13 @@ def PackageWic(args, proot):
         logger.info('bitbake pseudo-native')
         bitbake_utils.run_bitbakecmd('bitbake pseudo-native',
                                      proot, shell=True, logfile=args.logfile)
+    wic_tools_ver = '1.0-r0'
+    if plnx_vars.PetaLinux_Ver >= '2024.2':
+        wic_tools_ver = '1.0'
     # Check wictool dir if not build it
-    WicToolsDir = os.path.join(ConfigTmpDir, 'work', plnx_vars.YoctoEnvFile[args.arch],
-                               'wic-tools', '1.0-r0', 'recipe-sysroot-native')
+    WicToolsDir = os.path.join(ConfigTmpDir, 'work',
+                               plnx_vars.YoctoEnvFile[args.arch],
+                               'wic-tools', wic_tools_ver, 'recipe-sysroot-native')
     if not os.path.isdir(WicToolsDir):
         logger.info('bitbake wic-tools')
         bitbake_utils.run_bitbakecmd('bitbake wic-tools',
