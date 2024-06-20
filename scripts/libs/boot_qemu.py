@@ -119,7 +119,7 @@ def AutoSerial(dtb_file_path, args, QemuCmd):
             SerialAliases = 'serial0'
         aliases_match = re.search(r'aliases\s*{([^}]*)}', content)
         aliases_node = aliases_match.group(1) if aliases_match else None
-        exp = SerialAliases.strip(' ') + '\s*=\s*([^;]+);'
+        exp = SerialAliases.strip(' ') + r'\s*=\s*([^;]+);'
         SerialInstance = re.search(exp, aliases_node).group(
             1).split('/')[2].strip(';').strip('"')
         for lablekey in SerialRegexp:
