@@ -100,6 +100,7 @@ fi
 
 export PATH
 
+export HOST_PYTHONPATH="/usr/bin"
 source "${PETALINUX}"/.environment-setup-x86_64-petalinux-linux
 "${PETALINUX}"/scripts/bash/petalinux-env-check
 #
