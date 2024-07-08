@@ -268,6 +268,30 @@ SystemconfBootargs = '''
     }};
 }};
 '''
+
+Systemconfuboot = '''
+/ {{
+options {{
+    u-boot {{
+        compatible = "u-boot,config";
+	bootscr-address = /bits/ 64 <{0}>;
+    }};
+}};
+}};
+'''
+Systemconfubootqspi = '''
+/ {{
+options {{
+    u-boot {{
+        compatible = "u-boot,config";
+	bootscr-address = /bits/ 64 <{0}>;
+	bootscr-flash-offset = /bits/ 64 <{1}>;
+	bootscr-flash-size = /bits/ 64 <{2}>;
+    }};
+}};
+}};
+'''
+
 SystemconfEth = '''
 &{0} {{
     local-mac-address = [{1}];
@@ -331,7 +355,9 @@ UbootConfs = {
     'DtbOffset': 'CONFIG_SUBSYSTEM_UBOOT_DEVICETREE_OFFSET',
     'KernelOffset': 'CONFIG_SUBSYSTEM_UBOOT_KERNEL_OFFSET',
     'RootfsOffset': 'CONFIG_SUBSYSTEM_UBOOT_RAMDISK_IMAGE_OFFSET',
-    'BootScrOffset': 'CONFIG_SUBSYSTEM_UBOOT_BOOTSCR_OFFSET'
+    'BootScrOffset': 'CONFIG_SUBSYSTEM_UBOOT_BOOTSCR_OFFSET',
+    'QspiBootScrOffset': 'CONFIG_SUBSYSTEM_UBOOT_QSPI_BOOTSCR_OFFSET',
+    'QspiBootScrSize': 'CONFIG_SUBSYSTEM_UBOOT_QSPI_BOOTSCR_SIZE'
 }
 
 '''XSCT commands'''

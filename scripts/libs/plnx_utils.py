@@ -303,11 +303,29 @@ def gen_sysconf_dtsi_file(proot):
     SdtSystemConfDtsi = os.path.join(dts_dir, 'system-conf.dtsi')
     bootargs = get_config_value(plnx_vars.AutoBootArgsConf,
                                 plnx_vars.SysConfFile.format(proot))
+    baseaddr = get_config_value(plnx_vars.AutoBootArgsConf,
+                                plnx_vars.SysConfFile.format(proot))
+    bootscr_offset = get_config_value(plnx_vars.UbootConfs['BootScrOffset'],
+                                plnx_vars.SysConfFile.format(proot))
+    bootscr_addr = append_baseaddr(proot, plnx_vars.UbootConfs['BootScrOffset'],
+                                bootscr_offset, plnx_vars.SysConfFile.format(proot))
+    qspi_bootscr_offset = get_config_value(plnx_vars.UbootConfs['QspiBootScrOffset'],
+                                plnx_vars.SysConfFile.format(proot))
+    qspi_bootscr_size = get_config_value(plnx_vars.UbootConfs['QspiBootScrSize'],
+                                plnx_vars.SysConfFile.format(proot))
     if not bootargs:
         bootargs = get_config_value(plnx_vars.BootArgsCmdLineConf,
                                     plnx_vars.SysConfFile.format(proot))
     add_str_to_file(SdtSystemConfDtsi,
                     plnx_vars.SystemconfBootargs.format(bootargs))
+    if qspi_bootscr_offset != 'AUTO' and qspi_bootscr_size != 'AUTO':
+        add_str_to_file(SdtSystemConfDtsi,
+                        plnx_vars.Systemconfubootqspi.format(
+                        bootscr_addr, qspi_bootscr_offset, qspi_bootscr_size), mode='a')
+    else:
+        add_str_to_file(SdtSystemConfDtsi,
+                        plnx_vars.Systemconfuboot.format(
+                        bootscr_addr), mode='a')
     eth_ipname = get_config_value(
         plnx_vars.EthConfs['Prefix'], plnx_vars.SysConfFile.format(proot),
         'choice', '_SELECT=y').lower()
