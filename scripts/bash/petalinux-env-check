@@ -36,18 +36,22 @@ glib2-devel"
 
 ALMALINUX_TOOLS="$CENTOS_TOOLS"
 
+REDHAT_TOOLS="$CENTOS_TOOLS"
+
 SUSE_TOOLS="$CENTOS_TOOLS
 lsb_release"
 
 NEEDED_HEADERS="zlib.h ncurses.h"
 
 UBUNTUVERSIONS="20.04.2 20.04.3 \
-		20.04.4 20.04.5 20.04.6 22.04 \
-		22.04.1 22.04.2 22.04.3"
+		20.04.5 20.04.6 \
+		22.04.1 22.04.2 22.04.3 22.04.4 24.04"
 
-SUSEVERSIONS="15.3 15.4"
+REDHATVERSIONS="9.4"
 
-ALMALINUXVERSIONS="8.7 9.1"
+SUSEVERSIONS="15.4"
+
+ALMALINUXVERSIONS="8.7 8.10 9.1 9.4"
 
 function find_dist {
 	Dist=$(lsb_release -i 2>/dev/null)
@@ -109,6 +113,8 @@ function check_os {
 	release=$(find_release $OSTYPE)
 	if echo "$OSTYPE" | grep -i "ubuntu" >/dev/null; then
 		VERSIONS=$UBUNTUVERSIONS
+	elif echo "$OSTYPE" | grep -i "redhat" > /dev/null; then
+		VERSIONS=$REDHATVERSIONS
 	elif echo "$OSTYPE" | grep -i "almalinux" >/dev/null; then
 		VERSIONS=$ALMALINUXVERSIONS
 	elif echo "$OSTYPE" | grep -i "opensuse" >/dev/null; then
@@ -170,6 +176,8 @@ function check_tools {
 	Dist=$(find_dist)
 	if [ $Dist == "Ubuntu" ]; then
 		COMMON_TOOLS=$COMMON_TOOLS$UBUNTU_TOOLS
+	elif [ $Dist == "RedHatEnterpriseLinux" ]; then
+		COMMON_TOOLS=$COMMON_TOOLS$REDHAT_TOOLS
 	elif [ $Dist == "AlmaLinux" ]; then
 		COMMON_TOOLS=$COMMON_TOOLS$ALMALINUX_TOOLS
 	elif [ $Dist = "openSUSELeap" ] || [ $Dist = "openSUSE" ]; then
