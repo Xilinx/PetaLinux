@@ -86,7 +86,7 @@ def validate_srcuri(srcuris):
     return localfiles, networkfiles
 
 
-def get_bitbake_env(proot, logfile, use_hostpython=False):
+def get_bitbake_env(proot, logfile):
     '''Get the bitbake environment setup command to'''
     '''run before bitbake command'''
     arch = plnx_utils.get_system_arch(proot)
@@ -99,8 +99,6 @@ def get_bitbake_env(proot, logfile, use_hostpython=False):
                      env_scirpt), logfile
     )
     source_cmd += 'source %s;' % plnx_vars.BuildToolsEnvPath
-    if use_hostpython:
-        source_cmd += 'export PATH="%s":$PATH;' % os.environ.get('HOST_PYTHONPATH')
     source_cmd += 'source %s %s &>> %s;' % (
         os.path.join(plnx_vars.OeInitEnv.format(proot)),
         plnx_vars.BuildDir.format(proot), logfile)
@@ -258,17 +256,17 @@ def run_genmachineconf(proot, xilinx_arch, config_args, add_layers=False, logfil
         config_args)
     plnx_utils.RemoveFile(plnx_vars.SdtAutoConf.format(proot))
     run_bitbakecmd(genconf_cmd, proot, builddir=proot,
-                   logfile=logfile, extraenv=extraenv, shell=True, use_hostpython=False)
+                   logfile=logfile, extraenv=extraenv, shell=True)
 
 
 def run_bitbakecmd(command, proot, builddir=None, logfile='/dev/null',
-                   extraenv=None, shell=False, checkcall=True, use_hostpython=True):
+                   extraenv=None, shell=False, checkcall=True):
     '''Source the env script and Run bitbake commands'''
     cmd = command
     command = command.split() if not shell else command
     if not builddir:
         builddir = os.path.join(proot, 'build')
-    source_cmd = get_bitbake_env(proot, logfile, use_hostpython)
+    source_cmd = get_bitbake_env(proot, logfile)
     command = '%s%s' % (source_cmd, command)
     logger.debug(command)
     env = os.environ.copy()
