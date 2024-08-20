@@ -200,7 +200,7 @@ def get_yocto_source(proot):
                 proot), '^SIGGEN_LOCKEDSIGS_TYPES(.*)'
         )
         locked_string = 'SIGGEN_LOCKEDSIGS_TYPES = "%s"' % (
-            plnx_vars.LockedSigns[arch])
+            plnx_vars.LockedSigns.get(arch, ''))
         plnx_utils.add_str_to_file(
             plnx_vars.LockedSigsFile.format(proot), locked_string, mode='a+')
         plnx_utils.remove_str_from_file(

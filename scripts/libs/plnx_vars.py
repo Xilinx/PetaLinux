@@ -125,7 +125,6 @@ YoctoEnvFile = {
 
 LockedSigns = {
     'aarch64': 't-aarch64 t-allarch t-x86-64-aarch64 t-x86-64 t-x86-64-x86-64-nativesdk',
-    'aarch64_dt': 't-aarch64 t-allarch t-x86-64-aarch64 t-x86-64 t-x86-64-x86-64-nativesdk',
     'arm': 't-allarch t-x86-64-x86-64-nativesdk t-x86-64 t-cortexa9t2hf-neon t-x86-64-arm',
     'microblaze': 't-x86-64 t-allarch t-x86-64-x86-64-nativesdk t-microblazeel-v11.0-bs-cmp-mh-div t-x86-64-microblazeel'
 }
