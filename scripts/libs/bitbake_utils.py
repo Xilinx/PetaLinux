@@ -90,6 +90,9 @@ def get_bitbake_env(proot, logfile):
     '''Get the bitbake environment setup command to'''
     '''run before bitbake command'''
     arch = plnx_utils.get_system_arch(proot)
+    if plnx_utils.is_hwflow_sdt(proot) == 'sdt':
+        if arch == 'arm' or arch == 'aarch64':
+            arch = 'aarch64'
     env_scirpt = '%s-%s' % (
         plnx_vars.YoctoEnvPrefix, plnx_vars.YoctoEnvFile[arch]
     )
