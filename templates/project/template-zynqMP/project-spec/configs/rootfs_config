@@ -8,7 +8,6 @@ CONFIG_fpga-manager-script=y
 CONFIG_packagegroup-core-boot=y
 CONFIG_tcf-agent=y
 CONFIG_bridge-utils=y
-CONFIG_hellopm=y
 CONFIG_udev-extraconf=y
 CONFIG_imagefeature-ssh-server-openssh=y
 CONFIG_imagefeature-hwcodecs=y
