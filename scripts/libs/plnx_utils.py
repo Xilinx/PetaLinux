@@ -165,8 +165,6 @@ def append_baseaddr(proot, offset, default_offset='',
 
 def get_yocto_path(proot, arch):
     '''Return yocto sdk path and arch'''
-    if is_hwflow_sdt(proot) == 'sdt':
-        arch = 'aarch64_dt'
     yocto_path = os.path.join(plnx_vars.YoctoSrcPath, arch)
     return yocto_path, arch
 

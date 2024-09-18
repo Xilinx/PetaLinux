@@ -26,7 +26,7 @@ import examples
 
 logger, console_h = logger_setup.setup_logger('PetaLinux')
 
-DefaultPlatForm = ('aarch64', 'aarch64_dt', 'arm', 'microblaze', 'buildtools')
+DefaultPlatForm = ('aarch64', 'arm', 'microblaze', 'buildtools')
 
 
 def GetVersion(Filename):
@@ -163,7 +163,6 @@ def main():
                         nargs='+', action='append',
                         help='Specifies the architecture name to upgrade'
                         '\naarch64         	: sources for zynqMP and versal'
-                        '\naarch64_dt      	: system device-tree(SDT) sources for zynqMP and versal'
                         '\narm             	: sources for zynq'
                         '\nmicroblaze      	: sources for microblaze'
                         '\nbuildtools       : Native(x86) SDK tools')

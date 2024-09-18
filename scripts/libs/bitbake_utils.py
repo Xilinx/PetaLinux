@@ -90,9 +90,6 @@ def get_bitbake_env(proot, logfile):
     '''Get the bitbake environment setup command to'''
     '''run before bitbake command'''
     arch = plnx_utils.get_system_arch(proot)
-    if plnx_utils.is_hwflow_sdt(proot) == 'sdt':
-        if arch == 'arm' or arch == 'aarch64':
-            arch = 'aarch64'
     env_scirpt = '%s-%s' % (
         plnx_vars.YoctoEnvPrefix, plnx_vars.YoctoEnvFile[arch]
     )
@@ -158,6 +155,7 @@ def get_yocto_source(proot):
     ''' and ask user input if checksum changed from tool to project'''
     arch = plnx_utils.get_system_arch(proot)
     yocto_esdkpath, arch = plnx_utils.get_yocto_path(proot, arch)
+    hw_flow = plnx_utils.is_hwflow_sdt(proot)
     if not os.path.exists(yocto_esdkpath):
         logger.error('"%s" is missing in petalinux-tools.'
                      'Installed Petalinux tools are broken. Please reinstall' % yocto_esdkpath)
@@ -202,8 +200,10 @@ def get_yocto_source(proot):
             plnx_vars.LockedSigsFile.format(
                 proot), '^SIGGEN_LOCKEDSIGS_TYPES(.*)'
         )
-        locked_string = 'SIGGEN_LOCKEDSIGS_TYPES = "%s"' % (
-            plnx_vars.LockedSigns.get(arch, ''))
+        lockedsigs = plnx_vars.LockedSigns.get(arch, '')
+        if hw_flow == 'sdt':
+            lockedsigs = ''
+        locked_string = 'SIGGEN_LOCKEDSIGS_TYPES = "%s"' % (lockedsigs)
         plnx_utils.add_str_to_file(
             plnx_vars.LockedSigsFile.format(proot), locked_string, mode='a+')
         plnx_utils.remove_str_from_file(

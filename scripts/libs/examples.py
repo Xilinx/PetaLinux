@@ -451,6 +451,4 @@ Examples:
   $ petalinux-upgrade -u/-f <path/url> --platform "microblaze"
        This will upgrade esdks for microblaze
 
-  $ petalinux-upgrade -u/-f <path/url> --platform "aarch64_dt"
-       This will upgrade system device-tree(SDT) esdks for zynqMP and versal.
 '''
