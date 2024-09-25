@@ -313,14 +313,15 @@ def AddQemuBootBin(proot, arch, args, QemuCmd):
     images_dir = plnx_vars.PreBuildsImagesDir.format(proot) if args.prebuilt \
         else plnx_vars.BuildImagesDir.format(proot)
     bootfile = os.path.join(images_dir, plnx_vars.BootFileNames['QEMUIMG'])
-    plnx_utils.add_dictkey(boot_common.BootParams,
-                           'QemuBootBin', 'Path', bootfile)
+
     MmcEthValue = FindMmcAndGemStatus(os.path.join(images_dir, plnx_vars.BootFileNames['DTB']))
     Mmc = str(MmcEthValue[0]).strip('[]')
     Eth = str(MmcEthValue[1]).strip('[]').strip(',')
     BootMode, Index = AutoMmc(Mmc, args, QemuCmd)
     if arch in ['versal', 'versal-net']:
         if SkipAddWic == True:
+            plnx_utils.add_dictkey(boot_common.BootParams,
+                                   'QemuBootBin', 'Path', bootfile)
             before_load = ' -boot mode=%s -drive if=sd,index=%s,file=' % (
                 BootMode, Index)
             plnx_utils.add_dictkey(boot_common.BootParams, 'QemuBootBin',
@@ -329,6 +330,8 @@ def AddQemuBootBin(proot, arch, args, QemuCmd):
             plnx_utils.add_dictkey(boot_common.BootParams,
                                    'QemuBootBin', 'AfterLoad', after_load)
     else:
+        plnx_utils.add_dictkey(boot_common.BootParams,
+                               'QemuBootBin', 'Path', bootfile)
         before_load = ' -device loader,file='
         plnx_utils.add_dictkey(boot_common.BootParams, 'QemuBootBin',
                                'BeforeLoad', before_load)
@@ -391,6 +394,7 @@ def RunGenQemuCmd(proot, QemuCmd, QemuMach, args, BootParams, TftpDir, rootfs_ty
         WicImage = os.path.join(images_dir, 'petalinux-sdimage.wic')
         if not os.path.exists(WicImage):
             logger.error('File: %s Not found, This is required to boot the EXT4 Root file system type' % WicImage)
+            sys.exit(255)
         for qarg in args.qemu_args:
             if re.search('if=sd', qarg):
                 sd_provided = True
@@ -509,7 +513,7 @@ def QemuBootSetup(args, proot):
     # check whether wic image generation required or not
     if args.u_boot or args.prebuilt == '2':
         SkipAddWic = True
-    if args.xilinx_arch in ('versal', 'versal-net'):
+    if args.xilinx_arch in ('versal', 'versal-net') and rootfs_type != 'EXT4':
         SkipAddWic = True
 
     if imgarch == 'microblaze' and pmufw == 'y':
