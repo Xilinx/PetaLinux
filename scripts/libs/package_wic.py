@@ -100,8 +100,8 @@ def PackageWic(args, proot):
     ''' Generate the WIC image'''
     args.arch = plnx_utils.get_system_arch(proot)
     args.xilinx_arch = plnx_utils.get_xilinx_arch(proot)
-    if os.path.isabs(args.images_dir):
-        args.images_dir = os.path.join(proot, args.images_dir)
+    if not args.images_dir:
+        args.images_dir = os.path.join(proot, plnx_vars.ImagesDir)
     logger.info('Sourcing build environment')
 
     WicDefaultFiles = args.bootfiles
@@ -236,7 +236,7 @@ def pkgwic_args(wic_parser):
     wic_parser.add_argument('-o', '--outdir', metavar='OUTPUT_DIR', type=os.path.realpath,
                             help='Specify out directory the to place petalinux-sdimage.wic'
                             )
-    wic_parser.add_argument('-i', '--images-dir', type=os.path.realpath, default=plnx_vars.ImagesDir,
+    wic_parser.add_argument('-i', '--images-dir', type=os.path.realpath,
                             help='Specify the images directory the bootfiles are located.'
                             '\nDefault will be <PROOT>/images/linux'
                             )
