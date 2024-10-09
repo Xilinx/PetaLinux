@@ -124,5 +124,5 @@ CONFIG_SUBSYSTEM_DT_XSCT_WORKSPACE="${PROOT}/components/plnx_workspace/device-tr
 # PetaLinux Images Deploy Directory
 CONFIG_PLNX_IMAGES_LOCATION="${PROOT}/images/linux"
 CONFIG_TMP_DIR_LOCATION="${PROOT}/build/tmp"
-CONFIG_PRE_MIRROR_URL="https://petalinux.xilinx.com/sswreleases/rel-v${PETALINUX_MAJOR_VER}/downloads"
-CONFIG_YOCTO_NETWORK_SSTATE_FEEDS_URL="https://petalinux.xilinx.com/sswreleases/rel-v${PETALINUX_MAJOR_VER}/microblaze/sstate-cache"
+CONFIG_PRE_MIRROR_URL="https://petalinux.xilinx.com/sswreleases/rel-v${PETALINUX_VER}/downloads"
+CONFIG_YOCTO_NETWORK_SSTATE_FEEDS_URL="https://petalinux.xilinx.com/sswreleases/rel-v${PETALINUX_VER}/microblaze/sstate-cache"
