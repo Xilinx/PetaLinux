@@ -147,9 +147,6 @@ def CreateMBBootBin(args, proot):
                                               plnx_vars.HsmOutFile.format(
                                                   proot)
                                               )
-    jffs2_prop = plnx_utils.get_config_value('jffs2',
-                                             plnx_vars.HsmOutFile.format(proot)
-                                             )
     flash_size = ValidateFlashSize(args.flash_size, flash_type, flash_size)
     flash_intf = GetFlashInterface(args.flash_intf, flash_type,
                                    flash_width, BootParams['FPGA'].get('Path'))
