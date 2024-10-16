@@ -314,8 +314,16 @@ def gen_sysconf_dtsi_file(proot):
     if not bootargs:
         bootargs = get_config_value(plnx_vars.BootArgsCmdLineConf,
                                     plnx_vars.SysConfFile.format(proot))
+    bootargs_auto = get_config_value(
+            'CONFIG_SUBSYSTEM_BOOTARGS_AUTO',
+            plnx_vars.SysConfFile.format(proot))
+    serial_node = 'serial0'
+    uart_baudrate = 'notfound'
+    if bootargs_auto == 'y':
+        tty_var, uart_baudrate = bootargs.split("console=")[1].split()[0].split(',')
+        serial_node = 'serial' + re.findall('[0-9]+', tty_var)[0]
     add_str_to_file(SdtSystemConfDtsi,
-                    plnx_vars.SystemconfBootargs.format(bootargs))
+                plnx_vars.SystemconfBootargs.format(bootargs, serial_node, uart_baudrate))
     if qspi_bootscr_offset != 'AUTO' and qspi_bootscr_size != 'AUTO':
         add_str_to_file(SdtSystemConfDtsi,
                         plnx_vars.Systemconfubootqspi.format(
