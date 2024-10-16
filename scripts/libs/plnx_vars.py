@@ -263,7 +263,7 @@ SystemconfBootargs = '''
 / {{
     chosen {{
         bootargs = "{0}";
-        stdout-path = "serial0:115200n8";
+        stdout-path = "{1}:{2}n8";
     }};
 }};
 '''
