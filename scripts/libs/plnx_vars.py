@@ -311,6 +311,7 @@ FlashPartNode = '''
         partition@{0} {{
             label = "{1}";
             reg = <{2} {3}>;
+            {4}
             }};
 '''
 FlashendSymbols = '''\t};\n};\n'''
@@ -338,7 +339,7 @@ EthConfs = {
 }
 FlashConfs = {
     'Prefix': 'CONFIG_SUBSYSTEM_FLASH_',
-    'Name': '_NAME', 'Size': '_SIZE'
+    'Name': '_NAME', 'Size': '_SIZE', 'Flags': '_FLAGS'
 }
 MemoryConfs = {
     'Prefix': 'CONFIG_SUBSYSTEM_MEMORY_',

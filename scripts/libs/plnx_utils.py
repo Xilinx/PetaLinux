@@ -356,16 +356,24 @@ def gen_sysconf_dtsi_file(proot):
                 plnx_vars.FlashConfs['Prefix'], '%s_PART' % flash_ipname.upper(),
                 num, plnx_vars.FlashConfs['Name']),
                 plnx_vars.SysConfFile.format(proot))
+            part_flag = get_config_value('%s%s%s%s' % (
+                plnx_vars.FlashConfs['Prefix'], '%s_PART' % flash_ipname.upper(),
+                num, plnx_vars.FlashConfs['Flags']),
+                plnx_vars.SysConfFile.format(proot))
             part_size = get_config_value('%s%s%s%s' % (
                 plnx_vars.FlashConfs['Prefix'], '%s_PART' % flash_ipname.upper(),
                 num, plnx_vars.FlashConfs['Size']),
                 plnx_vars.SysConfFile.format(proot))
             prev_part_offset = part_offset
             prev_part_size = part_size
+            part_flag_name = ''
+            if 'RO' in part_flag.split():
+                part_flag_name = 'read-only;'
             if part_name:
                 add_str_to_file(SdtSystemConfDtsi,
                                 plnx_vars.FlashPartNode.format(
-                                    num, part_name, part_offset, part_size), mode='a')
+                                    num, part_name, part_offset, part_size,
+                                    part_flag_name), mode='a')
             else:
                 break
         add_str_to_file(SdtSystemConfDtsi,
