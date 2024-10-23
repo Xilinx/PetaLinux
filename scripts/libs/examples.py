@@ -16,6 +16,9 @@ Examples:
     Create project from PetaLinux Project BSP and specify the TMPDIR PATH:
     $ petalinux-create project -s <PATH_TO_PETALINUX_PROJECT_BSP> --tmpdir <TMPDIR PATH>
 
+    Create project from PetaLinux Project BSP and specify any name for the project
+    $ petalinux-create project -s <PATH_TO_PETALINUX_PROJECT_BSP> -n/--name <PROJECT_NAME>
+
     Create project from template and specify the TMPDIR PATH:
     $ petalinux-create project -n <PROJECT> --template <TEMPLATE> --tmpdir <TMPDIR PATH>
 

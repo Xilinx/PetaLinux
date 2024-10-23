@@ -76,6 +76,8 @@ def main():
 
     # Project parser args
     project_parser = subparsers.add_parser('project', help='Create PetaLinux project',
+                                           usage='Use %(prog)s {[-s SOURCE] [--template {versal,zynqMP,zynq,microblaze}] '
+                                                  '[--tmpdir TMPDIR] [--name NAME]}',
                                            epilog=examples.PCreateProject,
                                            formatter_class=argparse.RawTextHelpFormatter)
     project_parser.add_argument('-s', '--source', type=os.path.realpath,
