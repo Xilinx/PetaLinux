@@ -319,8 +319,13 @@ def gen_sysconf_dtsi_file(proot):
             plnx_vars.SysConfFile.format(proot))
     serial_node = 'serial0'
     uart_baudrate = 'notfound'
+    xilinx_arch = get_xilinx_arch(proot)
     if bootargs_auto == 'y':
-        tty_var, uart_baudrate = bootargs.split("console=")[1].split()[0].split(',')
+        if xilinx_arch in 'versal':
+           uart_baudrate = bootargs.split("earlycon=")[1].split()[0].split(',')[-1].replace("n8", "")
+           tty_var = bootargs.split("console=")[1].split()[0]
+        else:
+           tty_var, uart_baudrate = bootargs.split("console=")[1].split()[0].split(',')
         serial_node = 'serial' + re.findall('[0-9]+', tty_var)[0]
     add_str_to_file(SdtSystemConfDtsi,
                 plnx_vars.SystemconfBootargs.format(bootargs, serial_node, uart_baudrate))
