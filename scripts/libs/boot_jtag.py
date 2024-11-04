@@ -108,7 +108,8 @@ def GenerateTcl(args, BootParams):
 
     # If --kernel and no ROOTFS given display boot command
     if BootParams.get('KERNEL') and not BootParams.get('ROOTFS'):
-        TclStr += 'puts stderr "INFO: Enter booti %s - %s in uboot terminal if auto boot fails"\n' % (
+        TclStr += 'puts stderr "INFO: Enter %s %s - %s in uboot terminal if auto boot fails"\n' % (
+            'bootm' if args.xilinx_arch in ('zynq', 'microblaze') else 'booti',
             BootParams['KERNEL'].get('LoadAddr', '0x200000'),
             BootParams['DTB'].get('LoadAddr') if BootParams.get('DTB') else '0x1000')
     TclStr += 'exit\n'
