@@ -210,7 +210,7 @@ def PackageWic(args, proot):
                                  proot, shell=True, logfile=args.logfile)
     # Get the exact output file from wic tmp dir
     WicOutFile = [f for f in glob.glob(
-        os.path.join(WicTmpBuildDir, 'rootfs-*.direct*'))
+        os.path.join(WicTmpBuildDir, '*.direct*'))
         if not re.search('.+.direct.p.+', f)][0]
     # Get the output file extention
     WicOutExt = os.path.basename(
