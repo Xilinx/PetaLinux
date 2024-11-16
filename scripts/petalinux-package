@@ -123,6 +123,12 @@ def main():
             proot = plnx_utils.exit_not_plnx_project(args.project)
         else:
             proot = plnx_utils.exit_not_plnx_project(proot='')
+    else:
+        # Exit if PROOT is not PetaLinux project
+        if args.project:
+            proot = plnx_utils.exit_not_plnx_project(args.project[0])
+        else:
+            proot = plnx_utils.exit_not_plnx_project(proot='')
 
     args.builddir = plnx_vars.BuildDir.format(proot)
     plnx_utils.CreateDir(args.builddir)
