@@ -142,17 +142,18 @@ def AutoSerial(dtb_file_path, args, QemuCmd):
 
 def AutoEth(GemCnt, TftpDir):
     QemuEthArgs = ''
+    TftpArg = ''
     for Gem in GemCnt:
         if Gem.isdigit():
             j = int(Gem)
             for i in range(0, j+1):
                 if i < j:
-                    QemuEthArgs += ' -net nic'
+                    QemuEthArgs += ' -nic hubport,hubid=0'
                 elif j == i:
-                    QemuEthArgs += ' -net nic,netdev=%s%d -netdev user,id=%s%d,' % (
-                        HOST_NET_DEV, i, HOST_NET_DEV, i)
                     if TftpDir:
-                        QemuEthArgs += 'tftp=%s' % TftpDir
+                        TftpArg = ',tftp=%s' % TftpDir
+                    QemuEthArgs += ' -netdev user,id=%s%s -netdev hubport,id=h0,netdev=%s,hubid=0' % (
+                        HOST_NET_DEV, TftpArg, HOST_NET_DEV)
     return QemuEthArgs
 
 
@@ -184,7 +185,7 @@ def FindMmcAndGemStatus(dtb_file_path):
                 gem_labels += [match.strip() for match in gem_matches]
             mmc_counter = FindMmcEthNode(sdhci_labels, content)
             counter.append(mmc_counter)
-            gem_counter = FindMmcEthNode(gem_labels, content)
+            gem_counter = len(gem_labels)
             counter.append(gem_counter)
     return counter
 
