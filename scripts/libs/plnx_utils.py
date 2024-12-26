@@ -343,7 +343,7 @@ def gen_sysconf_dtsi_file(proot):
     eth_mac = get_config_value(
         plnx_vars.EthConfs['Prefix'], plnx_vars.SysConfFile.format(proot),
         'asterisk', plnx_vars.EthConfs['Mac']).replace(':', ' ')
-    if eth_ipname != 'manual':
+    if eth_ipname != 'manual' and eth_mac:
         add_str_to_file(SdtSystemConfDtsi,
                         plnx_vars.SystemconfEth.format(
                             eth_ipname, eth_mac), mode='a')
