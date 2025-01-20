@@ -123,7 +123,7 @@ function check_os {
 	else
 		return 1
 	fi
-	if ! echo $VERSIONS | grep -w $release >/dev/null; then
+	if ! echo $VERSIONS | grep -E "(^|\s)${release}($|\s)" >/dev/null; then
 		return 1
 	fi
 }
