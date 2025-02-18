@@ -27,6 +27,7 @@
 #include <linux/of_address.h>
 #include <linux/of_device.h>
 #include <linux/of_platform.h>
+#include <linux/platform_device.h>
 
 /* Standard module information, edit as appropriate */
 MODULE_LICENSE("GPL");
@@ -130,7 +131,7 @@ error1:
 	return rc;
 }
 
-static int @mod_name@_remove(struct platform_device *pdev)
+static void @mod_name@_remove(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct @mod_name@_local *lp = dev_get_drvdata(dev);
@@ -139,7 +140,6 @@ static int @mod_name@_remove(struct platform_device *pdev)
 	release_mem_region(lp->mem_start, lp->mem_end - lp->mem_start + 1);
 	kfree(lp);
 	dev_set_drvdata(dev, NULL);
-	return 0;
 }
 
 #ifdef CONFIG_OF
