@@ -84,15 +84,6 @@ def GetDefaultWicFiles(args, proot):
                          (Image, args.images_dir))
             logger.error('This is required to create the wic image')
             sys.exit(255)
-    # Add openamp dtbo to wic if openamp enabled
-    IsOpenampEnabled = plnx_utils.get_config_value('CONFIG_SUBSYSTEM_ENABLE_OPENAMP_DTSI',
-                                                   plnx_vars.SysConfFile.format(proot))
-    IsPkgGrpOpenamp = plnx_utils.get_config_value('CONFIG_packagegroup-petalinux-openamp',
-                                                  plnx_vars.RfsConfig.format(proot))
-    if os.path.exists(os.path.join(args.images_dir, plnx_vars.BootFileNames.get('OPENAMP'))) and \
-            not IsOpenampEnabled and IsPkgGrpOpenamp:
-        WicDefaultFiles += ' %s;devicetree' % plnx_vars.BootFileNames.get(
-            'OPENAMP')
     return WicDefaultFiles
 
 
