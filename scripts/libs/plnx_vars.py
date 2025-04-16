@@ -118,9 +118,9 @@ os.environ['BB_ENV_PASSTHROUGH_ADDITIONS'] = bb_extraenv + ' ' + plnx_bbenv
 
 YoctoEnvPrefix = 'environment-setup'
 YoctoEnvFile = {
-    'aarch64': 'cortexa72-cortexa53-xilinx-linux',
-    'arm': 'cortexa9t2hf-neon-xilinx-linux-gnueabi',
-    'microblaze': 'microblazeel-v11.0-*-xilinx-linux'
+    'aarch64': 'cortexa72-cortexa53-amd-linux',
+    'arm': 'cortexa9t2hf-neon-amd-linux-gnueabi',
+    'microblaze': 'microblazeel-v11.0-*-amd-linux'
 }
 
 LockedSigns = {
