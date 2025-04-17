@@ -28,6 +28,10 @@ logger, console_h = logger_setup.setup_logger('PetaLinux')
 
 DefaultPlatForm = ('aarch64', 'arm', 'microblaze', 'buildtools')
 
+# Buildtools files.sh is exporting the MAGIC variable to non-existing
+# path which leads to sdk extraction failures, unset it for upgrade command.
+if 'MAGIC' in os.environ:
+    del os.environ['MAGIC']
 
 def GetVersion(Filename):
     ''' Get eSDK version'''
