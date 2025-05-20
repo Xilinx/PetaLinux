@@ -388,6 +388,10 @@ Examples:
 
     Boot customised rootfs image with kernel:
       $ petalinux-boot jtag --kernel --rootfs <specify custom cpio rootfs path>
+
+    Boot customised u-boot script with kernel: (boot.scr is used for autoloading the kernel Image, DTB and rootfs thus used with --kernel)
+      $ petalinux-boot jtag --kernel --boot-script <specify the boot.scr path>
+
 '''
 
 PBootQemu = '''
@@ -437,6 +441,10 @@ Examples:
     Specify qemu-no-gdb option to disable gdb via qemu boot
       $ petalinux-boot qemu --prebuilt 2/--prebuilt 3 --qemu-no-gdb
       $ petalinux-boot qemu --u-boot/--kernel --qemu-no-gdb
+
+    Boot customised u-boot script with kernel: (boot.scr is used for autoloading the kernel Image, DTB and rootfs thus used with --kernel)
+      $ petalinux-boot qemu --kernel --boot-script <specify the boot.scr path>
+
 '''
 
 PUpgrade = '''
