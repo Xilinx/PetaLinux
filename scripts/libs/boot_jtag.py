@@ -232,7 +232,7 @@ def JtagBootArgs(jtag_parser):
                              help='Specify the DTB path')
     jtag_parser.add_argument('--boot-script', type=boot_common.add_bootfile('BOOTSCRIPT'),
                              nargs='?', default='', const='Default',
-                             help='Specify the boot.scr path')
+                             help='Specify the boot.scr path \nNote: boot.scr is used for autoloading the kernel Image, DTB and rootfs, thus used with --kernel')
     jtag_parser.add_argument('--hw_server-url', help='Specify the URL of the hw_server to connect to.'
                              '\nThis argument is optional and defaults to blank (local).'
                              '\nAn example URL is: "TCP:localhost:3121"'
