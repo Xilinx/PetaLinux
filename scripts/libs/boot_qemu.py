@@ -627,7 +627,7 @@ def QemuBootArgs(qemu_parser):
                              type=int, help='Specify target CPUID (0 to N-1)')
     qemu_parser.add_argument('--boot-script', type=boot_common.add_bootfile('BOOTSCRIPT'),
                              nargs='?', default='', const='Default',
-                             help='Specify the boot.scr path')
+                             help='Specify the boot.scr path \nNote: boot.scr is used for autoloading the kernel Image, DTB and rootfs, thus used with --kernel')
     qemu_parser.set_defaults(func=QemuBootSetup)
 
     return
