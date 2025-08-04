@@ -322,6 +322,8 @@ trap do_file_cleanup EXIT KILL QUIT SEGV INT HUP TERM ERR
 check_os
 [ $? -ne 0 ] && plnx_warning "This is not a supported OS"
 
+plnx_warning "The PetaLinux tool is scheduled for deprecation in version 26.2. It is recommended to adopt EDF flows and Yocto Project workflows"
+plnx_warning "The Microblaze BSP will be deprecated in version 26.1. Users of the PetaLinux Microblaze BSP are advised to transition to MB-V as the alternative."
 warn_free_space || exit 255
 
 # Check tools and libs
