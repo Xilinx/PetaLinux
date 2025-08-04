@@ -332,6 +332,15 @@ def main():
 
     # Setup logger to file
     logger_setup.setup_logger_file(args.logfile)
+    logger.warning('The PetaLinux tool is scheduled for deprecation'
+                   ' in version 26.2. It is recommended to adopt EDF'
+                   ' flows and Yocto Project workflows')
+	# Microblaze bsp deprecation message
+    xilinx_arch = plnx_utils.get_xilinx_arch(proot)
+    if xilinx_arch == 'microblaze':
+        logger.warning('The Microblaze BSP will be deprecated in version 26.1.'
+                       ' Users of the PetaLinux Microblaze BSP are advised'
+                       ' to transition to MB-V as the alternative.')
     # Print debug prints if debug selected
     if args.debug:
         console_h.setLevel(logging.DEBUG)
