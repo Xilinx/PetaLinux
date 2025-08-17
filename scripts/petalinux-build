@@ -332,9 +332,9 @@ def main():
 
     # Setup logger to file
     logger_setup.setup_logger_file(args.logfile)
-    logger.warning('The PetaLinux tool is scheduled for deprecation'
-                   ' in version 26.2. It is recommended to adopt EDF'
-                   ' flows and Yocto Project workflows')
+    logger.warning('The PetaLinux toolset is scheduled for deprecation'
+                   ' in the 2026.2 release. Users are advised to adopt AMD EDF'
+                   ' and its Yocto Project based workflows.')
 	# Microblaze bsp deprecation message
     xilinx_arch = plnx_utils.get_xilinx_arch(proot)
     if xilinx_arch == 'microblaze':
