@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # Setup script for PetaLinux development environment.
 #
@@ -6,34 +7,41 @@
 #
 
 SETTINGS_FILE='settings.sh'
-# The right location will be replaced by the installer
-XIL_SCRIPT_LOC="./"
-
-if [ $# != 0 ]; then
+if [ "$#" -ne 0 ]; then
 	# The first argument is the location of PetaLinux Installation
 	# Don't detect the installation location
 	XIL_SCRIPT_LOC="$1"
 else
 	#  XIL_SCRIPT_LOC should point to script location
-	if [ "$0" == "ksh" ]; then
-		XIL_SCRIPT_LOC_TMP_UNI=`readlink -f ${XIL_ARG_}`
+	if [ "$0" = "ksh" ]; then
+		XIL_SCRIPT_LOC_TMP_UNI=$(readlink -f "$XIL_ARG_")
 	else
-		XIL_SCRIPT_LOC_TMP_UNI=$BASH_SOURCE
+		XIL_SCRIPT_LOC_TMP_UNI="$BASH_SOURCE"
 	fi
-	XIL_SCRIPT_LOC_TMP_UNI=${XIL_SCRIPT_LOC_TMP_UNI%/*}
+	XIL_SCRIPT_LOC_TMP_UNI="${XIL_SCRIPT_LOC_TMP_UNI%/*}"
 	if [ "$XIL_SCRIPT_LOC_TMP_UNI" != "" ]; then
-		if [ "$XIL_SCRIPT_LOC_TMP_UNI" == "settings.sh" ]; then
+		if [ "$XIL_SCRIPT_LOC_TMP_UNI" = "settings.sh" ]; then
 			XIL_SCRIPT_LOC_TMP_UNI="./"
 		fi
-		XIL_SCRIPT_LOC_TMP_UNI=`readlink -f ${XIL_SCRIPT_LOC_TMP_UNI}`
-		if [ $? == 0 ]; then
-			XIL_SCRIPT_LOC=${XIL_SCRIPT_LOC_TMP_UNI}
+		XIL_SCRIPT_LOC_TMP_UNI=$(readlink -f "$XIL_SCRIPT_LOC_TMP_UNI")
+		if [ $? -eq 0 ]; then
+			XIL_SCRIPT_LOC="$XIL_SCRIPT_LOC_TMP_UNI"
 		fi
 	fi
 	unset XIL_SCRIPT_LOC_TMP_UNI
 fi
 
-export PETALINUX=`readlink -f "${XIL_SCRIPT_LOC}"`
+if [ -z $XIL_SCRIPT_LOC ]; then
+	if [ "$(basename "$0")" = "dash" ] ;then
+		echo "WARNING: The script is running in a dash environment.\
+'XIL_SCRIPT_LOC' was not found.Using current directory.Please set the environment variable.\
+Eg:XIL_SCRIPT_LOC=<PETALINUX_TOOL_PATH> . <PETALINUX_TOOL_PATH/settings.sh>"
+	fi
+	XIL_SCRIPT_LOC="./"
+	[ ! -f "$XIL_SCRIPT_LOC/settings.sh" ] && echo "WARNING: settings.sh not found in Current directory"
+fi
+export PETALINUX=$(readlink -f "${XIL_SCRIPT_LOC}")
+unset XIL_SCRIPT_LOC
 
 if echo "${PETALINUX}" | grep -q ' '; then
 	echo "********************************************************"
@@ -67,12 +75,12 @@ PATH="${PETALINUX}/scripts:${PATH}"
 #
 # Check for "." or ".\" in the path - it's broken
 #
-echo "${PATH}" | tr ":" "\n" | grep '^\./*$' > /dev/null && 
+echo "${PATH}" | tr ":" "\n" | grep '^\./*$' > /dev/null && \
 	echo "WARNING: '.' detected in PATH - fixing it." 1>&2
-PATH=`echo ${PATH} | tr ":" "\n" | grep -v '^\./*$' | tr "\n" ":"`
+PATH=$(echo "${PATH}" | tr ":" "\n" | grep -v '^\./*$' | tr "\n" ":")
 
 # Strip any trailing or multi-colons - they are interpreted as '.'
-PATH=$(echo ${PATH} | sed -e 's/:*$//g' -e 's/::*/:/g')
+PATH=$(echo "${PATH}" | sed -e 's/:*$//g' -e 's/::*/:/g')
 
 plnxbanner="The PetaLinux source code and images provided/generated are for demonstration purposes only."
 plnxbanner_url="Please refer to https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/2741928025/Moving+from+PetaLinux+to+Production+Deployment
@@ -100,8 +108,14 @@ fi
 
 export PATH
 
-source "${PETALINUX}"/.environment-setup-x86_64-petalinux-linux
-"${PETALINUX}"/scripts/bash/petalinux-env-check
-#
+# Use POSIX-compliant dot for sourcing
+if [ -f "${PETALINUX}/.environment-setup-x86_64-petalinux-linux" ]; then
+	. "${PETALINUX}/.environment-setup-x86_64-petalinux-linux"
+fi
+#Running petalinux-env-check script
+if [ -f "${PETALINUX}/scripts/bash/petalinux-env-check" ]; then
+	sh "${PETALINUX}/scripts/bash/petalinux-env-check"
+fi
+
 # Not to generate the pycache files in tool
 export PYTHONDONTWRITEBYTECODE=1
