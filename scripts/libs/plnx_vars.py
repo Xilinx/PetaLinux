@@ -110,6 +110,8 @@ ospath = os.environ['PATH']
 extra_ospaths = os.environ.get('EXTERNAL_TOOLS_PATH', '') + ':'
 extra_ospaths += XsctBinPath + ':'
 os.environ['PATH'] = extra_ospaths + ospath
+''' Disable blocking dependency check in xsct'''
+os.environ["XSCT_DEP_CHECK_BLOCKING"] = "FALSE"
 
 '''BB_ENV variables'''
 bb_extraenv = os.environ.get('BB_ENV_PASSTHROUGH_ADDITIONS', '')
