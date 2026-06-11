@@ -3,7 +3,7 @@
 # Setup script for PetaLinux development environment.
 #
 # Copyright (c) 1995-2022 Xilinx, Inc.  All rights reserved.
-# Copyright (c) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+# Copyright (c) 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
 #
 
 SETTINGS_FILE='settings.sh'
@@ -49,7 +49,7 @@ if echo "${PETALINUX}" | grep -q ' '; then
 	echo "WARNING: You are STRONGLY recommend to fix this".
 	echo "********************************************************"
 fi
-export PETALINUX_VER=2025.2
+export PETALINUX_VER=2026.2
 export PETALINUX_MAJOR_VER=${PETALINUX_VER%%.*}
 
 export XSCT_TOOLCHAIN="${PETALINUX}/components/xsct"

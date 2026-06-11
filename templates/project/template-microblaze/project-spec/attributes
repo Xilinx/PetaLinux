@@ -1,7 +1,0 @@
-#Virtual Providers
-
-
-
-#defconfigs
-
-UBOOT_DEFAULT_DEFCONFIG="microblaze-generic_defconfig"
