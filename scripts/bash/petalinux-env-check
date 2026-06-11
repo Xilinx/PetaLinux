@@ -330,8 +330,7 @@ check_os
 [ $? -ne 0 ] && plnx_warning "This is not a supported OS"
 
 plnx_warning "The PetaLinux toolset is scheduled for deprecation in the 2026.2 release. Users are advised to adopt AMD EDF and its Yocto Project based workflows."
-plnx_warning "The Microblaze BSP will be deprecated in version 26.1. PetaLinux Microblaze will be end-of-life in the 2026.2 release.\
- Users are advised to transition to MB-V as the alternative."
+plnx_warning "Microblaze BSP support has been removed starting from the 2026.2 release. Users are advised to transition to MB-V as the alternative."
 warn_free_space || exit 255
 
 # Check tools and libs

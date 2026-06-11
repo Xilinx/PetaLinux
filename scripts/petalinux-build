@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Copyright (C) 2021-2022, Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.  All rights reserved.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.  All rights reserved.
 #
 # Author:
 #       Ashwini Lomate <ashwini.lomate>
@@ -338,8 +338,7 @@ def main():
 	# Microblaze bsp deprecation message
     xilinx_arch = plnx_utils.get_xilinx_arch(proot)
     if xilinx_arch == 'microblaze':
-        logger.warning('The Microblaze BSP will be deprecated in version 26.1.'
-                       ' PetaLinux Microblaze will be end-of-life in the 2026.2 release.'
+        logger.warning('Microblaze BSP support has been removed starting from the 2026.2 release.'
                        ' Users are advised to transition to MB-V as the alternative.')
     # Print debug prints if debug selected
     if args.debug:
