@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Copyright (C) 2021-2022, Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.  All rights reserved.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.  All rights reserved.
 #
 # Author:
 #       Raju Kumar Pothuraju <rajukumar.pothuraju>
@@ -76,7 +76,7 @@ def main():
 
     # Project parser args
     project_parser = subparsers.add_parser('project', help='Create PetaLinux project',
-                                           usage='Use %(prog)s {[-s SOURCE] [--template {versal,zynqMP,zynq,microblaze}] '
+                                           usage='Use %(prog)s {[-s SOURCE] [--template {versal,zynqMP,zynq}] '
                                                   '[--tmpdir TMPDIR] [--name NAME]}',
                                            epilog=examples.PCreateProject,
                                            formatter_class=argparse.RawTextHelpFormatter)
@@ -84,7 +84,7 @@ def main():
                                 help='Specify a PetaLinux BSP as a project source')
     project_parser.add_argument('--template', default='',
                                 help='Specify the template name to use.',
-                                choices=['versal', 'zynqMP', 'zynq', 'microblaze'])
+                                choices=['versal', 'zynqMP', 'zynq'])
     project_parser.add_argument('--tmpdir',
                                 help='Specify the local drive path as TMPDIR location when creating project.'
                                 '\nDefault TMPDIR cannot be under NFS. By default.'

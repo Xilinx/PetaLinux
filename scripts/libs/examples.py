@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Copyright (C) 2021-2022, Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.  All rights reserved.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.  All rights reserved.
 #
 # Author:
 #       Raju Kumar Pothuraju <rajukumar.pothuraju>
@@ -23,9 +23,6 @@ Examples:
     $ petalinux-create project -n <PROJECT> --template <TEMPLATE> --tmpdir <TMPDIR PATH>
 
     Create project from template:
-    For microblaze project,
-    $ petalinux-create project -n <PROJECT> --template microblaze
-
     For zynq project,
     $ petalinux-create project -n <PROJECT> --template zynq
 
@@ -451,15 +448,12 @@ PUpgrade = '''
 Examples:
     To get only desired platforms:
   $ petalinux-upgrade -u/-f <path/url>
-       This will upgrade esdks for all(zynq,zynqMP,versal,microblaze).
+       This will upgrade esdks for all(zynq,zynqMP,versal).
 
   $ petalinux-upgrade -u/-f <path/url> --platform "arm"
         This will upgrade esdk for zynq only.
 
   $ petalinux-upgrade -u/-f <path/url> --platform arm aarch64
        This will upgrade esdks for zynq,zynqMP and versal.
-
-  $ petalinux-upgrade -u/-f <path/url> --platform "microblaze"
-       This will upgrade esdks for microblaze
 
 '''

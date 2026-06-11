@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # Copyright (C) 2021-2022, Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2024, Advanced Micro Devices, Inc.  All rights reserved.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.  All rights reserved.
 #
 # Author:
 #       Raju Kumar Pothuraju <rajukumar.pothuraju>
@@ -26,7 +26,7 @@ import examples
 
 logger, console_h = logger_setup.setup_logger('PetaLinux')
 
-DefaultPlatForm = ('aarch64', 'arm', 'microblaze', 'buildtools')
+DefaultPlatForm = ('aarch64', 'arm', 'buildtools')
 
 # Buildtools files.sh is exporting the MAGIC variable to non-existing
 # path which leads to sdk extraction failures, unset it for upgrade command.
@@ -168,7 +168,6 @@ def main():
                         help='Specifies the architecture name to upgrade'
                         '\naarch64         	: sources for zynqMP and versal'
                         '\narm             	: sources for zynq'
-                        '\nmicroblaze      	: sources for microblaze'
                         '\nbuildtools       : Native(x86) SDK tools')
     parser.add_argument('-h', '--help', action='help',
                         help='Show help message and exit')
