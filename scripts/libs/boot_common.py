@@ -104,7 +104,7 @@ def AddFpgaBootFile(fpga_arg, proot, xilinx_arch, bootmode, targetcpu=0, prebuil
         plnx_utils.add_dictkey(BootParams, 'FPGA', 'Path', bootfile)
         # Jtag settings for FPGA
         if bootmode == 'jtag' and xilinx_arch in ('versal', 'versal-net'):
-            before_load = 'targets -set -nocase -filter {name =~ "*PMC*"}\n'
+            before_load = 'targets -set -nocase -filter {name =~ "PMC*"}\n'
             plnx_utils.add_dictkey(
                 BootParams, 'FPGA', 'BeforeLoad', before_load)
             if BootParams.get('KERNEL') or prebuilt == 3:
