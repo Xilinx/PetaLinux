@@ -75,13 +75,21 @@ def validate_hw_file(args, proot):
     hw_file = []
     hw_ext = ''
     if os.path.isfile(args.get_hw_description):
+        if args.get_hw_description.endswith('.xsa'):
+            logger.error('XSA file input is no longer supported starting from the 2026.2 release.'
+                         '\nPlease provide a system device tree (SDT) .dts file instead.'
+                         '\nUsage: petalinux-config --get-hw-description <SDT_DIR_OR_DTS_FILE>')
+            sys.exit(255)
         hw_file.append(args.get_hw_description)
     elif os.path.isdir(args.get_hw_description):
         for _file in os.listdir(args.get_hw_description):
             if _file.endswith('.dts'):
                 hw_file.append(os.path.join(args.get_hw_description, _file))
             if _file.endswith('.xsa'):
-                hw_file.append(os.path.join(args.get_hw_description, _file))
+                logger.error('XSA file input is no longer supported starting from the 2026.2 release.'
+                             '\nPlease provide a system device tree (SDT) directory instead.'
+                             '\nUsage: petalinux-config --get-hw-description <SDT_DIR_OR_DTS_FILE>')
+                sys.exit(255)
     if hw_file:
         if len(hw_file) > 1:
             logger.error('More than one ".xsa/.dts" are found in %s'
