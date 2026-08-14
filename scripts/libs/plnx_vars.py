@@ -303,6 +303,8 @@ SystemconfFlash = '''
     #address-cells = <1>;
     #size-cells = <0>;
     flash0: flash@0 {{
+         #address-cells = <1>;
+         #size-cells = <1>;
         /delete-node/ partitions;
         /delete-node/ partition@0;
         /delete-node/ partition@100000;
